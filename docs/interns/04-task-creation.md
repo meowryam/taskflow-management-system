@@ -69,6 +69,8 @@ The implementation is split across `dataStore.js`, `taskValidation.js`, `taskSer
 
 ## 10. Manual testing steps
 
+Run the terminal test suite first with `node --test --test-isolation=none tests/task-creation.test.mjs`.
+
 1. Serve the repository using a local development server and open `index.html`.
 2. With no `taskflow.projects` or `taskflow.members`, open Tasks and confirm creation is disabled with a clear message.
 3. Add test arrays to those two LocalStorage keys, using objects with `id` and `name`, then reload.

@@ -47,6 +47,9 @@ export class TaskRepository {
 
   addTask(task) {
     const tasks = this.getTasks();
+    if (!TASK_STATUSES.includes(task.status)) {
+      throw new TypeError('Task status must be Todo, In Progress, Review, or Done.');
+    }
     if (tasks.some((item) => item.id === task.id)) {
       throw new Error(`A task with ID ${task.id} already exists.`);
     }

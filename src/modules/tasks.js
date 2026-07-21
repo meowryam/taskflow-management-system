@@ -8,6 +8,9 @@ const formMessage = document.getElementById('taskFormMessage');
 const submitButton = document.getElementById('createTaskButton');
 const projectSelect = document.getElementById('taskProject');
 const memberSelect = document.getElementById('taskAssignedMember');
+const taskNavigation = Array.from(document.querySelectorAll('.sidebar__item')).find((item) => (
+  item.querySelector('.sidebar__label')?.textContent.trim() === 'Tasks'
+));
 let projects = [];
 let members = [];
 let isSubmitting = false;
@@ -114,7 +117,7 @@ function showTaskCreation(event) {
   });
   document.querySelector('.header__title').textContent = 'Create Task';
   document.querySelectorAll('.sidebar__item').forEach((item) => item.classList.remove('sidebar__item--active'));
-  document.getElementById('nav-tasks')?.classList.add('sidebar__item--active');
+  taskNavigation?.classList.add('sidebar__item--active');
   document.getElementById('sidebar')?.classList.remove('sidebar--open');
   loadDependencies();
 }
@@ -122,7 +125,13 @@ function showTaskCreation(event) {
 if (form) {
   form.addEventListener('submit', handleSubmit);
   form.addEventListener('reset', () => window.setTimeout(clearFormState, 0));
-  document.getElementById('nav-tasks')?.addEventListener('click', showTaskCreation);
+  taskNavigation?.addEventListener('click', showTaskCreation);
+  document.getElementById('nav-dashboard')?.addEventListener('click', () => {
+    taskSection.style.display = 'none';
+  });
+  document.getElementById('nav-prompt-builder')?.addEventListener('click', () => {
+    taskSection.style.display = 'none';
+  });
   window.addEventListener('taskflow:projects-changed', loadDependencies);
   window.addEventListener('taskflow:members-changed', loadDependencies);
   loadDependencies();

@@ -49,7 +49,7 @@
             <span class="sidebar__label">Projects</span>
           </a>
         </li>
-        <li class="sidebar__item" id="nav-tasks">
+        <li class="sidebar__item">
           <a href="#" class="sidebar__link">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -284,8 +284,7 @@
 
             <div class="task-form__field task-form__field--wide">
               <label for="taskDescription">Description</label>
-              <textarea id="taskDescription" name="description" maxlength="2000" aria-describedby="descriptionError"></textarea>
-              <span id="descriptionError" class="task-form__error" aria-live="polite"></span>
+              <textarea id="taskDescription" name="description" maxlength="2000"></textarea>
             </div>
 
             <div class="task-form__field">
@@ -459,7 +458,6 @@
       const navPromptBld = document.getElementById('nav-prompt-builder');
       const dashboardSec = document.querySelector('.dashboard');
       const pbSection    = document.getElementById('prompt-builder-section');
-      const taskSection  = document.getElementById('task-creation-section');
       const headerTitle  = document.querySelector('.header__title');
       const allNavItems  = document.querySelectorAll('.sidebar__item');
 
@@ -485,7 +483,6 @@
         if (e) { e.preventDefault(); }
         if (dashboardSec) { dashboardSec.style.display = ''; }
         if (pbSection)    { pbSection.style.display    = 'none'; }
-        if (taskSection)  { taskSection.style.display  = 'none'; }
         if (headerTitle)  { headerTitle.textContent    = 'Dashboard'; }
         if (navDashboard) { setActiveNav(navDashboard); }
         closeMobileSidebar();
@@ -496,7 +493,6 @@
         if (e) { e.preventDefault(); }
         if (dashboardSec) { dashboardSec.style.display = 'none'; }
         if (pbSection)    { pbSection.style.display    = ''; }
-        if (taskSection)  { taskSection.style.display  = 'none'; }
         if (headerTitle)  { headerTitle.textContent    = 'Prompt Builder'; }
         if (navPromptBld) { setActiveNav(navPromptBld); }
         closeMobileSidebar();
