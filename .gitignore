@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# vscode
+.vscode/
+
+# environment
+.env
+.env.*
+
+# build
+dist/
+build/
+
+# cache
+.cache/
+
+# temporary
+*.tmp
+*.temp
+
+# local storage exports
+*.json
+
+# screenshots generated during testing
+screenshots/*.zip
