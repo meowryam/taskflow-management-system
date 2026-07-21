@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaskFlow · Sign In</title>
+<style>
+
+/* ================================================================
+   0. Design tokens
+   ================================================================ */
+:root {
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+
+  --color-primary:        #6B4F2A;
+  --color-primary-dark:   #4A3420;
+  --color-primary-light:  rgba(107, 79, 42, 0.14);
+
+  --color-success: #2F855A;
+  --color-danger:  #A8452F;
+
+  --color-white: #FFFDF8;
+  --color-gray-50:  #FAF6EC;
+  --color-gray-100: #F3ECDB;
+  --color-gray-200: #E6DCC0;
+  --color-gray-400: #A89B78;
+  --color-gray-500: #7D7256;
+  --color-gray-600: #5C5340;
+  --color-gray-700: #423C2E;
+  --color-gray-800: #2C2820;
+  --color-gray-900: #1A1712;
+
+  --font-size-xs:   0.75rem;
+  --font-size-sm:   0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg:   1.125rem;
+  --font-size-xl:   1.375rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+
+  --card-bg: var(--color-white);
+  --card-radius: 16px;
+  --card-shadow: 0 1px 2px rgba(32, 30, 27, 0.04), 0 12px 32px rgba(32, 30, 27, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ----- 8. Login Module ------------------------------------ */
+
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(107, 79, 42, 0.10), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgba(66, 60, 46, 0.10), transparent 45%),
+    var(--color-gray-50);
+  padding: var(--space-4);
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-card {
+  background-color: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--space-10) var(--space-8);
+  animation: card-rise 0.5s ease;
+}
+
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-card__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.login-card__logo-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--color-primary);
+}
+
+.login-card__brand-name {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-gray-900);
+  letter-spacing: -0.01em;
+}
+
+.login-card__heading {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-gray-700);
+  text-align: center;
+  margin: 0 0 var(--space-8);
+}
+
+.login-card__subheading {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+  text-align: center;
+  margin: calc(var(--space-8) * -1 + var(--space-1)) 0 var(--space-8);
+}
+
+/* ---- Login form ---- */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.login-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.login-form__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.login-form__label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.login-form__forgot {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-family);
+}
+
+.login-form__forgot:hover { text-decoration: underline; }
+
+.login-form__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-form__input {
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 8px;
+  background-color: var(--color-white);
+  color: var(--color-gray-800);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-form__input--has-toggle { padding-right: var(--space-10); }
+
+.login-form__input::placeholder {
+  color: var(--color-gray-400);
+}
+
+.login-form__input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.login-form__input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.login-form__input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(168, 69, 47, 0.14);
+}
+
+.login-form__field-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  min-height: 1em;
+}
+
+.login-form__toggle-visibility {
+  position: absolute;
+  right: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-gray-400);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.login-form__toggle-visibility:hover {
+  color: var(--color-gray-600);
+  background-color: var(--color-gray-100);
+}
+
+.login-form__toggle-visibility svg { width: 18px; height: 18px; }
+
+/* ---- Remember me ---- */
+
+.login-form__remember {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.login-form__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.login-form__remember label {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+  cursor: pointer;
+}
+
+/* ---- Error message ---- */
+
+.login-form__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  background-color: rgba(168, 69, 47, 0.08);
+  border-radius: 8px;
+  padding: var(--space-3);
+  line-height: 1.4;
+}
+
+.login-form__error svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.login-form__error[hidden] {
+  display: none;
+}
+
+/* ---- Submit button ---- */
+
+.login-form__submit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-white);
+  background-color: var(--color-primary);
+  padding: var(--space-3) var(--space-6);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+  text-align: center;
+}
+
+.login-form__submit:hover { background-color: var(--color-primary-dark); }
+.login-form__submit:active { transform: scale(0.99); }
+
+.login-form__submit:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.login-form__submit--logout {
+  background-color: var(--color-gray-600);
+  width: 100%;
+}
+
+.login-form__submit--logout:hover {
+  background-color: var(--color-gray-700);
+}
+
+.login-form__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: var(--color-white);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+.login-form__submit--loading .login-form__spinner { display: inline-block; }
+.login-form__submit--loading .login-form__submit-label { opacity: 0.85; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Divider ---- */
+
+.login-form__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.login-form__divider::before,
+.login-form__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-gray-200);
+}
+
+.login-form__divider-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.login-form[hidden] { display: none; }
+
+/* ---- Google sign-in ---- */
+
+.login-form__google-btn {
+  display: flex;
+  justify-content: center;
+}
+
+.login-form__google-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-700);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 8px;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.login-form__google-fallback:hover {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-400);
+}
+
+.login-form__google-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ---- Sign-up hint ---- */
+
+.login-card__footer {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}
+
+.login-card__footer a {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.login-card__footer a:hover { text-decoration: underline; }
+
+/* ---- Session / logged-in view ---- */
+
+.login-session {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  text-align: center;
+  animation: card-rise 0.4s ease;
+}
+
+.login-session[hidden] { display: none; }
+
+.login-session__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.login-session__avatar {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary-light);
+  border-radius: 50%;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  flex-shrink: 0;
+}
+
+.login-session__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.login-session__name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.login-session__role {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+  margin-top: var(--space-1);
+}
+
+.login-session__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  font-weight: 500;
+  margin: 0;
+}
+
+.login-session__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+}
+
+/* Toast for demo feedback */
+.login-toast {
+  position: fixed;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background-color: var(--color-gray-900);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  padding: var(--space-3) var(--space-5);
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.login-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ----- 9. Responsive -------------------------------------- */
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: var(--space-8) var(--space-5);
+    border-radius: 12px;
+  }
+
+  .login-card__brand-name { font-size: var(--font-size-lg); }
+  .login-card__heading { font-size: var(--font-size-base); margin-bottom: var(--space-6); }
+
+  .login-session__user {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .login-session__info { align-items: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-card, .login-session, .login-form__spinner {
+    animation: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .login-form__input { border-width: 2px; }
+}
+
+</style>
+</head>
+<body class="login-body">
+
+  <main class="login-container" aria-labelledby="login-heading">
+    <div class="login-card">
+
+      <div class="login-card__brand">
+        <span class="login-card__logo-icon" aria-hidden="true">&#x25C9;</span>
+        <span class="login-card__brand-name">TaskFlow</span>
+      </div>
+
+      <h1 class="login-card__heading" id="login-heading">Sign in to your account</h1>
+      <p class="login-card__subheading">Demo: <strong>demo@taskflow.local</strong> / <strong>taskflow123</strong></p>
+
+      <!-- ============================================================
+           LOGIN FORM — shown when user is NOT logged in
+           ============================================================ -->
+      <form class="login-form" id="loginForm" novalidate autocomplete="off">
+
+        <div class="login-form__field">
+          <label class="login-form__label" for="loginEmail">Email</label>
+          <input
+            class="login-form__input"
+            type="email"
+            id="loginEmail"
+            name="email"
+            placeholder="you@taskflow.local"
+            autocomplete="username"
+            aria-describedby="emailHint"
+            required
+          />
+          <span class="login-form__field-hint" id="emailHint"></span>
+        </div>
+
+        <div class="login-form__field">
+          <div class="login-form__label-row">
+            <label class="login-form__label" for="loginPassword">Password</label>
+            <button type="button" class="login-form__forgot" id="forgotBtn">Forgot password?</button>
+          </div>
+          <div class="login-form__input-wrap">
+            <input
+              class="login-form__input login-form__input--has-toggle"
+              type="password"
+              id="loginPassword"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              aria-describedby="passwordHint"
+              required
+            />
+            <button type="button" class="login-form__toggle-visibility" id="togglePassword" aria-label="Show password" aria-pressed="false">
+              <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="login-form__field-hint" id="passwordHint"></span>
+        </div>
+
+        <div class="login-form__remember">
+          <input type="checkbox" class="login-form__checkbox" id="rememberMe" name="remember" />
+          <label for="rememberMe">Keep me signed in</label>
+        </div>
+
+        <div class="login-form__error" id="loginError" role="alert" aria-live="polite" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="loginErrorText"></span>
+        </div>
+
+        <button class="login-form__submit" type="submit" id="submitBtn">
+          <span class="login-form__spinner" aria-hidden="true"></span>
+          <span class="login-form__submit-label">Sign In</span>
+        </button>
+
+        <div class="login-form__divider">
+          <span class="login-form__divider-text">or</span>
+        </div>
+
+        <!-- Google Sign-In button — rendered by GSI library -->
+        <div class="login-form__google-btn" id="googleSignInBtn">
+          <!-- GOOGLE BUTTON PLACEHOLDER: The GSI library renders the real
+               styled button into this container. If the library fails to
+               load, the fallback below will be visible. -->
+          <button
+            class="login-form__google-fallback"
+            type="button"
+            id="googleFallbackBtn"
+            aria-label="Sign in with Google"
+          >
+            <svg class="login-form__google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            <span>Sign in with Google</span>
+          </button>
+        </div>
+      </form>
+
+      <p class="login-card__footer" id="signupFooter">Don't have an account? <a href="register.html" id="signupLink">Create one</a></p>
+
+      <!-- ============================================================
+           LOGGED-IN VIEW — shown when a session is active
+           ============================================================ -->
+      <div class="login-session" id="loginSession" hidden>
+        <div class="login-session__user">
+          <span class="login-session__avatar" id="sessionAvatar" aria-hidden="true"></span>
+          <div class="login-session__info">
+            <span class="login-session__name" id="sessionName"></span>
+            <span class="login-session__role" id="sessionRole"></span>
+          </div>
+        </div>
+
+        <p class="login-session__status">
+          <span class="login-session__status-dot" aria-hidden="true"></span>
+          You are signed in.
+        </p>
+
+        <button class="login-form__submit login-form__submit--logout" type="button" id="logoutBtn">
+          Sign Out
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="login-toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../modules/jwt.js" defer></script>
+  <script src="../modules/permissions.js" defer></script>
+  <script src="../modules/login.js" defer></script>
+
+</body>
+</html>
