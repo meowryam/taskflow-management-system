@@ -114,7 +114,7 @@ A standalone HTML page with 6 test suites (45+ assertions):
 6. **Edge cases & matrix integrity** — corrupted payloads, unknown roles, permission superset hierarchy
 
 ## AI Tool Used
--
+- Deepseek
 
 ## Prompting Techniques Used
 - Role-based
