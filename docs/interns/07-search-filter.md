@@ -76,8 +76,6 @@ Requirements:
 - [ ] Call Filters.sortByDueDate(tasks, 'desc') — tasks sorted with latest due date first, null dates last
 - [ ] Call Filters.clearFilters() — returns empty object
 
-## Screenshots
-(Add screenshots here)
 
 ## Notes
 - All functions are pure — they do not mutate the input array, they return new arrays
