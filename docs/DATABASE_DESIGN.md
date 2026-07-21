@@ -20,6 +20,9 @@ Projects 1 ---- many Tasks
 Users 1 ---- many ActivityLogs (performed by)
 ```
 
+# ERD
+
+![ERD](ERD.jpg)
 ## Why reports are views instead of stored totals
 
 Task counts, pending/completed totals, overdue totals, completion percentage, and member workload are calculated from current project/task/member data. Storing duplicate totals would create synchronization problems. Views keep reports consistent with live data.
