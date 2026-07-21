@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — Prompt Builder</title>
+  <link rel="stylesheet" href="src/styles/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="container">
+    <h1>TaskFlow <span class="sub">Prompt Builder</span></h1>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Responsible AI Guidance -->
+  <section class="section responsible-ai" aria-label="Responsible AI guidance">
+    <h2>Responsible AI &mdash; Developer Guidance</h2>
+    <ul>
+      <li>Never share passwords, API keys, credentials, or private company information with AI tools.</li>
+      <li>Never commit <code>.env</code> files or secrets to version control.</li>
+      <li>Do not blindly trust AI-generated code &mdash; always verify logic and security.</li>
+      <li>Manually review and test all AI-generated output before using it in production.</li>
+      <li>Do not use AI to create fake commits, reviews, reports, or evidence of work.</li>
+      <li>Developers must understand and be able to explain all code they submit.</li>
+      <li>AI should assist with planning, debugging, testing, refactoring, and documentation &mdash; but must not replace human verification.</li>
+    </ul>
+  </section>
+
+  <!-- Prompt Builder Form -->
+  <section class="section" aria-label="Prompt builder form">
+    <h2>Build Your Prompt</h2>
+
+    <form id="promptForm" novalidate>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="promptType">Prompt Type</label>
+          <select id="promptType" required>
+            <option value="">— Select a prompt type —</option>
+            <option value="project-breakdown">Project Breakdown</option>
+            <option value="task-description">Task Description</option>
+            <option value="acceptance-criteria">Acceptance Criteria</option>
+            <option value="code-review">Code Review</option>
+            <option value="test-cases">Test Cases</option>
+            <option value="documentation">Documentation</option>
+          </select>
+          <span class="validation-msg" id="validPromptType" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="projectName">Project / Module Name</label>
+          <input type="text" id="projectName" placeholder="e.g. TaskFlow task creation module" required>
+          <span class="validation-msg" id="validProjectName" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="techStack">Technology Stack <span class="badge">optional</span></label>
+        <input type="text" id="techStack" placeholder="e.g. HTML, CSS, JavaScript, LocalStorage">
+      </div>
+
+      <div class="form-group">
+        <label for="context">Context <span class="badge">optional</span></label>
+        <textarea id="context" rows="4" placeholder="Provide background information about the project or module..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="mainTask">Main Task</label>
+        <textarea id="mainTask" rows="4" placeholder="Describe the main task you need the AI to perform..." required></textarea>
+        <span class="validation-msg" id="validMainTask" aria-live="polite"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="constraints">Constraints <span class="badge">optional</span></label>
+        <textarea id="constraints" rows="3" placeholder="e.g. Do not use external libraries. Must support offline mode."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="expectedFormat">Expected Output Format</label>
+          <input type="text" id="expectedFormat" placeholder="Auto-filled based on prompt type" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="edgeCases">Edge Cases <span class="badge">optional</span></label>
+          <textarea id="edgeCases" rows="3" placeholder="e.g. Empty fields, invalid input, network failure, duplicate submission..."></textarea>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" id="generateBtn">Generate Prompt</button>
+        <button type="button" class="btn btn-outline" id="copyBtn" disabled>Copy Prompt</button>
+        <button type="button" class="btn btn-secondary" id="resetBtn">Clear / Reset</button>
+      </div>
+
+    </form>
+  </section>
+
+  <!-- Generated Output -->
+  <section class="section" aria-label="Generated prompt output">
+    <h2>Generated Prompt</h2>
+    <pre class="output-box" id="output" aria-label="Generated prompt">Your generated prompt will appear here...</pre>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+<script src="src/modules/promptBuilder.js"></script>
+</body>
+</html>
