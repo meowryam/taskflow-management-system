@@ -1,115 +1,443 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaskFlow — Prompt Builder</title>
-  <link rel="stylesheet" href="src/styles/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow · Management System</title>
+  <!-- ============================================================
+       STYLESHEET
+       ============================================================ -->
+  <link rel="stylesheet" href="src/styles/style.css" />
+  <link rel="stylesheet" href="src/styles/promptBuilder.css" />
 </head>
 <body>
 
-<header class="app-header">
-  <div class="container">
-    <h1>TaskFlow <span class="sub">Prompt Builder</span></h1>
+  <!-- ============================================================
+       APPLICATION SHELL – SIDEBAR
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+
+    <!-- Brand / Logo -->
+    <div class="sidebar__brand">
+      <span class="sidebar__logo-icon">◉</span>
+      <span class="sidebar__brand-name">TaskFlow</span>
+    </div>
+
+    <!-- Navigation list -->
+    <nav class="sidebar__nav" aria-label="Sidebar navigation">
+      <ul class="sidebar__list">
+        <li class="sidebar__item sidebar__item--active" id="nav-dashboard">
+          <a href="#" class="sidebar__link" aria-current="page">
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="12" width="4" height="9" rx="1" stroke="currentColor" stroke-width="2"/>
+                <rect x="10" y="7" width="4" height="14" rx="1" stroke="currentColor" stroke-width="2"/>
+                <rect x="17" y="3" width="4" height="18" rx="1" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </span>
+            <span class="sidebar__label">Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar__item">
+          <a href="#" class="sidebar__link">
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 7C3 5.89543 3.89543 5 5 5H9L11 8H19C20.1046 8 21 8.89543 21 10V17C21 18.1046 20.1046 19 19 19H5C3.89543 19 3 18.1046 3 17V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="sidebar__label">Projects</span>
+          </a>
+        </li>
+        <li class="sidebar__item">
+          <a href="#" class="sidebar__link">
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="sidebar__label">Tasks</span>
+          </a>
+        </li>
+        <li class="sidebar__item">
+          <a href="#" class="sidebar__link">
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M3 9H21" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 3V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 3V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="sidebar__label">Board</span>
+          </a>
+        </li>
+        <li class="sidebar__item">
+          <a href="#" class="sidebar__link">
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M3 20C3 16.6863 5.68629 14 9 14C12.3137 14 15 16.6863 15 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 8.5C17.1046 8.5 18 7.60457 18 6.5C18 5.39543 17.1046 4.5 16 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 14C18.7614 14 21 16.2386 21 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="sidebar__label">Members</span>
+          </a>
+        </li>
+        <li class="sidebar__item">
+          <a href="#" class="sidebar__link">
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 21H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M5 21V10L9 6L13 12L18 4L21 8V21" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="sidebar__label">Reports</span>
+          </a>
+        </li>
+        <li class="sidebar__item">
+          <a href="#" class="sidebar__link">
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2H15L20 7V22H6V2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M15 2V7H20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M9 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9 16H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9 20H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="sidebar__label">Activity Log</span>
+          </a>
+        </li>
+        <li class="sidebar__item" id="nav-prompt-builder">
+          <a href="#" class="sidebar__link">
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M10 21H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 3C8.68629 3 6 5.68629 6 9C6 11.2144 7.20961 13.1461 9 14.1973V16C9 16.5523 9.44772 17 10 17H14C14.5523 17 15 16.5523 15 16V14.1973C16.7904 13.1461 18 11.2144 18 9C18 5.68629 15.3137 3 12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="sidebar__label">Prompt Builder</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Footer area inside sidebar (optional) -->
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-text">v1.0.0</span>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN LAYOUT — WRAPS HEADER & CONTENT
+       ============================================================ -->
+  <div class="layout-wrapper">
+
+    <!-- ==========================================================
+         TOP HEADER / NAVBAR
+         ========================================================== -->
+    <header class="header" id="header" role="banner">
+      <div class="header__left">
+        <!-- Mobile menu toggle – visible only on small screens -->
+        <button class="header__menu-toggle" id="menuToggle" aria-label="Toggle sidebar">
+          <span class="header__hamburger"></span>
+          <span class="header__hamburger"></span>
+          <span class="header__hamburger"></span>
+        </button>
+        <h1 class="header__title">Dashboard</h1>
+      </div>
+
+      <div class="header__right">
+        <!-- Placeholder for future user menu / search / notifications -->
+        <div class="header__search-placeholder">Search…</div>
+        <div class="header__avatar" aria-label="User avatar">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M4 20C4 16.134 7.58172 13 12 13C16.4183 13 20 16.134 20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==========================================================
+         MAIN CONTENT AREA — GENERIC MODULE CONTAINER
+         ========================================================== -->
+    <main class="main-content" id="mainContent" role="main">
+
+      <!-- ========================================================
+           DASHBOARD VIEW — can be replaced entirely by a module
+           ======================================================== -->
+      <section class="dashboard" aria-label="Dashboard">
+
+        <!-- Welcome section -->
+        <div class="dashboard__welcome">
+          <h2 class="dashboard__greeting">Welcome back!</h2>
+          <p class="dashboard__subtitle">Here’s what’s happening across your workspace.</p>
+        </div>
+
+        <!-- Summary statistic cards -->
+        <div class="dashboard__stats-grid">
+          <article class="stat-card">
+            <div class="stat-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 7C3 5.89543 3.89543 5 5 5H9L11 8H19C20.1046 8 21 8.89543 21 10V17C21 18.1046 20.1046 19 19 19H5C3.89543 19 3 18.1046 3 17V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="stat-card__info">
+              <h3 class="stat-card__value" aria-label="Total projects">12</h3>
+              <p class="stat-card__label">Total Projects</p>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="stat-card__info">
+              <h3 class="stat-card__value" aria-label="Active tasks">48</h3>
+              <p class="stat-card__label">Active Tasks</p>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M3 20C3 16.6863 5.68629 14 9 14C12.3137 14 15 16.6863 15 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 8.5C17.1046 8.5 18 7.60457 18 6.5C18 5.39543 17.1046 4.5 16 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 14C18.7614 14 21 16.2386 21 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="stat-card__info">
+              <h3 class="stat-card__value" aria-label="Team members">8</h3>
+              <p class="stat-card__label">Team Members</p>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 21H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M5 21V10L9 6L13 12L18 4L21 8V21" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="stat-card__info">
+              <h3 class="stat-card__value" aria-label="Completed this week">23</h3>
+              <p class="stat-card__label">Completed This Week</p>
+            </div>
+          </article>
+        </div>
+
+        <!-- Two-column layout for activity + quick actions -->
+        <div class="dashboard__panels">
+
+          <!-- Recent Activity placeholder -->
+          <section class="panel panel--activity" aria-label="Recent activity">
+            <div class="panel__header">
+              <h3 class="panel__title">Recent Activity</h3>
+            </div>
+            <div class="panel__body panel__body--placeholder">
+              <p class="placeholder-text">
+                Activity feed will be displayed here by the Activity Log module.
+              </p>
+            </div>
+          </section>
+
+          <!-- Quick Actions placeholder -->
+          <section class="panel panel--quick-actions" aria-label="Quick actions">
+            <div class="panel__header">
+              <h3 class="panel__title">Quick Actions</h3>
+            </div>
+            <div class="panel__body panel__body--placeholder">
+              <p class="placeholder-text">
+                Action buttons and shortcuts will be placed here by the respective modules.
+              </p>
+            </div>
+          </section>
+
+        </div>
+      </section>
+
+      <!-- ========================================================
+           PROMPT BUILDER VIEW — hidden by default
+           ======================================================== -->
+      <section id="prompt-builder-section" aria-label="Prompt Builder" style="display: none;">
+
+        <!-- Responsible AI Guidance -->
+        <div class="pb-card pb-card--warning">
+          <h2 class="pb-card__title">Responsible AI &mdash; Developer Guidance</h2>
+          <ul class="pb-rules">
+            <li>Never share passwords, API keys, credentials, or private company information with AI tools.</li>
+            <li>Never commit <code>.env</code> files or secrets to version control.</li>
+            <li>Do not blindly trust AI-generated code &mdash; always verify logic and security.</li>
+            <li>Manually review and test all AI-generated output before using it in production.</li>
+            <li>Do not use AI to create fake commits, reviews, reports, or evidence of work.</li>
+            <li>Developers must understand and be able to explain all code they submit.</li>
+            <li>AI should assist with planning, debugging, testing, refactoring, and documentation &mdash; but must not replace human verification.</li>
+          </ul>
+        </div>
+
+        <!-- Builder Form -->
+        <div class="pb-card">
+          <h2 class="pb-card__title">Build Your Prompt</h2>
+
+          <form id="promptForm" novalidate>
+
+            <div class="pb-row">
+              <div class="pb-group">
+                <label for="promptType">Prompt Type</label>
+                <select id="promptType" required>
+                  <option value="">&mdash; Select a prompt type &mdash;</option>
+                  <option value="project-breakdown">Project Breakdown</option>
+                  <option value="task-description">Task Description</option>
+                  <option value="acceptance-criteria">Acceptance Criteria</option>
+                  <option value="code-review">Code Review</option>
+                  <option value="test-cases">Test Cases</option>
+                  <option value="documentation">Documentation</option>
+                </select>
+                <span class="pb-validation" id="validPromptType" aria-live="polite"></span>
+              </div>
+
+              <div class="pb-group">
+                <label for="projectName">Project / Module Name</label>
+                <input type="text" id="projectName" placeholder="e.g. TaskFlow task creation module" required>
+                <span class="pb-validation" id="validProjectName" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <div class="pb-group">
+              <label for="techStack">Technology Stack <span class="pb-badge">optional</span></label>
+              <input type="text" id="techStack" placeholder="e.g. HTML, CSS, JavaScript, LocalStorage">
+            </div>
+
+            <div class="pb-group">
+              <label for="context">Context <span class="pb-badge">optional</span></label>
+              <textarea id="context" rows="4" placeholder="Provide background information about the project or module..."></textarea>
+            </div>
+
+            <div class="pb-group">
+              <label for="mainTask">Main Task</label>
+              <textarea id="mainTask" rows="4" placeholder="Describe the main task you need the AI to perform..." required></textarea>
+              <span class="pb-validation" id="validMainTask" aria-live="polite"></span>
+            </div>
+
+            <div class="pb-group">
+              <label for="constraints">Constraints <span class="pb-badge">optional</span></label>
+              <textarea id="constraints" rows="3" placeholder="e.g. Do not use external libraries. Must support offline mode."></textarea>
+            </div>
+
+            <div class="pb-row">
+              <div class="pb-group">
+                <label for="expectedFormat">Expected Output Format</label>
+                <input type="text" id="expectedFormat" placeholder="Auto-filled based on prompt type" readonly>
+              </div>
+
+              <div class="pb-group">
+                <label for="edgeCases">Edge Cases <span class="pb-badge">optional</span></label>
+                <textarea id="edgeCases" rows="3" placeholder="e.g. Empty fields, invalid input, network failure, duplicate submission..."></textarea>
+              </div>
+            </div>
+
+            <div class="pb-actions">
+              <button type="submit" class="pb-btn pb-btn--primary" id="generateBtn">Generate Prompt</button>
+              <button type="button" class="pb-btn pb-btn--outline" id="copyBtn" disabled>Copy Prompt</button>
+              <button type="button" class="pb-btn pb-btn--secondary" id="resetBtn">Clear / Reset</button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Generated Output -->
+        <div class="pb-card">
+          <h2 class="pb-card__title">Generated Prompt</h2>
+          <pre class="pb-output" id="output" aria-label="Generated prompt">Your generated prompt will appear here...</pre>
+        </div>
+
+      </section>
+
+    </main>
+
   </div>
-</header>
 
-<main class="container">
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
 
-  <!-- Responsible AI Guidance -->
-  <section class="section responsible-ai" aria-label="Responsible AI guidance">
-    <h2>Responsible AI &mdash; Developer Guidance</h2>
-    <ul>
-      <li>Never share passwords, API keys, credentials, or private company information with AI tools.</li>
-      <li>Never commit <code>.env</code> files or secrets to version control.</li>
-      <li>Do not blindly trust AI-generated code &mdash; always verify logic and security.</li>
-      <li>Manually review and test all AI-generated output before using it in production.</li>
-      <li>Do not use AI to create fake commits, reviews, reports, or evidence of work.</li>
-      <li>Developers must understand and be able to explain all code they submit.</li>
-      <li>AI should assist with planning, debugging, testing, refactoring, and documentation &mdash; but must not replace human verification.</li>
-    </ul>
-  </section>
+  <!-- ============================================================
+       JAVASCRIPT – menu toggle + view routing
+       ============================================================ -->
+  <script>
+    (function() {
+      'use strict';
 
-  <!-- Prompt Builder Form -->
-  <section class="section" aria-label="Prompt builder form">
-    <h2>Build Your Prompt</h2>
+      /* ── Shared DOM refs ──────────────────────────────────── */
+      const toggleBtn    = document.getElementById('menuToggle');
+      const sidebar      = document.getElementById('sidebar');
+      const navDashboard = document.getElementById('nav-dashboard');
+      const navPromptBld = document.getElementById('nav-prompt-builder');
+      const dashboardSec = document.querySelector('.dashboard');
+      const pbSection    = document.getElementById('prompt-builder-section');
+      const headerTitle  = document.querySelector('.header__title');
+      const allNavItems  = document.querySelectorAll('.sidebar__item');
 
-    <form id="promptForm" novalidate>
+      /* ── Helper: activate a nav item ───────────────────────── */
+      function setActiveNav(activeLi) {
+        allNavItems.forEach(function(li) {
+          li.classList.remove('sidebar__item--active');
+          var link = li.querySelector('.sidebar__link');
+          if (link) { link.removeAttribute('aria-current'); }
+        });
+        activeLi.classList.add('sidebar__item--active');
+        var activeLink = activeLi.querySelector('.sidebar__link');
+        if (activeLink) { activeLink.setAttribute('aria-current', 'page'); }
+      }
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="promptType">Prompt Type</label>
-          <select id="promptType" required>
-            <option value="">— Select a prompt type —</option>
-            <option value="project-breakdown">Project Breakdown</option>
-            <option value="task-description">Task Description</option>
-            <option value="acceptance-criteria">Acceptance Criteria</option>
-            <option value="code-review">Code Review</option>
-            <option value="test-cases">Test Cases</option>
-            <option value="documentation">Documentation</option>
-          </select>
-          <span class="validation-msg" id="validPromptType" aria-live="polite"></span>
-        </div>
+      /* ── Helper: close mobile sidebar ──────────────────────── */
+      function closeMobileSidebar() {
+        if (sidebar) { sidebar.classList.remove('sidebar--open'); }
+      }
 
-        <div class="form-group">
-          <label for="projectName">Project / Module Name</label>
-          <input type="text" id="projectName" placeholder="e.g. TaskFlow task creation module" required>
-          <span class="validation-msg" id="validProjectName" aria-live="polite"></span>
-        </div>
-      </div>
+      /* ── Show Dashboard ────────────────────────────────────── */
+      function showDashboard(e) {
+        if (e) { e.preventDefault(); }
+        if (dashboardSec) { dashboardSec.style.display = ''; }
+        if (pbSection)    { pbSection.style.display    = 'none'; }
+        if (headerTitle)  { headerTitle.textContent    = 'Dashboard'; }
+        if (navDashboard) { setActiveNav(navDashboard); }
+        closeMobileSidebar();
+      }
 
-      <div class="form-group">
-        <label for="techStack">Technology Stack <span class="badge">optional</span></label>
-        <input type="text" id="techStack" placeholder="e.g. HTML, CSS, JavaScript, LocalStorage">
-      </div>
+      /* ── Show Prompt Builder ───────────────────────────────── */
+      function showPromptBuilder(e) {
+        if (e) { e.preventDefault(); }
+        if (dashboardSec) { dashboardSec.style.display = 'none'; }
+        if (pbSection)    { pbSection.style.display    = ''; }
+        if (headerTitle)  { headerTitle.textContent    = 'Prompt Builder'; }
+        if (navPromptBld) { setActiveNav(navPromptBld); }
+        closeMobileSidebar();
+      }
 
-      <div class="form-group">
-        <label for="context">Context <span class="badge">optional</span></label>
-        <textarea id="context" rows="4" placeholder="Provide background information about the project or module..."></textarea>
-      </div>
+      /* ── Menu toggle (responsive) ──────────────────────────── */
+      if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', function() {
+          sidebar.classList.toggle('sidebar--open');
+        });
+      }
 
-      <div class="form-group">
-        <label for="mainTask">Main Task</label>
-        <textarea id="mainTask" rows="4" placeholder="Describe the main task you need the AI to perform..." required></textarea>
-        <span class="validation-msg" id="validMainTask" aria-live="polite"></span>
-      </div>
+      /* ── Nav click handlers ────────────────────────────────── */
+      if (navDashboard) {
+        navDashboard.addEventListener('click', showDashboard);
+      }
 
-      <div class="form-group">
-        <label for="constraints">Constraints <span class="badge">optional</span></label>
-        <textarea id="constraints" rows="3" placeholder="e.g. Do not use external libraries. Must support offline mode."></textarea>
-      </div>
+      if (navPromptBld) {
+        navPromptBld.addEventListener('click', showPromptBuilder);
+      }
+    })();
+  </script>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="expectedFormat">Expected Output Format</label>
-          <input type="text" id="expectedFormat" placeholder="Auto-filled based on prompt type" readonly>
-        </div>
-
-        <div class="form-group">
-          <label for="edgeCases">Edge Cases <span class="badge">optional</span></label>
-          <textarea id="edgeCases" rows="3" placeholder="e.g. Empty fields, invalid input, network failure, duplicate submission..."></textarea>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button type="submit" class="btn btn-primary" id="generateBtn">Generate Prompt</button>
-        <button type="button" class="btn btn-outline" id="copyBtn" disabled>Copy Prompt</button>
-        <button type="button" class="btn btn-secondary" id="resetBtn">Clear / Reset</button>
-      </div>
-
-    </form>
-  </section>
-
-  <!-- Generated Output -->
-  <section class="section" aria-label="Generated prompt output">
-    <h2>Generated Prompt</h2>
-    <pre class="output-box" id="output" aria-label="Generated prompt">Your generated prompt will appear here...</pre>
-  </section>
-
-</main>
-
-<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
-
-<script src="src/modules/promptBuilder.js"></script>
 </body>
 </html>
