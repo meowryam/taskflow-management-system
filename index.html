@@ -374,34 +374,30 @@
     (function() {
       'use strict';
 
-      /* ── Shared DOM refs ──────────────────────────────────── */
-      const toggleBtn    = document.getElementById('menuToggle');
-      const sidebar      = document.getElementById('sidebar');
-      const navDashboard = document.getElementById('nav-dashboard');
-      const navPromptBld = document.getElementById('nav-prompt-builder');
-      const dashboardSec = document.querySelector('.dashboard');
-      const pbSection    = document.getElementById('prompt-builder-section');
-      const headerTitle  = document.querySelector('.header__title');
-      const allNavItems  = document.querySelectorAll('.sidebar__item');
+      var toggleBtn    = document.getElementById('menuToggle');
+      var sidebar      = document.getElementById('sidebar');
+      var navDashboard = document.getElementById('nav-dashboard');
+      var navPromptBld = document.getElementById('nav-prompt-builder');
+      var dashboardSec = document.querySelector('.dashboard');
+      var pbSection    = document.getElementById('prompt-builder-section');
+      var headerTitle  = document.querySelector('.header__title');
+      var allNavItems  = document.querySelectorAll('.sidebar__item');
 
-      /* ── Helper: activate a nav item ───────────────────────── */
       function setActiveNav(activeLi) {
-        allNavItems.forEach(function(li) {
-          li.classList.remove('sidebar__item--active');
-          var link = li.querySelector('.sidebar__link');
+        for (var i = 0; i < allNavItems.length; i++) {
+          allNavItems[i].classList.remove('sidebar__item--active');
+          var link = allNavItems[i].querySelector('.sidebar__link');
           if (link) { link.removeAttribute('aria-current'); }
-        });
+        }
         activeLi.classList.add('sidebar__item--active');
         var activeLink = activeLi.querySelector('.sidebar__link');
         if (activeLink) { activeLink.setAttribute('aria-current', 'page'); }
       }
 
-      /* ── Helper: close mobile sidebar ──────────────────────── */
       function closeMobileSidebar() {
         if (sidebar) { sidebar.classList.remove('sidebar--open'); }
       }
 
-      /* ── Show Dashboard ────────────────────────────────────── */
       function showDashboard(e) {
         if (e) { e.preventDefault(); }
         if (dashboardSec) { dashboardSec.style.display = ''; }
@@ -411,7 +407,6 @@
         closeMobileSidebar();
       }
 
-      /* ── Show Prompt Builder ───────────────────────────────── */
       function showPromptBuilder(e) {
         if (e) { e.preventDefault(); }
         if (dashboardSec) { dashboardSec.style.display = 'none'; }
@@ -421,14 +416,12 @@
         closeMobileSidebar();
       }
 
-      /* ── Menu toggle (responsive) ──────────────────────────── */
       if (toggleBtn && sidebar) {
         toggleBtn.addEventListener('click', function() {
           sidebar.classList.toggle('sidebar--open');
         });
       }
 
-      /* ── Nav click handlers ────────────────────────────────── */
       if (navDashboard) {
         navDashboard.addEventListener('click', showDashboard);
       }
@@ -438,6 +431,8 @@
       }
     })();
   </script>
+
+  <script src="src/modules/promptBuilder.js"></script>
 
 </body>
 </html>
