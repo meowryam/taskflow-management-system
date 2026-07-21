@@ -8,6 +8,7 @@
        STYLESHEET
        ============================================================ -->
   <link rel="stylesheet" href="src/styles/style.css" />
+  <link rel="stylesheet" href="src/styles/promptBuilder.css" />
 </head>
 <body>
 
@@ -25,7 +26,7 @@
     <!-- Navigation list -->
     <nav class="sidebar__nav" aria-label="Sidebar navigation">
       <ul class="sidebar__list">
-        <li class="sidebar__item sidebar__item--active">
+        <li class="sidebar__item sidebar__item--active" id="nav-dashboard">
           <a href="#" class="sidebar__link" aria-current="page">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -109,7 +110,7 @@
             <span class="sidebar__label">Activity Log</span>
           </a>
         </li>
-        <li class="sidebar__item">
+        <li class="sidebar__item" id="nav-prompt-builder">
           <a href="#" class="sidebar__link">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -263,24 +264,177 @@
         </div>
       </section>
 
+      <!-- ========================================================
+           PROMPT BUILDER VIEW — hidden by default
+           ======================================================== -->
+      <section id="prompt-builder-section" aria-label="Prompt Builder" style="display: none;">
+
+        <!-- Responsible AI Guidance -->
+        <div class="pb-card pb-card--warning">
+          <h2 class="pb-card__title">Responsible AI &mdash; Developer Guidance</h2>
+          <ul class="pb-rules">
+            <li>Never share passwords, API keys, credentials, or private company information with AI tools.</li>
+            <li>Never commit <code>.env</code> files or secrets to version control.</li>
+            <li>Do not blindly trust AI-generated code &mdash; always verify logic and security.</li>
+            <li>Manually review and test all AI-generated output before using it in production.</li>
+            <li>Do not use AI to create fake commits, reviews, reports, or evidence of work.</li>
+            <li>Developers must understand and be able to explain all code they submit.</li>
+            <li>AI should assist with planning, debugging, testing, refactoring, and documentation &mdash; but must not replace human verification.</li>
+          </ul>
+        </div>
+
+        <!-- Builder Form -->
+        <div class="pb-card">
+          <h2 class="pb-card__title">Build Your Prompt</h2>
+
+          <form id="promptForm" novalidate>
+
+            <div class="pb-row">
+              <div class="pb-group">
+                <label for="promptType">Prompt Type</label>
+                <select id="promptType" required>
+                  <option value="">&mdash; Select a prompt type &mdash;</option>
+                  <option value="project-breakdown">Project Breakdown</option>
+                  <option value="task-description">Task Description</option>
+                  <option value="acceptance-criteria">Acceptance Criteria</option>
+                  <option value="code-review">Code Review</option>
+                  <option value="test-cases">Test Cases</option>
+                  <option value="documentation">Documentation</option>
+                </select>
+                <span class="pb-validation" id="validPromptType" aria-live="polite"></span>
+              </div>
+
+              <div class="pb-group">
+                <label for="projectName">Project / Module Name</label>
+                <input type="text" id="projectName" placeholder="e.g. TaskFlow task creation module" required>
+                <span class="pb-validation" id="validProjectName" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <div class="pb-group">
+              <label for="techStack">Technology Stack <span class="pb-badge">optional</span></label>
+              <input type="text" id="techStack" placeholder="e.g. HTML, CSS, JavaScript, LocalStorage">
+            </div>
+
+            <div class="pb-group">
+              <label for="context">Context <span class="pb-badge">optional</span></label>
+              <textarea id="context" rows="4" placeholder="Provide background information about the project or module..."></textarea>
+            </div>
+
+            <div class="pb-group">
+              <label for="mainTask">Main Task</label>
+              <textarea id="mainTask" rows="4" placeholder="Describe the main task you need the AI to perform..." required></textarea>
+              <span class="pb-validation" id="validMainTask" aria-live="polite"></span>
+            </div>
+
+            <div class="pb-group">
+              <label for="constraints">Constraints <span class="pb-badge">optional</span></label>
+              <textarea id="constraints" rows="3" placeholder="e.g. Do not use external libraries. Must support offline mode."></textarea>
+            </div>
+
+            <div class="pb-row">
+              <div class="pb-group">
+                <label for="expectedFormat">Expected Output Format</label>
+                <input type="text" id="expectedFormat" placeholder="Auto-filled based on prompt type" readonly>
+              </div>
+
+              <div class="pb-group">
+                <label for="edgeCases">Edge Cases <span class="pb-badge">optional</span></label>
+                <textarea id="edgeCases" rows="3" placeholder="e.g. Empty fields, invalid input, network failure, duplicate submission..."></textarea>
+              </div>
+            </div>
+
+            <div class="pb-actions">
+              <button type="submit" class="pb-btn pb-btn--primary" id="generateBtn">Generate Prompt</button>
+              <button type="button" class="pb-btn pb-btn--outline" id="copyBtn" disabled>Copy Prompt</button>
+              <button type="button" class="pb-btn pb-btn--secondary" id="resetBtn">Clear / Reset</button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Generated Output -->
+        <div class="pb-card">
+          <h2 class="pb-card__title">Generated Prompt</h2>
+          <pre class="pb-output" id="output" aria-label="Generated prompt">Your generated prompt will appear here...</pre>
+        </div>
+
+      </section>
+
     </main>
 
   </div>
 
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
   <!-- ============================================================
-       JAVASCRIPT (MINIMAL) – only used for responsive menu toggle
+       JAVASCRIPT – menu toggle + view routing
        ============================================================ -->
   <script>
     (function() {
       'use strict';
 
-      const toggleBtn = document.getElementById('menuToggle');
-      const sidebar   = document.getElementById('sidebar');
+      /* ── Shared DOM refs ──────────────────────────────────── */
+      const toggleBtn    = document.getElementById('menuToggle');
+      const sidebar      = document.getElementById('sidebar');
+      const navDashboard = document.getElementById('nav-dashboard');
+      const navPromptBld = document.getElementById('nav-prompt-builder');
+      const dashboardSec = document.querySelector('.dashboard');
+      const pbSection    = document.getElementById('prompt-builder-section');
+      const headerTitle  = document.querySelector('.header__title');
+      const allNavItems  = document.querySelectorAll('.sidebar__item');
 
+      /* ── Helper: activate a nav item ───────────────────────── */
+      function setActiveNav(activeLi) {
+        allNavItems.forEach(function(li) {
+          li.classList.remove('sidebar__item--active');
+          var link = li.querySelector('.sidebar__link');
+          if (link) { link.removeAttribute('aria-current'); }
+        });
+        activeLi.classList.add('sidebar__item--active');
+        var activeLink = activeLi.querySelector('.sidebar__link');
+        if (activeLink) { activeLink.setAttribute('aria-current', 'page'); }
+      }
+
+      /* ── Helper: close mobile sidebar ──────────────────────── */
+      function closeMobileSidebar() {
+        if (sidebar) { sidebar.classList.remove('sidebar--open'); }
+      }
+
+      /* ── Show Dashboard ────────────────────────────────────── */
+      function showDashboard(e) {
+        if (e) { e.preventDefault(); }
+        if (dashboardSec) { dashboardSec.style.display = ''; }
+        if (pbSection)    { pbSection.style.display    = 'none'; }
+        if (headerTitle)  { headerTitle.textContent    = 'Dashboard'; }
+        if (navDashboard) { setActiveNav(navDashboard); }
+        closeMobileSidebar();
+      }
+
+      /* ── Show Prompt Builder ───────────────────────────────── */
+      function showPromptBuilder(e) {
+        if (e) { e.preventDefault(); }
+        if (dashboardSec) { dashboardSec.style.display = 'none'; }
+        if (pbSection)    { pbSection.style.display    = ''; }
+        if (headerTitle)  { headerTitle.textContent    = 'Prompt Builder'; }
+        if (navPromptBld) { setActiveNav(navPromptBld); }
+        closeMobileSidebar();
+      }
+
+      /* ── Menu toggle (responsive) ──────────────────────────── */
       if (toggleBtn && sidebar) {
         toggleBtn.addEventListener('click', function() {
           sidebar.classList.toggle('sidebar--open');
         });
+      }
+
+      /* ── Nav click handlers ────────────────────────────────── */
+      if (navDashboard) {
+        navDashboard.addEventListener('click', showDashboard);
+      }
+
+      if (navPromptBld) {
+        navPromptBld.addEventListener('click', showPromptBuilder);
       }
     })();
   </script>

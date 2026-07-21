@@ -10,6 +10,10 @@ All notable changes to this project will be documented here.
 - Professional folder structure
 - Documentation files
 - Base project layout
+- Prompt Builder module with 6 prompt categories
+- Prompt validation, copy, and reset functionality
+- Responsible AI guidance section
+- Prompt Builder documentation and manual test cases
 
 ---
 

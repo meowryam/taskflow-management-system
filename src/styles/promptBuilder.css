@@ -1,0 +1,269 @@
+/* ============================================================
+   TASKFLOW – PROMPT BUILDER MODULE STYLES
+   Scoped under #prompt-builder-section.
+   Reuses shared CSS variables from style.css.
+   ============================================================ */
+
+/* ── Cards ──────────────────────────────────── */
+
+#prompt-builder-section .pb-card {
+  background-color: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+#prompt-builder-section .pb-card--warning {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+}
+
+#prompt-builder-section .pb-card__title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-gray-100);
+}
+
+#prompt-builder-section .pb-card--warning .pb-card__title {
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+/* ── Responsible AI rules ───────────────────── */
+
+#prompt-builder-section .pb-rules {
+  list-style: none;
+  padding: 0;
+}
+
+#prompt-builder-section .pb-rules li {
+  font-size: var(--font-size-sm);
+  color: #78350f;
+  padding: var(--space-1) 0 var(--space-1) 1.35rem;
+  position: relative;
+}
+
+#prompt-builder-section .pb-rules li::before {
+  content: '\26A0\FE0F';
+  position: absolute;
+  left: 0;
+  font-size: 0.85rem;
+}
+
+#prompt-builder-section .pb-rules code {
+  background: #fef3c7;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.82rem;
+}
+
+/* ── Form layout ────────────────────────────── */
+
+#prompt-builder-section .pb-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+#prompt-builder-section .pb-group {
+  margin-bottom: var(--space-4);
+}
+
+#prompt-builder-section .pb-group label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-700);
+  margin-bottom: var(--space-1);
+}
+
+#prompt-builder-section .pb-badge {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-gray-500);
+  background: var(--color-gray-100);
+  border-radius: 4px;
+  padding: 0.05rem 0.45rem;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+#prompt-builder-section textarea,
+#prompt-builder-section input,
+#prompt-builder-section select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-size: var(--font-size-base);
+  border: 1.5px solid var(--color-gray-200);
+  border-radius: 7px;
+  background: var(--color-gray-50);
+  font-family: var(--font-family);
+  transition: border-color 0.2s, box-shadow 0.15s;
+  outline: none;
+}
+
+#prompt-builder-section textarea:focus,
+#prompt-builder-section input:focus,
+#prompt-builder-section select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(107, 122, 58, 0.15);
+  background: var(--card-bg);
+}
+
+#prompt-builder-section textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+#prompt-builder-section select {
+  cursor: pointer;
+}
+
+/* ── Validation ─────────────────────────────── */
+
+#prompt-builder-section .pb-validation {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  margin-top: var(--space-1);
+  min-height: 1.2em;
+}
+
+#prompt-builder-section .field-error {
+  border-color: var(--color-danger) !important;
+  background: #fef2f2;
+}
+
+/* ── Buttons ────────────────────────────────── */
+
+#prompt-builder-section .pb-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+
+#prompt-builder-section .pb-btn {
+  padding: 0.6rem 1.4rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  font-family: var(--font-family);
+}
+
+#prompt-builder-section .pb-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#prompt-builder-section .pb-btn--primary {
+  background: var(--color-primary);
+  color: var(--card-bg);
+}
+
+#prompt-builder-section .pb-btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+#prompt-builder-section .pb-btn--outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-primary);
+}
+
+#prompt-builder-section .pb-btn--outline:hover:not(:disabled) {
+  background: var(--color-primary-light);
+}
+
+#prompt-builder-section .pb-btn--secondary {
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+}
+
+#prompt-builder-section .pb-btn--secondary:hover {
+  background: var(--color-gray-200);
+}
+
+/* ── Output ─────────────────────────────────── */
+
+#prompt-builder-section .pb-output {
+  background: var(--color-gray-50);
+  border: 1.5px solid var(--color-gray-200);
+  border-radius: 7px;
+  padding: var(--space-4);
+  min-height: 180px;
+  white-space: pre-wrap;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.84rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  color: var(--color-gray-800);
+}
+
+#prompt-builder-section .pb-output:empty::before {
+  content: 'Your generated prompt will appear here...';
+  color: var(--color-gray-400);
+  font-family: var(--font-family);
+  font-style: italic;
+}
+
+/* ── Toast (global overlay) ─────────────────── */
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--color-success);
+  color: var(--card-bg);
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Responsive ─────────────────────────────── */
+
+@media (max-width: 768px) {
+  #prompt-builder-section .pb-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  #prompt-builder-section .pb-actions {
+    flex-direction: column;
+  }
+
+  #prompt-builder-section .pb-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  #prompt-builder-section .pb-card {
+    padding: var(--space-4);
+  }
+
+  .toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    text-align: center;
+  }
+}
