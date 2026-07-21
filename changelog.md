@@ -1,16 +1,27 @@
 # Changelog
 
+All notable changes to this project will be documented here.
+
 ## [Unreleased]
 
 ### Added
-- Prompt Builder module (`src/modules/promptBuilder.js`) with 6 prompt types:
-  Project Breakdown, Task Description, Acceptance Criteria, Code Review, Test Cases, Documentation
-- Form validation for required fields (prompt type, project name, main task)
-- Clipboard copy with toast notification
-- Reset functionality to clear all fields and output
-- LocalStorage persistence for last selected prompt type
-- Responsive CSS layout with mobile support
-- Semantic HTML with accessible labels and ARIA attributes
-- Responsible AI guidance section with 7 developer safety rules
-- Documentation in `docs/interns/10-prompt-builder.md`
-- Manual test cases in `tests/manual-test-cases.md`
+
+- Initial repository
+- Professional folder structure
+- Documentation files
+- Base project layout
+- Prompt Builder module with 6 prompt categories
+- Prompt validation, copy, and reset functionality
+- Responsible AI guidance section
+- Prompt Builder documentation and manual test cases
+
+---
+
+## [0.1.0] - Initial Setup
+
+### Added
+
+- Repository created
+- README starter
+- Git ignore
+- Documentation folders
