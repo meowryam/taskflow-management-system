@@ -12,7 +12,8 @@ Issue Link:https://github.com/meowryam/taskflow-management-system/issues/1
 ## Branch
 Branch Name:feature/login-register
 
-
+## Pull Request
+https://github.com/meowryam/taskflow-management-system/pull/20
 
 ## Files Modified
 - `src/html_files/login.html` — Login page UI with styles, form, session view, and toast feedback
@@ -255,8 +256,9 @@ Output format:
 
 ## Screenshots
 
-![alt text](screenshots/image.png)
-![alt text](<screenshots/image copy.png>)
+
+![alt text](../screenshots/login.png)
+![alt text](<../screenshots/register.png>)
 
 ## Notes
 - All auth is client-side only (no backend). The JWT implementation is a **concept demonstration** — signature uses a deterministic hash for reproducibility, not a cryptographically secure HMAC. In production the server would sign tokens with a real secret and clients would only store/forward them.
