@@ -17,7 +17,7 @@
   function filterTasksByRole(tasks) {
     var session = getSession();
     if (!session) return tasks;
-    if (session.role === 'Admin' || session.role === 'Manager') return tasks;
+    if (session.role !== 'Team Member') return tasks;
     if (!session.memberId) return tasks.filter(function (t) {
       return String(t.assignedUserId) === String(session.email);
     });
@@ -29,7 +29,7 @@
   function filterProjectsByRole(projects, tasks) {
     var session = getSession();
     if (!session) return projects;
-    if (session.role === 'Admin' || session.role === 'Manager') return projects;
+    if (session.role !== 'Team Member') return projects;
     var userTaskProjectIds = new Set();
     tasks.forEach(function (t) {
       if (t.projectId) userTaskProjectIds.add(String(t.projectId));
@@ -43,7 +43,7 @@
     var session = getSession();
     if (!session) return [];
     var allTasks = globalThis.DataStore.getTasks();
-    if (session.role === 'Admin' || session.role === 'Manager') return allTasks;
+    if (session.role !== 'Team Member') return allTasks;
     if (!session.memberId) return allTasks.filter(function (t) {
       return String(t.assignedUserId) === String(session.email);
     });

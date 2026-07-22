@@ -91,7 +91,7 @@
     var allTasks = DataStore.getTasks();
     var session = window.TaskFlowSession;
     if (!session) return allTasks;
-    if (session.role === 'Admin' || session.role === 'Manager') return allTasks;
+    if (session.role !== 'Team Member') return allTasks;
     if (!session.memberId) return allTasks.filter(function (t) {
       return String(t.assignedUserId) === String(session.email);
     });
