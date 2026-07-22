@@ -65,7 +65,12 @@ export function createTask(input, projects, members, now = new Date()) {
     updatedAt: timestamp
   };
 
-  return { task: globalThis.DataStore.addTask(task), isValid: true, errors: {} };
+  const savedTask = globalThis.DataStore.addTask(task);
+  if (globalThis.ActivityLog) {
+    globalThis.ActivityLog.logTaskCreated(savedTask);
+  }
+
+  return { task: savedTask, isValid: true, errors: {} };
 }
 
 export function editTask(taskId, input, projects, members, now = new Date()) {
@@ -82,6 +87,9 @@ export function editTask(taskId, input, projects, members, now = new Date()) {
     assignedUserId: undefined
   };
   const task = globalThis.DataStore.updateTask(taskId, changes);
+  if (task && globalThis.ActivityLog) {
+    globalThis.ActivityLog.logTaskUpdated(existingTask, task);
+  }
   return { task, isValid: true, errors: {} };
 }
 
@@ -101,5 +109,10 @@ export function normalizeTaskForEditing(task, today = getTodayIso()) {
 }
 
 export function deleteTask(taskId) {
-  return globalThis.DataStore.deleteTask(taskId);
+  const existingTask = globalThis.DataStore.getTaskById(taskId);
+  const deleted = globalThis.DataStore.deleteTask(taskId);
+  if (deleted && existingTask && globalThis.ActivityLog) {
+    globalThis.ActivityLog.logTaskDeleted(existingTask);
+  }
+  return deleted;
 }
