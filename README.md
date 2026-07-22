@@ -402,7 +402,7 @@ TaskFlow was validated through structured manual testing rather than automated t
 
 | Dashboard | Task Board | Reports |
 |:---:|:---:|:---:|
-| 🖼️ *screenshot placeholder* | 🖼️ *screenshot placeholder* | 🖼️ *screenshot placeholder* |
+| https://github.com/meowryam/taskflow-management-system/blob/main/docs/screenshots/dashboard.png | 🖼️ *screenshot placeholder* | 🖼️ *screenshot placeholder* |
 
 </div>
 
