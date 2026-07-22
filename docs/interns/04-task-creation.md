@@ -37,11 +37,13 @@ All required form fields, validation rules, exact Kanban statuses, storage opera
   title: 'Create task form',
   description: 'Implement and validate the form.',
   projectId: 'project-1',
-  assignedMemberId: 'member-1',
+  assignedMemberIds: ['member-1', 'member-2'],
+  startDate: '2026-07-24',
   dueDate: '2026-07-31',
   priority: 'High',
   status: 'Todo',
-  createdAt: '2026-07-21T12:00:00.000Z'
+  createdAt: '2026-07-21T12:00:00.000Z',
+  updatedAt: '2026-07-21T12:00:00.000Z'
 }
 ```
 
@@ -49,11 +51,11 @@ Only IDs connect a task to a project and member. Display names are resolved by c
 
 ## 5. Validation strategy
 
-Input is trimmed and normalized before validation. Title, project, member, date, priority, and status are required. Project/member IDs must exist in the currently loaded collections. Dates must be real `YYYY-MM-DD` calendar dates. Priorities are `Low`, `Medium`, or `High`; statuses are exactly `Todo`, `In Progress`, `Review`, or `Done`. Invalid input returns field-keyed messages and never reaches storage.
+Input is trimmed and normalized before validation. Title, project, member count, every generated member selection, start date, due date, priority, and status are required. References must exist, member selections must be unique, and the count cannot exceed available members. Dates must be real `YYYY-MM-DD` dates, cannot be before today, and due date cannot precede start date. The same structured validation runs for create and edit.
 
 ## 6. Storage strategy
 
-LocalStorage keys are `taskflow.tasks`, `taskflow.projects`, and `taskflow.members`. Missing keys, invalid JSON, non-array values, and empty arrays safely read as empty collections. `TaskRepository` exposes `getTasks`, `getTaskById`, `addTask`, `updateTask`, and `deleteTask`. All returned updates preserve the existing object, so `updateTask(id, { status: 'Done' })` changes only status. Invalid status updates are rejected at the repository boundary.
+The existing shared keys are `taskflow_tasks`, `taskflow_projects`, and `taskflow_members`. Missing keys, invalid JSON, non-array values, and empty arrays safely read as empty collections. Shared `DataStore` exposes `getTasks`, `getTaskById`, `addTask`, `updateTask`, and `deleteTask`. Task Creation never creates another key or duplicates persistence logic.
 
 ## 7. HTML
 
@@ -72,41 +74,32 @@ The implementation is split across `dataStore.js`, `taskValidation.js`, `taskSer
 Run the terminal test suite first with `node --test --test-isolation=none tests/task-creation.test.mjs`.
 
 1. Serve the repository using a local development server and open `index.html`.
-2. With no `taskflow.projects` or `taskflow.members`, open Tasks and confirm creation is disabled with a clear message.
-3. Add test arrays to those two LocalStorage keys, using objects with `id` and `name`, then reload.
-4. Submit the empty form and verify field messages appear and no task is stored.
-5. Try invalid select values through developer tools and confirm they are rejected.
-6. Enter a valid task, submit twice rapidly, and confirm only one task is created.
-7. Inspect `taskflow.tasks`; confirm the nine expected properties exist and no project/member names are stored.
-8. Confirm Reset clears fields, errors, and messages.
-9. Call `updateTask(taskId, { status: 'Done' })` from another module and confirm all other properties remain unchanged.
-10. Try an invalid status update and confirm it throws without modifying storage.
-11. Corrupt `taskflow.tasks` and confirm reads return an empty array without crashing the UI.
+2. Open Task Creation and confirm the shared projects and members populate.
+3. Submit empty or invalid inputs and verify field messages appear and no task is stored.
+4. Test past dates, reversed dates, excessive member count, missing selections, and duplicate members.
+5. Create a valid task, then inspect `taskflow_tasks` for the canonical model without names or legacy assignment fields.
+6. Edit the task and verify `createdAt` remains unchanged while `updatedAt` changes.
+7. Cancel an edit and verify nothing is saved.
+8. Delete a task, reload, and verify it remains deleted.
+9. Open Board and verify a new task appears in its status column and can move between columns.
 
 ## 11. Integration points with Task Board
 
 ```js
-import {
-  getTasks,
-  getTaskById,
-  updateTask,
-  TASKS_CHANGED_EVENT
-} from '../dataStore.js';
-
-const tasks = getTasks();
-updateTask(taskId, { status: 'In Progress' });
-window.addEventListener(TASKS_CHANGED_EVENT, renderBoard);
+const tasks = DataStore.getTasks();
+DataStore.updateTask(taskId, { status: 'In Progress' });
+window.addEventListener(DataStore.TASKS_CHANGED_EVENT, renderBoard);
 ```
 
 The board groups tasks by the exact stored `status` strings. It resolves project/member names separately using IDs. Every add, update, or delete dispatches `taskflow:tasks-changed` with `{ action, taskId }`.
 
 ## 12. Future SQL Server integration notes
 
-Replace `BrowserStorageAdapter`/repository persistence with asynchronous HTTP calls to a backend whose routes map to task CRUD operations. UI and validation remain unchanged; only service/repository calls need to become `async` and awaited. The frontend model maps naturally to task table fields, while the API translates camelCase properties to database column names and validates foreign keys server-side.
+Replace the implementation behind the shared `DataStore` CRUD methods with asynchronous HTTP calls whose routes map to task operations. UI and validation remain unchanged; service calls only need to become `async` and awaited. The API translates camelCase properties to database fields and validates project/member relationships server-side.
 
 ## 13. Architectural decisions
 
-The repository pattern isolates persistence, and the service owns task construction so neither UI nor Board creates incompatible records. Validation is reusable and independent of DOM rendering. Custom events decouple producers from consumers. IDs are strings to support browser UUIDs now and backend-generated identifiers later. Reference labels are never copied into tasks, preventing stale duplicated data.
+The shared store isolates persistence, and the service owns task construction so UI code does not create incompatible records. Validation is reusable and independent of DOM rendering. Custom events decouple producers from consumers. Reference labels are never copied into tasks, preventing stale duplicated data.
 
 Edge cases are handled as follows:
 
@@ -290,19 +283,24 @@ New tasks persist this canonical shape:
   title,
   description,
   projectId,
-  assignedMemberId,
+  assignedMemberIds,
+  startDate,
   dueDate,
   priority,
   status,
-  createdAt
+  createdAt,
+  updatedAt
 }
 ```
 
 Resolve project and member names at render time. Do not copy names into a task. For assignment lookup, prefer the canonical field while retaining compatibility with main's older seeded tasks:
 
 ```js
-const memberId = task.assignedMemberId ?? task.assignedUserId;
-const member = members.find(item => String(item.id) === String(memberId));
+const memberIds = task.assignedMemberIds
+  ?? [task.assignedMemberId ?? task.assignedUserId].filter(id => id != null);
+const assignedMembers = members.filter(item =>
+  memberIds.some(id => String(item.id) === String(id))
+);
 ```
 
 The only supported columns and stored statuses are `Todo`, `In Progress`, `Review`, and `Done`. Move a card by sending a partial update so every other task property is preserved:
@@ -322,3 +320,52 @@ window.addEventListener(DataStore.TASKS_CHANGED_EVENT, () => {
 ```
 
 When integrating scripts in the page, load `src/dataStore.js` before Task Creation or Board code. Navigating to the current Board already calls `loadData()`, so newly created tasks appear on navigation; listening for the event also supports live refresh when both modules are visible in a future layout.
+
+## Task Creation enhancement implementation
+
+### Updated plan and responsibilities
+
+- `index.html` contains only the additional Task Creation controls: member count, generated-member host, paired dates, edit/cancel buttons, and the testing list.
+- `tasks.css` contains only Task Creation presentation changes.
+- `taskValidation.js` owns the reusable create/edit rules.
+- `taskService.js` owns normalization, legacy assignment handling, timestamps, create, edit, and delete operations.
+- `tasks.js` owns form state, dynamic dropdowns, field-error rendering, edit/cancel mode, confirmation, and testing-list refresh.
+- `dataStore.js` has one backward-compatible runtime alias extension so the unchanged Board can read the first new assignment. The alias is non-enumerable and is not stored.
+
+No Project, Member, Board, Report, Activity, Authentication, Dashboard, navigation, or global-style module is changed.
+
+### Feature behavior
+
+- Start Date and Due Date are grouped under Task Schedule. Their HTML `min` values begin at today, and Due Date's minimum follows a later Start Date.
+- Member Count is limited to `1..availableMembers`. Changing it adds or removes member selects without keeping extra assignments.
+- Every selected member must exist and be unique.
+- Create sets both timestamps. Edit preserves `createdAt` and replaces `updatedAt`.
+- Edit loads old `assignedMemberId` or `assignedUserId` values into the new array model. Saving removes the legacy persisted fields.
+- Delete requires confirmation, removes only the task, and refreshes the testing list.
+- Create, update, and delete continue emitting `taskflow:tasks-changed`.
+
+### Edge-case handling
+
+- No projects or members: creation is disabled with a message; member count also disables when no members exist.
+- Empty or missing storage: shared `DataStore` returns safe collections and the task list shows its empty state.
+- Old task structure: a single legacy assignment becomes a one-item `assignedMemberIds` array during editing.
+- Missing former member: the edit form requires a currently available replacement before saving.
+- Invalid/past/reversed dates: both HTML constraints and JavaScript validation block persistence.
+- Duplicate or incomplete member selections: structured field errors block persistence.
+- Member availability changes: the input maximum and rendered dropdown count are recalculated.
+- Deleting the final task: the persisted collection becomes `[]` and the empty state renders.
+- Cancelling edit: the form, errors, generated member fields, heading, and buttons return to create mode without saving.
+- Refreshing: all successful changes are already in the existing LocalStorage collection.
+
+### Manual testing
+
+1. Run `node --test --test-isolation=none tests/task-creation.test.mjs`.
+2. Open Task Creation and verify Start Date and Due Date have today's minimum.
+3. Try past dates and a due date earlier than start date; confirm field errors and no save.
+4. Change Member Count from 1 to the available maximum and back; confirm dropdowns add/remove cleanly.
+5. Select the same member twice and confirm creation is blocked.
+6. Create a valid multi-member task and inspect `taskflow_tasks` for the new model and both timestamps.
+7. Edit it, change all supported values, and confirm `createdAt` is unchanged while `updatedAt` changes.
+8. Cancel another edit and confirm nothing persists.
+9. Delete a task, accept confirmation, reload, and confirm it stays deleted.
+10. Edit a legacy seeded task and confirm its single assignment loads safely into the new UI.

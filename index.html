@@ -402,6 +402,7 @@
         <header class="task-creation__intro">
           <h2 id="taskCreationTitle">Create a task</h2>
           <p>Add work to a project and assign it to a team member.</p>
+          <p id="taskEditIndicator" class="task-form__edit-indicator" hidden>Editing an existing task</p>
         </header>
 
         <form id="taskForm" class="task-form" novalidate>
@@ -428,17 +429,35 @@
             </div>
 
             <div class="task-form__field">
-              <label for="taskAssignedMember">Assigned Member</label>
-              <select id="taskAssignedMember" name="assignedMemberId" aria-describedby="assignedMemberIdError">
-                <option value="">Select a member</option>
-              </select>
-              <span id="assignedMemberIdError" class="task-form__error" aria-live="polite"></span>
+              <label for="taskMemberCount">Number of Assigned Members</label>
+              <input id="taskMemberCount" name="memberCount" type="number" min="1" step="1" value="1" aria-describedby="memberCountError" />
+              <span id="memberCountError" class="task-form__error" aria-live="polite"></span>
             </div>
 
-            <div class="task-form__field">
-              <label for="taskDueDate">Due Date</label>
-              <input id="taskDueDate" name="dueDate" type="date" aria-describedby="dueDateError" />
-              <span id="dueDateError" class="task-form__error" aria-live="polite"></span>
+            <div class="task-form__field task-form__field--wide">
+              <fieldset class="task-form__member-group">
+                <legend>Assigned Members</legend>
+                <div id="taskMemberSelections" class="task-form__member-selections"></div>
+                <span id="assignedMemberIdsError" class="task-form__error" aria-live="polite"></span>
+              </fieldset>
+            </div>
+
+            <div class="task-form__field task-form__field--wide">
+              <fieldset class="task-form__date-group">
+                <legend>Task Schedule</legend>
+                <div class="task-form__date-fields">
+                  <div class="task-form__field">
+                    <label for="taskStartDate">Start Date</label>
+                    <input id="taskStartDate" name="startDate" type="date" aria-describedby="startDateError" />
+                    <span id="startDateError" class="task-form__error" aria-live="polite"></span>
+                  </div>
+                  <div class="task-form__field">
+                    <label for="taskDueDate">Due Date</label>
+                    <input id="taskDueDate" name="dueDate" type="date" aria-describedby="dueDateError" />
+                    <span id="dueDateError" class="task-form__error" aria-live="polite"></span>
+                  </div>
+                </div>
+              </fieldset>
             </div>
 
             <div class="task-form__field">
@@ -468,9 +487,16 @@
           <div class="task-form__actions">
             <button id="createTaskButton" class="task-form__button task-form__button--primary" type="submit">Create Task</button>
             <button class="task-form__button task-form__button--secondary" type="reset">Reset</button>
+            <button id="cancelTaskEditButton" class="task-form__button task-form__button--secondary" type="button" hidden>Cancel Edit</button>
           </div>
           <p id="taskFormMessage" class="task-form__message" role="status" aria-live="polite"></p>
         </form>
+
+        <section class="task-testing-panel" aria-labelledby="taskTestingPanelTitle">
+          <h3 id="taskTestingPanelTitle">Created Tasks</h3>
+          <p class="task-testing-panel__hint">Use this list to test editing and deleting tasks.</p>
+          <div id="taskTestingList" class="task-testing-panel__list"></div>
+        </section>
       </section>
 
       <!-- ========================================================
