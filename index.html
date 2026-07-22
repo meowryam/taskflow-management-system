@@ -629,9 +629,46 @@
               </div>
 
               <div class="pb-group">
-                <label for="projectName">Project / Module Name</label>
-                <input type="text" id="projectName" placeholder="e.g. TaskFlow task creation module" required>
-                <span class="pb-validation" id="validProjectName" aria-live="polite"></span>
+                <label for="projectSelect">Project</label>
+                <select id="projectSelect" required>
+                  <option value="">Select a project</option>
+                </select>
+                <span class="pb-validation" id="validProjectId" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <div class="pb-group">
+              <label for="taskSelect">Related Task <span class="pb-badge">optional</span></label>
+              <select id="taskSelect" disabled>
+                <option value="">Select a related task</option>
+              </select>
+            </div>
+
+            <p class="pb-data-status" id="promptBuilderDataStatus" aria-live="polite"></p>
+
+            <div class="pb-row pb-row--context">
+              <div class="pb-context-card">
+                <h3 class="pb-context-card__title">Project Context</h3>
+                <p class="pb-context-empty" id="projectContextEmpty">Select a project to load TaskFlow context.</p>
+                <div id="projectDetails" hidden>
+                  <div class="pb-meta-grid" id="projectMeta"></div>
+                  <div class="pb-context-block">
+                    <h4>Team Members</h4>
+                    <ul class="pb-context-list" id="projectMembers"></ul>
+                  </div>
+                  <div class="pb-context-block">
+                    <h4>Related Tasks</h4>
+                    <ul class="pb-context-list" id="projectTasks"></ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pb-context-card">
+                <h3 class="pb-context-card__title">Task Context</h3>
+                <p class="pb-context-empty" id="taskContextEmpty">Select a project first to view related tasks.</p>
+                <div id="taskDetails" hidden>
+                  <div class="pb-meta-grid" id="taskMeta"></div>
+                </div>
               </div>
             </div>
 
@@ -647,7 +684,7 @@
 
             <div class="pb-group">
               <label for="mainTask">Main Task</label>
-              <textarea id="mainTask" rows="4" placeholder="Describe the main task you need the AI to perform..." required></textarea>
+              <textarea id="mainTask" rows="4" placeholder="Describe the main task you need the AI to perform using the selected TaskFlow project context..." required></textarea>
               <span class="pb-validation" id="validMainTask" aria-live="polite"></span>
             </div>
 
@@ -670,6 +707,7 @@
 
             <div class="pb-actions">
               <button type="submit" class="pb-btn pb-btn--primary" id="generateBtn">Generate Prompt</button>
+              <button type="button" class="pb-btn pb-btn--outline" id="generateSummaryBtn">Generate Project Summary</button>
               <button type="button" class="pb-btn pb-btn--outline" id="copyBtn" disabled>Copy Prompt</button>
               <button type="button" class="pb-btn pb-btn--secondary" id="resetBtn">Clear / Reset</button>
             </div>
