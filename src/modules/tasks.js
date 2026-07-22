@@ -1,4 +1,3 @@
-import { taskStore } from '../dataStore.js';
 import { createTask } from './taskService.js';
 
 const form = document.getElementById('taskForm');
@@ -20,7 +19,7 @@ function normalizeReference(item, type) {
   const label = type === 'project'
     ? (item.name ?? item.projectName ?? item.title)
     : (item.name ?? item.fullName ?? item.memberName);
-  return rawId == null ? null : { id: String(rawId), label: label || `Unnamed ${type}` };
+  return rawId == null ? null : { id: rawId, label: label || `Unnamed ${type}` };
 }
 
 function populateSelect(select, items, placeholder) {
@@ -29,8 +28,8 @@ function populateSelect(select, items, placeholder) {
 }
 
 function loadDependencies() {
-  projects = taskStore.getProjects().map((item) => normalizeReference(item, 'project')).filter(Boolean);
-  members = taskStore.getMembers().map((item) => normalizeReference(item, 'member')).filter(Boolean);
+  projects = globalThis.DataStore.getProjects().map((item) => normalizeReference(item, 'project')).filter(Boolean);
+  members = globalThis.DataStore.getMembers().map((item) => normalizeReference(item, 'member')).filter(Boolean);
   populateSelect(projectSelect, projects, 'Select a project');
   populateSelect(memberSelect, members, 'Select a member');
 

@@ -1,4 +1,3 @@
-import { addTask } from '../dataStore.js';
 import { validateTaskInput } from './taskValidation.js';
 
 function createId() {
@@ -23,11 +22,16 @@ export function createTask(input, projects, members) {
   const validation = validateTaskInput(normalizedInput, projects, members);
   if (!validation.isValid) return { task: null, ...validation };
 
+  const project = projects.find((item) => String(item.id) === normalizedInput.projectId);
+  const member = members.find((item) => String(item.id) === normalizedInput.assignedMemberId);
+
   const task = {
     id: createId(),
     ...normalizedInput,
+    projectId: project.id,
+    assignedMemberId: member.id,
     createdAt: new Date().toISOString()
   };
 
-  return { task: addTask(task), isValid: true, errors: {} };
+  return { task: globalThis.DataStore.addTask(task), isValid: true, errors: {} };
 }

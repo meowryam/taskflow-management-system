@@ -15,8 +15,10 @@ window.localStorage = {
     storedValues.delete(key);
   }
 };
+globalThis.localStorage = window.localStorage;
 
-const store = await import('../src/dataStore.js');
+await import('../src/dataStore.js');
+const store = globalThis.DataStore;
 const service = await import('../src/modules/taskService.js');
 
 const projects = [{ id: 'project-1', name: 'TaskFlow' }];
@@ -37,8 +39,8 @@ function validInput(overrides = {}) {
 
 beforeEach(() => {
   storedValues.clear();
-  storedValues.set(store.STORAGE_KEYS.projects, JSON.stringify(projects));
-  storedValues.set(store.STORAGE_KEYS.members, JSON.stringify(members));
+  storedValues.set(store.STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
+  storedValues.set(store.STORAGE_KEYS.MEMBERS, JSON.stringify(members));
 });
 
 test('creates and stores the canonical task object', () => {
@@ -52,6 +54,10 @@ test('creates and stores the canonical task object', () => {
   assert.equal(result.task.projectId, 'project-1');
   assert.equal(result.task.assignedMemberId, 'member-1');
   assert.equal(store.getTasks().length, 1);
+
+  const boardTask = store.getTaskById(result.task.id);
+  assert.equal(boardTask.assignedUserId, 'member-1');
+  assert.equal(Object.hasOwn(JSON.parse(storedValues.get(store.STORAGE_KEYS.TASKS))[0], 'assignedUserId'), false);
 });
 
 test('rejects invalid input without saving it', () => {
@@ -107,13 +113,13 @@ test('deletes a task and handles an unknown task ID', () => {
 });
 
 test('handles missing, empty, and malformed LocalStorage values', () => {
-  storedValues.delete(store.STORAGE_KEYS.tasks);
+  storedValues.delete(store.STORAGE_KEYS.TASKS);
   assert.deepEqual(store.getTasks(), []);
 
-  storedValues.set(store.STORAGE_KEYS.tasks, '[]');
+  storedValues.set(store.STORAGE_KEYS.TASKS, '[]');
   assert.deepEqual(store.getTasks(), []);
 
-  storedValues.set(store.STORAGE_KEYS.tasks, '{invalid json');
+  storedValues.set(store.STORAGE_KEYS.TASKS, '{invalid json');
   assert.deepEqual(store.getTasks(), []);
 });
 

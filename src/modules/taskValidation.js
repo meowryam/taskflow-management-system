@@ -1,6 +1,4 @@
-import { TASK_STATUSES } from '../dataStore.js';
-
-export { TASK_STATUSES };
+export const TASK_STATUSES = Object.freeze(['Todo', 'In Progress', 'Review', 'Done']);
 export const TASK_PRIORITIES = Object.freeze(['Low', 'Medium', 'High']);
 
 function isRealIsoDate(value) {
