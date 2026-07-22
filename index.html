@@ -10,6 +10,85 @@
   <link rel="stylesheet" href="src/styles/style.css" />
   <link rel="stylesheet" href="src/styles/tasks.css" />
   <link rel="stylesheet" href="src/styles/promptBuilder.css" />
+  <link rel="stylesheet" href="src/styles/board.css" id="board-css" />
+
+  <!-- Projects module styles -->
+  <style>
+    .pm-card {
+      background: var(--card-bg, #fff);
+      border-radius: var(--card-radius, 12px);
+      box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.08));
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .pm-card h2 { margin: 0 0 16px 0; font-size: 18px; }
+    .pm-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .pm-header h2 { margin: 0; font-size: var(--font-size-xl, 1.5rem); }
+    .pm-btn {
+      padding: 8px 18px; border-radius: 6px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: 1px solid transparent; transition: 0.15s ease;
+    }
+    .pm-btn--primary {
+      background: var(--color-primary, #6b7a3a); color: #fff; border-color: var(--color-primary, #6b7a3a);
+    }
+    .pm-btn--primary:hover { opacity: 0.9; }
+    .pm-btn--secondary {
+      background: #fff; color: var(--color-gray-700, #423c2e); border-color: var(--color-gray-200, #e6dcc0);
+    }
+    .pm-btn--secondary:hover { background: var(--color-gray-50, #faf6ec); }
+    .pm-btn--danger {
+      background: #fff; color: var(--color-danger, #a8452f); border-color: #e5b3b3;
+    }
+    .pm-btn--danger:hover { background: #fbeaea; }
+    .pm-btn--small { padding: 5px 12px; font-size: 12.5px; }
+    .pm-form-row {
+      display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;
+    }
+    .pm-form-row label { font-size: 13px; font-weight: 500; color: var(--color-gray-700, #423c2e); }
+    .pm-form-row input, .pm-form-row select, .pm-form-row textarea {
+      padding: 8px 10px; border: 1px solid var(--color-gray-200, #e6dcc0);
+      border-radius: 6px; font-size: 14px; font-family: inherit;
+    }
+    .pm-form-row textarea { resize: vertical; min-height: 60px; }
+    .pm-form-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .pm-error { color: var(--color-danger, #a8452f); font-size: 12px; margin-top: 4px; }
+    .pm-table { width: 100%; border-collapse: collapse; }
+    .pm-table th, .pm-table td {
+      text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-gray-200, #e6dcc0);
+      font-size: 14px;
+    }
+    .pm-table th { font-weight: 600; color: var(--color-gray-600, #5c5340); background: var(--color-gray-50, #faf6ec); }
+    .pm-empty { color: var(--color-gray-400, #a89b78); text-align: center; padding: 40px 0; }
+    .pm-overdue { color: var(--color-danger, #a8452f); font-weight: 600; }
+    .pm-badge {
+      display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    }
+    .pm-badge--active { background: #e8ecd7; color: #4f5c29; }
+    .pm-badge--completed { background: #d4edda; color: #155724; }
+    .pm-badge--onhold { background: #fff3cd; color: #856404; }
+    .pm-actions { display: flex; gap: 6px; }
+
+    /* Placeholder sections */
+    .placeholder-card {
+      background: var(--card-bg, #fff);
+      border-radius: var(--card-radius, 12px);
+      box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.08));
+      padding: 48px 24px;
+      text-align: center;
+    }
+    .placeholder-card h2 {
+      font-size: var(--font-size-xl, 1.5rem);
+      color: var(--color-gray-700, #423c2e);
+      margin-bottom: 8px;
+    }
+    .placeholder-card p {
+      color: var(--color-gray-400, #a89b78);
+      font-size: var(--font-size-sm, 0.875rem);
+    }
+  </style>
 </head>
 <body>
 
@@ -39,7 +118,7 @@
             <span class="sidebar__label">Dashboard</span>
           </a>
         </li>
-        <li class="sidebar__item">
+        <li class="sidebar__item" id="nav-projects">
           <a href="#" class="sidebar__link">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,7 +128,7 @@
             <span class="sidebar__label">Projects</span>
           </a>
         </li>
-        <li class="sidebar__item">
+        <li class="sidebar__item" id="nav-tasks">
           <a href="#" class="sidebar__link">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -60,7 +139,7 @@
             <span class="sidebar__label">Tasks</span>
           </a>
         </li>
-        <li class="sidebar__item">
+        <li class="sidebar__item" id="nav-board">
           <a href="#" class="sidebar__link">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -73,7 +152,7 @@
             <span class="sidebar__label">Board</span>
           </a>
         </li>
-        <li class="sidebar__item">
+        <li class="sidebar__item" id="nav-members">
           <a href="#" class="sidebar__link">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -86,7 +165,7 @@
             <span class="sidebar__label">Members</span>
           </a>
         </li>
-        <li class="sidebar__item">
+        <li class="sidebar__item" id="nav-reports">
           <a href="#" class="sidebar__link">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -97,7 +176,7 @@
             <span class="sidebar__label">Reports</span>
           </a>
         </li>
-        <li class="sidebar__item">
+        <li class="sidebar__item" id="nav-activity-log">
           <a href="#" class="sidebar__link">
             <span class="sidebar__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -438,6 +517,31 @@
 
       </section>
 
+      <!-- ========================================================
+           PROJECTS VIEW — mounted by projects.js
+           ======================================================== -->
+      <section id="projects-section" aria-label="Projects" style="display: none;"></section>
+
+      <!-- ========================================================
+           REPORTS VIEW — placeholder (module coming soon)
+           ======================================================== -->
+      <section id="reports-section" aria-label="Reports" style="display: none;">
+        <div class="placeholder-card">
+          <h2>Reports</h2>
+          <p>The Reports module is coming soon. Check back later.</p>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           ACTIVITY LOG VIEW — placeholder (module coming soon)
+           ======================================================== -->
+      <section id="activity-log-section" aria-label="Activity Log" style="display: none;">
+        <div class="placeholder-card">
+          <h2>Activity Log</h2>
+          <p>The Activity Log module is coming soon. Check back later.</p>
+        </div>
+      </section>
+
     </main>
 
   </div>
@@ -445,72 +549,147 @@
   <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
 
   <!-- ============================================================
-       JAVASCRIPT – menu toggle + view routing
+       JAVASCRIPT – centralized navigation router
        ============================================================ -->
   <script>
-    (function() {
+    (function () {
       'use strict';
 
+      /* ---- DOM refs ---- */
       var toggleBtn    = document.getElementById('menuToggle');
       var sidebar      = document.getElementById('sidebar');
-      var navDashboard = document.getElementById('nav-dashboard');
-      var navPromptBld = document.getElementById('nav-prompt-builder');
-      var dashboardSec = document.querySelector('.dashboard');
-      var pbSection    = document.getElementById('prompt-builder-section');
       var headerTitle  = document.querySelector('.header__title');
       var allNavItems  = document.querySelectorAll('.sidebar__item');
+      var projectsMounted = false;
 
       function setActiveNav(activeLi) {
         for (var i = 0; i < allNavItems.length; i++) {
           allNavItems[i].classList.remove('sidebar__item--active');
           var link = allNavItems[i].querySelector('.sidebar__link');
-          if (link) { link.removeAttribute('aria-current'); }
+          if (link) link.removeAttribute('aria-current');
         }
         activeLi.classList.add('sidebar__item--active');
         var activeLink = activeLi.querySelector('.sidebar__link');
-        if (activeLink) { activeLink.setAttribute('aria-current', 'page'); }
+        if (activeLink) activeLink.setAttribute('aria-current', 'page');
       }
 
       function closeMobileSidebar() {
-        if (sidebar) { sidebar.classList.remove('sidebar--open'); }
+        if (sidebar) sidebar.classList.remove('sidebar--open');
       }
 
-      function showDashboard(e) {
-        if (e) { e.preventDefault(); }
-        if (dashboardSec) { dashboardSec.style.display = ''; }
-        if (pbSection)    { pbSection.style.display    = 'none'; }
-        if (headerTitle)  { headerTitle.textContent    = 'Dashboard'; }
-        if (navDashboard) { setActiveNav(navDashboard); }
+      /* Hide every known section so only the target is visible */
+      function hideAllSections() {
+        var ids = [
+          'task-creation-section', 'prompt-builder-section',
+          'projects-section', 'reports-section', 'activity-log-section',
+          'board-section', 'members-section'
+        ];
+        for (var i = 0; i < ids.length; i++) {
+          var el = document.getElementById(ids[i]);
+          if (el) el.style.display = 'none';
+        }
+        var dash = document.querySelector('.dashboard');
+        if (dash) dash.style.display = 'none';
+      }
+
+      /* Route map: nav-id → { sectionId, title, init? } */
+      var routes = {
+        'nav-dashboard':      { sectionId: 'dashboard-selector', title: 'Dashboard' },
+        'nav-projects':       { sectionId: 'projects-section',   title: 'Projects',      init: 'projects' },
+        'nav-tasks':          { sectionId: 'task-creation-section', title: 'Create Task' },
+        'nav-board':          { sectionId: 'board-section',      title: 'Task Board',    init: 'board' },
+        'nav-members':        { sectionId: 'members-section',    title: 'Team Members',  init: 'members' },
+        'nav-reports':        { sectionId: 'reports-section',    title: 'Reports' },
+        'nav-activity-log':   { sectionId: 'activity-log-section', title: 'Activity Log' },
+        'nav-prompt-builder': { sectionId: 'prompt-builder-section', title: 'Prompt Builder' }
+      };
+
+      function getTargetElement(route) {
+        if (route.sectionId === 'dashboard-selector') {
+          return document.querySelector('.dashboard');
+        }
+        return document.getElementById(route.sectionId);
+      }
+
+      function handleNavClick(navId, event) {
+        event.preventDefault();
+
+        var route = routes[navId];
+        if (!route) return;
+
+        hideAllSections();
+
+        var target = getTargetElement(route);
+        if (target) target.style.display = '';
+
+        if (headerTitle) headerTitle.textContent = route.title;
+
+        var navItem = document.getElementById(navId);
+        if (navItem) setActiveNav(navItem);
+
         closeMobileSidebar();
+
+        /* One-time mount for Projects */
+        if (route.init === 'projects' && !projectsMounted) {
+          var ps = document.getElementById('projects-section');
+          if (ps && typeof Projects !== 'undefined' && Projects.mount) {
+            Projects.mount(ps);
+            projectsMounted = true;
+          }
+        }
+
+        /* Refresh board data when navigating to it */
+        if (route.init === 'board') {
+          var bm = window.KanbanBoardModule;
+          if (bm && typeof bm.refresh === 'function') bm.refresh();
+        }
       }
 
-      function showPromptBuilder(e) {
-        if (e) { e.preventDefault(); }
-        if (dashboardSec) { dashboardSec.style.display = 'none'; }
-        if (pbSection)    { pbSection.style.display    = ''; }
-        if (headerTitle)  { headerTitle.textContent    = 'Prompt Builder'; }
-        if (navPromptBld) { setActiveNav(navPromptBld); }
-        closeMobileSidebar();
-      }
-
+      /* ---- Hamburger toggle ---- */
       if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener('click', function() {
+        toggleBtn.addEventListener('click', function () {
           sidebar.classList.toggle('sidebar--open');
         });
       }
 
-      if (navDashboard) {
-        navDashboard.addEventListener('click', showDashboard);
-      }
-
-      if (navPromptBld) {
-        navPromptBld.addEventListener('click', showPromptBuilder);
+      /* ---- Attach router to every nav item ---- */
+      var navIds = [
+        'nav-dashboard', 'nav-projects', 'nav-tasks', 'nav-board',
+        'nav-members', 'nav-reports', 'nav-activity-log', 'nav-prompt-builder'
+      ];
+      for (var i = 0; i < navIds.length; i++) {
+        (function (id) {
+          var item = document.getElementById(id);
+          if (item) {
+            item.addEventListener('click', function (e) { handleNavClick(id, e); });
+          }
+        })(navIds[i]);
       }
     })();
   </script>
+
+  <!-- ============================================================
+       SCRIPT LOADING – order matters for dependencies
+       ============================================================ -->
   <script src="src/dataStore.js"></script>
+
+  <!-- Auth / permissions libs -->
+  <script src="src/modules/jwt.js"></script>
+  <script src="src/modules/permissions.js"></script>
+
+  <!-- Data modules -->
+  <script src="src/modules/filters.js"></script>
+  <script src="src/modules/members.js"></script>
+
+  <!-- UI modules (self-contained, register their own nav handlers) -->
+  <script src="src/modules/projects.js"></script>
+  <script src="src/modules/board.js"></script>
+  <script src="src/modules/members-ui.js"></script>
+
+  <!-- ES Module (tasks – uses import) -->
   <script type="module" src="src/modules/tasks.js"></script>
 
+  <!-- Standalone feature -->
   <script src="src/modules/promptBuilder.js"></script>
   <script src="src/dataStore.js"></script>
   <script src="src/modules/members.js"></script>
