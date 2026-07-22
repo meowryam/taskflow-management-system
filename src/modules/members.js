@@ -59,6 +59,9 @@ const Members = (function () {
 
     members.push(newMember);
     DataStore.saveMembers(members);
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.logMemberAdded(newMember);
+    }
     return { success: true, member: newMember };
   }
 
@@ -112,6 +115,9 @@ const Members = (function () {
 
     const updated = members.filter((m) => m.id !== memberId);
     DataStore.saveMembers(updated);
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.logMemberDeleted(member);
+    }
     return { success: true };
   }
 

@@ -701,14 +701,9 @@
       </section>
 
       <!-- ========================================================
-           ACTIVITY LOG VIEW — placeholder (module coming soon)
+           ACTIVITY LOG VIEW — mounted by activityLog-ui.js
            ======================================================== -->
-      <section id="activity-log-section" aria-label="Activity Log" style="display: none;">
-        <div class="placeholder-card">
-          <h2>Activity Log</h2>
-          <p>The Activity Log module is coming soon. Check back later.</p>
-        </div>
-      </section>
+      <section id="activity-log-section" aria-label="Activity Log" style="display: none;"></section>
 
     </main>
 
@@ -729,6 +724,7 @@
       var headerTitle  = document.querySelector('.header__title');
       var allNavItems  = document.querySelectorAll('.sidebar__item');
       var projectsMounted = false;
+      var activityLogMounted = false;
 
       function setActiveNav(activeLi) {
         for (var i = 0; i < allNavItems.length; i++) {
@@ -768,7 +764,7 @@
         'nav-board':          { sectionId: 'board-section',      title: 'Task Board',    init: 'board' },
         'nav-members':        { sectionId: 'members-section',    title: 'Team Members',  init: 'members' },
         'nav-reports':        { sectionId: 'reports-section',    title: 'Reports' },
-        'nav-activity-log':   { sectionId: 'activity-log-section', title: 'Activity Log' },
+        'nav-activity-log':   { sectionId: 'activity-log-section', title: 'Activity Log', init: 'activityLog' },
         'nav-prompt-builder': { sectionId: 'prompt-builder-section', title: 'Prompt Builder' }
       };
 
@@ -811,6 +807,15 @@
           var bm = window.KanbanBoardModule;
           if (bm && typeof bm.refresh === 'function') bm.refresh();
         }
+
+        /* One-time mount for Activity Log */
+        if (route.init === 'activityLog' && !activityLogMounted) {
+          var als = document.getElementById('activity-log-section');
+          if (als && typeof ActivityLogUI !== 'undefined' && ActivityLogUI.mount) {
+            ActivityLogUI.mount(als);
+            activityLogMounted = true;
+          }
+        }
       }
 
       /* ---- Create Task button inside tasks view ---- */
@@ -850,6 +855,8 @@
        SCRIPT LOADING – order matters for dependencies
        ============================================================ -->
   <script src="src/dataStore.js"></script>
+  <script src="src/modules/activityLog.js"></script>
+  <script src="src/modules/activityLog-ui.js"></script>
 
   <!-- Auth / permissions libs -->
   <script src="src/modules/jwt.js"></script>

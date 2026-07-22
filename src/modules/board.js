@@ -405,6 +405,7 @@
     var task = this.tasks.find(function (t) { return String(t.id) === String(taskId); });
     if (!task || task.status === newStatus) return;
 
+    var oldStatus = task.status;
     task.status = newStatus;
     if (newStatus === 'Done') {
       task.completedAt = new Date().toISOString();
@@ -412,6 +413,10 @@
 
     if (typeof DataStore !== 'undefined') {
       DataStore.saveTasks(this.tasks);
+    }
+
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.logStatusChanged(task, oldStatus, newStatus);
     }
 
     this.renderBoard();
