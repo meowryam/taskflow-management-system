@@ -73,6 +73,10 @@
   margin-bottom: var(--space-4);
 }
 
+#prompt-builder-section .pb-row--context {
+  align-items: start;
+}
+
 #prompt-builder-section .pb-group label {
   display: block;
   font-weight: 600;
@@ -90,6 +94,93 @@
   padding: 0.05rem 0.45rem;
   margin-left: 0.35rem;
   vertical-align: middle;
+}
+
+#prompt-builder-section .pb-data-status {
+  margin: 0 0 var(--space-4);
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 8px;
+  background: var(--color-gray-50);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+}
+
+#prompt-builder-section .pb-context-card {
+  border: 1px solid var(--color-gray-200);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fffdf8 0%, #faf6ec 100%);
+  padding: var(--space-4);
+  min-height: 100%;
+}
+
+#prompt-builder-section .pb-context-card__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-gray-800);
+}
+
+#prompt-builder-section .pb-context-empty {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}
+
+#prompt-builder-section .pb-meta-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+#prompt-builder-section .pb-meta-item {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 8px;
+  background: var(--card-bg);
+}
+
+#prompt-builder-section .pb-meta-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-gray-500);
+}
+
+#prompt-builder-section .pb-meta-value {
+  color: var(--color-gray-800);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+#prompt-builder-section .pb-context-block {
+  margin-top: var(--space-4);
+}
+
+#prompt-builder-section .pb-context-block h4 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-gray-700);
+}
+
+#prompt-builder-section .pb-context-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.55rem;
+  list-style: disc;
+}
+
+#prompt-builder-section .pb-context-list li {
+  color: var(--color-gray-700);
+  line-height: 1.5;
+}
+
+#prompt-builder-section .pb-context-list__empty {
+  color: var(--color-gray-500) !important;
 }
 
 #prompt-builder-section textarea,
@@ -123,6 +214,13 @@
   cursor: pointer;
 }
 
+#prompt-builder-section select:disabled,
+#prompt-builder-section input[readonly] {
+  background: var(--color-gray-100);
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
 /* ── Validation ─────────────────────────────── */
 
 #prompt-builder-section .pb-validation {
@@ -145,6 +243,7 @@
   gap: var(--space-3);
   flex-wrap: wrap;
   margin-top: var(--space-2);
+  align-items: center;
 }
 
 #prompt-builder-section .pb-btn {
@@ -154,8 +253,9 @@
   border: none;
   border-radius: 7px;
   cursor: pointer;
-  transition: background 0.2s, opacity 0.2s;
+  transition: background 0.2s, opacity 0.2s, transform 0.15s;
   font-family: var(--font-family);
+  min-height: 42px;
 }
 
 #prompt-builder-section .pb-btn:disabled {
@@ -170,6 +270,7 @@
 
 #prompt-builder-section .pb-btn--primary:hover:not(:disabled) {
   background: var(--color-primary-dark);
+  transform: translateY(-1px);
 }
 
 #prompt-builder-section .pb-btn--outline {
@@ -180,6 +281,7 @@
 
 #prompt-builder-section .pb-btn--outline:hover:not(:disabled) {
   background: var(--color-primary-light);
+  transform: translateY(-1px);
 }
 
 #prompt-builder-section .pb-btn--secondary {
@@ -189,6 +291,7 @@
 
 #prompt-builder-section .pb-btn--secondary:hover {
   background: var(--color-gray-200);
+  transform: translateY(-1px);
 }
 
 /* ── Output ─────────────────────────────────── */
@@ -200,6 +303,7 @@
   padding: var(--space-4);
   min-height: 180px;
   white-space: pre-wrap;
+  word-break: break-word;
   font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
   font-size: 0.84rem;
   line-height: 1.7;
@@ -244,7 +348,7 @@
 @media (max-width: 768px) {
   #prompt-builder-section .pb-row {
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: var(--space-4);
   }
 
   #prompt-builder-section .pb-actions {
