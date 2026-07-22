@@ -89,6 +89,10 @@
     setText('statActiveTasks', String(activeTasks));
     setText('statTeamMembers', String(teamMembers));
     setText('statCompletedWeek', String(completedThisWeek));
+
+    if (globalThis.ActivityLogUI && typeof globalThis.ActivityLogUI.renderDashboardFeed === 'function') {
+      globalThis.ActivityLogUI.renderDashboardFeed();
+    }
   }
 
   function setText(id, text) {
@@ -105,4 +109,5 @@
   document.addEventListener('taskflow:tasks-changed', refresh);
   document.addEventListener('taskflow:members-changed', refresh);
   document.addEventListener('taskflow:projects-changed', refresh);
+  document.addEventListener('taskflow:activity-changed', refresh);
 })();
