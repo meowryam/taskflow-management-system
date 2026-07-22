@@ -47,7 +47,7 @@ open index.html
 | 06 | [📘 Usage Instructions](#-usage-instructions) |
 | 07 | [🔀 GitHub Workflow Evidence](#-github-workflow-evidence) |
 | 08 | [📅 Development Process](#-development-process) |
-| 09 | [🧩 Day 1: The 12 Modules](#-day-1-the-12-modules) |
+| 09 | [🧩 Day 1: The 12 Modules](#-day-1-the-9-modules) |
 | 10 | [🤝 Day 2: Group Integration](#-day-2-group-integration) |
 | 11 | [🤖 AI Usage and Prompt Engineering](#-ai-usage-and-prompt-engineering) |
 | 12 | [🛡️ Responsible AI Policy](#️-responsible-ai-policy) |
