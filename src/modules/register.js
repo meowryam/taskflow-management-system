@@ -82,18 +82,35 @@ function validatePasswordStrength(password) {
 }
 
 /**
+ * Validates email format.
+ * @param {string} email
+ * @returns {boolean}
+ */
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+/**
  * Validates registration inputs.
  * @param {string} username 
+ * @param {string} email
  * @param {string} password 
  * @param {string} role 
  * @param {Array<Object>} existingUsers 
  * @returns {{ isValid: boolean, error: string|null }}
  */
-function validateRegistration(username, password, role, existingUsers) {
+function validateRegistration(username, email, password, role, existingUsers) {
   const cleanUsername = username.trim();
+  const cleanEmail = email.trim();
 
   if (!cleanUsername) {
     return { isValid: false, error: 'Please enter a username.' };
+  }
+  if (!cleanEmail) {
+    return { isValid: false, error: 'Please enter an email address.' };
+  }
+  if (!isValidEmail(cleanEmail)) {
+    return { isValid: false, error: 'Please enter a valid email address.' };
   }
   if (!password) {
     return { isValid: false, error: 'Please enter a password.' };
@@ -107,12 +124,20 @@ function validateRegistration(username, password, role, existingUsers) {
     return { isValid: false, error: 'Password is not strong enough. Meet all requirements below.' };
   }
 
-  const duplicate = existingUsers.some(
+  const duplicateUsername = existingUsers.some(
     (user) => user.username.toLowerCase() === cleanUsername.toLowerCase()
   );
 
-  if (duplicate) {
+  if (duplicateUsername) {
     return { isValid: false, error: 'Username is already taken. Please choose another.' };
+  }
+
+  const duplicateEmail = existingUsers.some(
+    (user) => user.email && user.email.toLowerCase() === cleanEmail.toLowerCase()
+  );
+
+  if (duplicateEmail) {
+    return { isValid: false, error: 'Email is already registered. Please use another.' };
   }
 
   return { isValid: true, error: null };
@@ -121,14 +146,16 @@ function validateRegistration(username, password, role, existingUsers) {
 /**
  * Formats a new user object matching the exact /scripts user schema.
  * @param {string} username 
+ * @param {string} email
  * @param {string} password 
  * @param {string} role 
  * @returns {Object}
  */
-function createUserModel(username, password, role) {
+function createUserModel(username, email, password, role) {
   return {
     id: Date.now(),
     username: username.trim(),
+    email: email.trim(),
     password: password,
     role: role,
     createdAt: new Date().toISOString()
@@ -155,6 +182,7 @@ function getStrengthLabel(score) {
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('register-form');
   const usernameInput = document.getElementById('username');
+  const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
   const roleSelect = document.getElementById('role');
   const feedbackElement = document.getElementById('feedback-message');
@@ -223,26 +251,27 @@ document.addEventListener('DOMContentLoaded', () => {
     clearFeedback();
 
     const username = usernameInput.value;
+    const email = emailInput.value;
     const password = passwordInput.value;
     const role = roleSelect.value;
 
     const existingUsers = getExistingUsers();
 
-    const validation = validateRegistration(username, password, role, existingUsers);
+    const validation = validateRegistration(username, email, password, role, existingUsers);
 
     if (!validation.isValid) {
       showFeedback(validation.error, 'error');
       return;
     }
 
-    const newUser = createUserModel(username, password, role);
+    const newUser = createUserModel(username, email, password, role);
     saveUser(newUser);
 
     if (window.JWT) {
       window.JWT.save(window.JWT.create({
         name: newUser.username,
         role: newUser.role,
-        email: newUser.username + "@taskflow.local",
+        email: newUser.email,
       }));
     }
 
@@ -254,14 +283,14 @@ document.addEventListener('DOMContentLoaded', () => {
       members.push({
         id: Date.now(),
         name: newUser.username,
-        email: newUser.username + "@taskflow.local",
+        email: newUser.email,
         role: newUser.role,
         initials: initials
       });
       localStorage.setItem('taskflow_members', JSON.stringify(members));
     } catch (_) {}
 
-    showFeedback("User \"" + newUser.username + "\" successfully registered as " + newUser.role + "!", 'success');
+    showFeedback("User \"" + newUser.username + "\" (" + newUser.email + ") successfully registered as " + newUser.role + "!", 'success');
     form.reset();
     renderStrengthFeedback(0, ['At least 8 characters', 'At least 1 uppercase letter', 'At least 1 lowercase letter', 'At least 1 number', 'At least 1 special character (!@#$...)']);
 

@@ -87,6 +87,15 @@ function isValidEmail(value) {
 return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+/**
+ * Checks if the input looks like a username (no @ symbol).
+ * @param {string} value
+ * @returns {boolean}
+ */
+function isUsername(value) {
+return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length > 0;
+}
+
 function setLoading(isLoading) {
 submitBtn.disabled = isLoading;
 submitBtn.classList.toggle("login-form__submit--loading", isLoading);
@@ -152,15 +161,12 @@ form.addEventListener("submit", (event) => {
 event.preventDefault();
 hideFormError();
 
-const email = emailInput.value.trim();
+const loginValue = emailInput.value.trim();
 const password = passwordInput.value;
 
 let hasError = false;
-if (!email) {
-setFieldError(emailInput, emailHint, "Email is required.");
-hasError = true;
-} else if (!isValidEmail(email)) {
-setFieldError(emailInput, emailHint, "Enter a valid email address.");
+if (!loginValue) {
+setFieldError(emailInput, emailHint, "Username or email is required.");
 hasError = true;
 }
 if (!password) {
@@ -177,10 +183,13 @@ setLoading(true);
 // Simulate a network round-trip
 setTimeout(() => {
 setLoading(false);
-var matches =
-email.toLowerCase() === DEMO_ACCOUNT.email && password === DEMO_ACCOUNT.password;
 
-if (matches) {
+// Try demo account — check by both email and username
+var demoMatches =
+(loginValue.toLowerCase() === DEMO_ACCOUNT.email || loginValue.toLowerCase() === DEMO_ACCOUNT.name.toLowerCase()) &&
+password === DEMO_ACCOUNT.password;
+
+if (demoMatches) {
 session = {
 name: DEMO_ACCOUNT.name,
 role: DEMO_ACCOUNT.role,
@@ -198,7 +207,8 @@ var raw = localStorage.getItem(REGISTERED_USERS_KEY);
 var registeredUsers = raw ? JSON.parse(raw) : [];
 var found = registeredUsers.find(function (u) {
 return (
-u.username.toLowerCase() === email.toLowerCase() &&
+(u.username.toLowerCase() === loginValue.toLowerCase() ||
+(u.email && u.email.toLowerCase() === loginValue.toLowerCase())) &&
 u.password === password
 );
 });
@@ -206,7 +216,7 @@ if (found) {
 session = {
 name: found.username,
 role: found.role,
-email: found.username + "@taskflow.local",
+email: found.email || found.username + "@taskflow.local",
 };
 renderSession();
 showToast("Signed in successfully.");
@@ -215,7 +225,7 @@ return;
 }
 } catch (_) { /* ignore parse errors */ }
 
-showFormError("That email and password don't match our records.");
+showFormError("That username/email and password don't match our records.");
 passwordInput.focus();
 }, 700);
 });
