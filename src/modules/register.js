@@ -107,6 +107,9 @@ function validateRegistration(username, email, password, role, existingUsers) {
   if (!cleanUsername) {
     return { isValid: false, error: 'Please enter a username.' };
   }
+  if (cleanUsername.length < 4) {
+    return { isValid: false, error: 'Username must be at least 4 characters long.' };
+  }
   if (!cleanEmail) {
     return { isValid: false, error: 'Please enter an email address.' };
   }
@@ -200,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function clearFeedback() {
     feedbackElement.textContent = '';
     feedbackElement.className = 'feedback-message';
+    var hint = document.getElementById('usernameHint');
+    if (hint) { hint.textContent = ''; hint.className = 'form-hint'; }
   }
 
   function renderStrengthFeedback(score, errors) {
@@ -227,6 +232,22 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+
+  usernameInput.addEventListener('input', () => {
+    const val = usernameInput.value;
+    const hint = document.getElementById('usernameHint');
+    if (!hint) return;
+    if (!val) {
+      hint.textContent = '';
+      hint.className = 'form-hint';
+    } else if (val.trim().length < 4) {
+      hint.textContent = 'Username must be at least 4 characters long.';
+      hint.className = 'form-hint';
+    } else {
+      hint.textContent = '✓ Username looks good';
+      hint.className = 'form-hint form-hint--success';
+    }
+  });
 
   passwordInput.addEventListener('input', () => {
     const pass = passwordInput.value;
