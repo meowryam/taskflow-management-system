@@ -841,13 +841,15 @@
   <!-- ES Module (tasks – uses import) -->
   <script type="module" src="src/modules/tasks.js"></script>
 
+  <!-- App init (sets TaskFlowSession — must load before dashboard/filters) -->
+  <script src="src/app.js"></script>
+
   <!-- Search, Filter & Sorting UI -->
   <script src="src/modules/filters-ui.js"></script>
 
   <!-- Standalone feature -->
   <script src="src/modules/promptBuilder.js"></script>
   <script src="src/modules/dashboard.js"></script>
-  <script src="src/app.js"></script>
 
 </body>
 </html>
