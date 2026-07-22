@@ -2,7 +2,7 @@
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:2193b0,100:6dd5ed&height=200&section=header&text=TaskFlow&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Team%20Task%20Management%20System&descAlignY=55&descSize=20" width="100%"/>
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&pause=1000&color=2193B0&center=true&vCenter=true&width=650&lines=Plan.+Assign.+Track.+Deliver.;Built+in+a+2+Day+Agentic+Development+Sprint;12+Interns+%2B+2+Groups+%2B+1+Product;Prompted%2C+Verified%2C+and+Shipped" alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&pause=1000&color=2193B0&center=true&vCenter=true&width=650&lines=Plan.+Assign.+Track.+Deliver.;Built+in+a+2+Day+Agentic+Development+Sprint;9+Interns+%2B+2+Groups+%2B+1+Product;Prompted%2C+Verified%2C+and+Shipped" alt="Typing SVG" />
 
 ![Build](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge)
@@ -64,7 +64,7 @@ open index.html
 
 **TaskFlow** is a lightweight, browser based team task management system built to help small teams create projects, assign work, track status, and stay on top of deadlines, all without needing a backend server.
 
-TaskFlow was born out of a **2 day Agentic Development Sprint**: a hands on assessment where 12 interns used AI coding assistants (Cursor, Claude, Codex, GitHub Copilot) as professional development partners, not as a shortcut. Every line of AI generated code was manually verified, tested, and explained before it shipped.
+TaskFlow was born out of a **2 day Agentic Development Sprint**: a hands on assessment where 9 interns used AI coding assistants (Cursor, Claude, Codex, GitHub Copilot) as professional development partners, not as a shortcut. Every line of AI generated code was manually verified, tested, and explained before it shipped.
 
 ### 💎 In a nutshell
 
@@ -239,7 +239,7 @@ flowchart LR
 
 ## 🔀 GitHub Workflow Evidence
 
-Every single change in this repository, across all 12 interns and both integration groups, followed the same mandatory workflow:
+Every single change in this repository, across all 9 interns and both integration groups, followed the same mandatory workflow:
 
 <div align="center">
 
@@ -282,7 +282,7 @@ TaskFlow was built in a tight, structured **2 day Agentic Development Sprint**.
 
 | Day | Mode | Focus |
 |---|---|---|
-| **Day 1** | 🧑‍💻 Solo, 12 interns | Each intern built one module independently on their own branch |
+| **Day 1** | 🧑‍💻 Solo, 9 interns | Each intern built one module independently on their own branch |
 | **Day 2** | 🤝 Group Alpha and Group Beta, 6 members each | Integration, bug fixes, testing, documentation, and final release |
 
 </div>
@@ -302,13 +302,10 @@ Each intern owned one module end to end: designing it, building it, testing it, 
 | 3 | [laibainqilab-ds](https://github.com/laibainqilab-ds) | Project Management | ✅ |
 | 4 | [abihajibbran1-lang](https://github.com/abihajibbran1-lang) | Task Creation | ✅ |
 | 5 | [Bilalmughal-07](https://github.com/Bilalmughal-07) | Task Board | ✅ |
-| 6 | *Team Members module owner* | Team Members | ✅ |
+| 6 | [AbdulAzeemHashmi](https://github.com/AbdulAzeemHashmi) | Documentation and Release Prep | ✅ |
 | 7 | [TahaSohail-Goat](https://github.com/TahaSohail-Goat) | Search, Filter and Sorting | ✅ |
-| 8 | *Activity Log module owner* | Activity Log | ✅ |
-| 9 | *Reports Dashboard module owner* | Reports Dashboard | ✅ |
-| 10 | [hassaanahmed-dev](https://github.com/hassaanahmed-dev) | Prompt Builder and Responsible AI | ✅ |
-| 11 | [inshrahmumtaz](https://github.com/inshrahmumtaz) | QA and Manual Testing | ✅ |
-| 12 | [AbdulAzeemHashmi](https://github.com/AbdulAzeemHashmi) | Documentation and Release Prep | ✅ |
+| 8 | [hassaanahmed-dev](https://github.com/hassaanahmed-dev) | Prompt Builder and Responsible AI | ✅ |
+| 9 | [inshrahmumtaz](https://github.com/inshrahmumtaz) | QA and Manual Testing | ✅ |
 
 </div>
 
@@ -324,8 +321,8 @@ Each module followed the same discipline: an Issue describing the task, a dedica
 
 | Group | Members | Focus | Main Responsibility |
 |---|:---:|---|---|
-| 🔵 **Group Alpha** | 6 | Product Integration and UI | Merged all UI modules into one consistent flow, polished the dashboard, connected projects to tasks to the board, and prepared the final demo |
-| 🟣 **Group Beta** | 6 | Logic, QA, Storage and Release | Fixed LocalStorage sync bugs, connected reports to real data, completed manual testing, finalized all documentation, and shipped the release |
+| 🔵 **Group Alpha** | 5 | Product Integration and UI | Merged all UI modules into one consistent flow, polished the dashboard, connected projects to tasks to the board, and prepared the final demo |
+| 🟣 **Group Beta** | 4 | Logic, QA, Storage and Release | Fixed LocalStorage sync bugs, connected reports to real data, completed manual testing, finalized all documentation, and shipped the release |
 
 </div>
 
@@ -427,13 +424,10 @@ This project exists because of the combined effort of 12 talented interns across
 | Intern 3 | Project Management | [@laibainqilab-ds](https://github.com/laibainqilab-ds) |
 | Intern 4 | Task Creation | [@abihajibbran1-lang](https://github.com/abihajibbran1-lang) |
 | Intern 5 | Task Board | [@Bilalmughal-07](https://github.com/Bilalmughal-07) |
-| Intern 6 | Team Members | *profile not listed* |
+| Intern 6 | Documentation and Release Prep | [@AbdulAzeemHashmi](https://github.com/AbdulAzeemHashmi) |
 | Intern 7 | Search, Filter and Sorting | [@TahaSohail-Goat](https://github.com/TahaSohail-Goat) |
-| Intern 8 | Activity Log | *profile not listed* |
-| Intern 9 | Reports Dashboard | *profile not listed* |
-| Intern 10 | Prompt Builder and Responsible AI | [@hassaanahmed-dev](https://github.com/hassaanahmed-dev) |
-| Intern 11 | QA and Manual Testing | [@inshrahmumtaz](https://github.com/inshrahmumtaz) |
-| Intern 12 | Documentation and Release Prep | [@AbdulAzeemHashmi](https://github.com/AbdulAzeemHashmi) |
+| Intern 8 | Prompt Builder and Responsible AI  | [@hassaanahmed-dev](https://github.com/hassaanahmed-dev) |
+| Intern 9 | QA and Manual Testing | [@inshrahmumtaz](https://github.com/inshrahmumtaz) |
 
 </div>
 
@@ -482,7 +476,7 @@ publish, distribute, sublicense, and or sell copies of the Software.
 
 <br/><br/>
 
-**Built with 💙 by 12 interns in 2 days | CODOC Internship Programme 2026**
+**Built with 💙 by 9 interns in 2 days | CODOC Internship Programme 2026**
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6dd5ed,100:2193b0&height=100&section=footer" width="100%"/>
 
