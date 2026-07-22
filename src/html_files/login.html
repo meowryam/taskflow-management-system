@@ -661,6 +661,12 @@ body {
 
   <div class="login-toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- Google Identity Services (loaded asynchronously) -->
+  <script>
+    window.TASKFLOW_GOOGLE_CLIENT_ID = '53414606442-ap70jlb8jjon4j7qgs28t5rjdbcps3ce.apps.googleusercontent.com';
+  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <script src="../modules/jwt.js" defer></script>
   <script src="../modules/permissions.js" defer></script>
   <script src="../modules/login.js" defer></script>

@@ -238,8 +238,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const newUser = createUserModel(username, password, role);
     saveUser(newUser);
 
-    showFeedback(`User "${newUser.username}" successfully registered as ${newUser.role}!`, 'success');
+    if (window.JWT) {
+      window.JWT.save(window.JWT.create({
+        name: newUser.username,
+        role: newUser.role,
+        email: newUser.username + "@taskflow.local",
+      }));
+    }
+
+    var initials = newUser.username.split(' ').map(function(p) { return p[0]; }).join('').toUpperCase();
+    try {
+      var membersRaw = localStorage.getItem('taskflow_members');
+      var members = membersRaw ? JSON.parse(membersRaw) : [];
+      if (!Array.isArray(members)) members = [];
+      members.push({
+        id: Date.now(),
+        name: newUser.username,
+        email: newUser.username + "@taskflow.local",
+        role: newUser.role,
+        initials: initials
+      });
+      localStorage.setItem('taskflow_members', JSON.stringify(members));
+    } catch (_) {}
+
+    showFeedback("User \"" + newUser.username + "\" successfully registered as " + newUser.role + "!", 'success');
     form.reset();
     renderStrengthFeedback(0, ['At least 8 characters', 'At least 1 uppercase letter', 'At least 1 lowercase letter', 'At least 1 number', 'At least 1 special character (!@#$...)']);
+
+    setTimeout(function () {
+      window.location.href = "../../index.html";
+    }, 1500);
   });
 });

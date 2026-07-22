@@ -124,7 +124,6 @@ function showTaskCreation(event) {
 if (form) {
   form.addEventListener('submit', handleSubmit);
   form.addEventListener('reset', () => window.setTimeout(clearFormState, 0));
-  taskNavigation?.addEventListener('click', showTaskCreation);
   document.getElementById('nav-dashboard')?.addEventListener('click', () => {
     taskSection.style.display = 'none';
   });
@@ -135,3 +134,5 @@ if (form) {
   window.addEventListener('taskflow:members-changed', loadDependencies);
   loadDependencies();
 }
+
+window.showCreateTaskForm = showTaskCreation;
