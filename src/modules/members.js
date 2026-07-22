@@ -87,6 +87,12 @@ const Members = (function () {
    * Returns { success: true } or { success: false, error, taskCount }
    */
   function deleteMember(memberId) {
+    if (window.Permissions && window.TaskFlowSession) {
+      if (!window.Permissions.check(window.TaskFlowSession.role, 'manage_team')) {
+        return { success: false, error: "You don't have permission to delete members." };
+      }
+    }
+
     const members = DataStore.getMembers();
     const member = members.find((m) => m.id === memberId);
 

@@ -1,337 +1,350 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TaskFlow - Register</title>
-  <style>
-    /* Design Tokens: Light Brown & Cream Theme */
-    :root {
-      --bg-main: #fdfbf7;         /* Soft Cream Background */
-      --card-bg: #f4efe6;         /* Light Sand / Cream Card */
-      --card-border: #e2d7c7;     /* Soft Tan Border */
-      --text-main: #3d322c;       /* Deep Walnut Text */
-      --text-muted: #7a6e65;      /* Warm Muted Brown */
-      --input-bg: #ffffff;        /* Crisp White Input */
-      --input-border: #d3c4b1;    /* Light Brown Border */
-      --primary: #a66e38;         /* Warm Amber Primary Button */
-      --primary-hover: #8c5a2b;   /* Darker Amber Hover */
-      --error-bg: #fce8e6;        /* Soft Red/Brown Error Alert */
-      --error-text: #a83232;      
-      --success-bg: #eaf3e6;      /* Soft Sage Success Alert */
-      --success-text: #2d6a2e;
-      --radius: 8px;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaskFlow - Register</title>
+<style>
+/* Design Tokens: Light Brown & Cream Theme */
+:root {
+--bg-main: #fdfbf7; /* Soft Cream Background */
+--card-bg: #f4efe6; /* Light Sand / Cream Card */
+--card-border: #e2d7c7; /* Soft Tan Border */
+--text-main: #3d322c; /* Deep Walnut Text */
+--text-muted: #7a6e65; /* Warm Muted Brown */
+--input-bg: #ffffff; /* Crisp White Input */
+--input-border: #d3c4b1; /* Light Brown Border */
+--primary: #a66e38; /* Warm Amber Primary Button */
+--primary-hover: #8c5a2b; /* Darker Amber Hover */
+--error-bg: #fce8e6; /* Soft Red/Brown Error Alert */
+--error-text: #a83232; 
+--success-bg: #eaf3e6; /* Soft Sage Success Alert */
+--success-text: #2d6a2e;
+--radius: 8px;
+}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    }
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
 
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
+body {
+background-color: var(--bg-main);
+color: var(--text-main);
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+padding: 20px;
+}
 
-    .register-container {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      width: 100%;
-      max-width: 400px;
-      padding: 32px;
-      box-shadow: 0 4px 12px rgba(61, 50, 44, 0.05);
-    }
+.register-container {
+background-color: var(--card-bg);
+border: 1px solid var(--card-border);
+border-radius: var(--radius);
+width: 100%;
+max-width: 400px;
+padding: 32px;
+box-shadow: 0 4px 12px rgba(61, 50, 44, 0.05);
+}
 
-    .brand-header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
+.brand-header {
+text-align: center;
+margin-bottom: 24px;
+}
 
-    .brand-header h1 {
-      font-size: 1.8rem;
-      color: var(--text-main);
-      letter-spacing: -0.5px;
-    }
+.brand-header h1 {
+font-size: 1.8rem;
+color: var(--text-main);
+letter-spacing: -0.5px;
+}
 
-    .brand-header p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
+.brand-header p {
+font-size: 0.9rem;
+color: var(--text-muted);
+margin-top: 4px;
+}
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+.form-group {
+margin-bottom: 20px;
+}
 
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text-main);
-    }
+.form-group label {
+display: block;
+font-size: 0.85rem;
+font-weight: 600;
+margin-bottom: 6px;
+color: var(--text-main);
+}
 
-    .form-control {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 0.95rem;
-      border: 1px solid var(--input-border);
-      border-radius: var(--radius);
-      background-color: var(--input-bg);
-      color: var(--text-main);
-      outline: none;
-      transition: border-color 0.2s;
-    }
+.form-control {
+width: 100%;
+padding: 10px 12px;
+font-size: 0.95rem;
+border: 1px solid var(--input-border);
+border-radius: var(--radius);
+background-color: var(--input-bg);
+color: var(--text-main);
+outline: none;
+transition: border-color 0.2s;
+}
 
-    .form-control:focus {
-      border-color: var(--primary);
-    }
+.form-control:focus {
+border-color: var(--primary);
+}
 
-    select.form-control {
-      cursor: pointer;
-    }
+select.form-control {
+cursor: pointer;
+}
 
-    .btn-submit {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--primary);
-      color: #ffffff;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
+.btn-submit {
+width: 100%;
+padding: 12px;
+background-color: var(--primary);
+color: #ffffff;
+border: none;
+border-radius: var(--radius);
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: background-color 0.2s;
+}
 
-    .btn-submit:hover {
-      background-color: var(--primary-hover);
-    }
+.btn-submit:hover {
+background-color: var(--primary-hover);
+}
 
-    .password-wrapper {
-      position: relative;
-    }
+.password-wrapper {
+position: relative;
+}
 
-    .password-wrapper .form-control {
-      padding-right: 40px;
-    }
+.password-wrapper .form-control {
+padding-right: 40px;
+}
 
-    .toggle-password {
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      font-size: 1.1rem;
-      cursor: pointer;
-      padding: 4px 8px;
-      color: var(--text-muted);
-      line-height: 1;
-    }
+.toggle-password {
+position: absolute;
+right: 4px;
+top: 50%;
+transform: translateY(-50%);
+background: none;
+border: none;
+font-size: 1.1rem;
+cursor: pointer;
+padding: 4px 8px;
+color: var(--text-muted);
+line-height: 1;
+}
 
-    .toggle-password:hover {
-      color: var(--text-main);
-    }
+.toggle-password:hover {
+color: var(--text-main);
+}
 
-    .strength-section {
-      margin-top: 8px;
-    }
+.strength-section {
+margin-top: 8px;
+}
 
-    .strength-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
+.strength-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 4px;
+}
 
-    .strength-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
+.strength-label {
+font-size: 0.75rem;
+font-weight: 600;
+color: var(--text-muted);
+}
 
-    .strength-meter {
-      width: 100%;
-      height: 4px;
-      appearance: none;
-      -webkit-appearance: none;
-      border-radius: 2px;
-      overflow: hidden;
-    }
+.strength-meter {
+width: 100%;
+height: 4px;
+appearance: none;
+-webkit-appearance: none;
+border-radius: 2px;
+overflow: hidden;
+}
 
-    .strength-meter::-webkit-progress-bar {
-      background-color: #e0d5c7;
-      border-radius: 2px;
-    }
+.strength-meter::-webkit-progress-bar {
+background-color: #e0d5c7;
+border-radius: 2px;
+}
 
-    .strength-meter::-webkit-progress-value {
-      border-radius: 2px;
-      transition: width 0.2s ease, background-color 0.2s ease;
-    }
+.strength-meter::-webkit-progress-value {
+border-radius: 2px;
+transition: width 0.2s ease, background-color 0.2s ease;
+}
 
-    .strength-meter--score-0::-webkit-progress-value { background-color: #e0d5c7; }
-    .strength-meter--score-1::-webkit-progress-value { background-color: #c0392b; }
-    .strength-meter--score-2::-webkit-progress-value { background-color: #e67e22; }
-    .strength-meter--score-3::-webkit-progress-value { background-color: #f39c12; }
-    .strength-meter--score-4::-webkit-progress-value { background-color: #27ae60; }
-    .strength-meter--score-5::-webkit-progress-value { background-color: #2ecc71; }
+.strength-meter--score-0::-webkit-progress-value { background-color: #e0d5c7; }
+.strength-meter--score-1::-webkit-progress-value { background-color: #c0392b; }
+.strength-meter--score-2::-webkit-progress-value { background-color: #e67e22; }
+.strength-meter--score-3::-webkit-progress-value { background-color: #f39c12; }
+.strength-meter--score-4::-webkit-progress-value { background-color: #27ae60; }
+.strength-meter--score-5::-webkit-progress-value { background-color: #2ecc71; }
 
-    .strength-checklist {
-      list-style: none;
-      padding: 0;
-      margin: 6px 0 0;
-      font-size: 0.75rem;
-    }
+.strength-checklist {
+list-style: none;
+padding: 0;
+margin: 6px 0 0;
+font-size: 0.75rem;
+}
 
-    .strength-checklist li {
-      padding: 2px 0;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+.strength-checklist li {
+padding: 2px 0;
+display: flex;
+align-items: center;
+gap: 4px;
+}
 
-    .strength-checklist li::before {
-      font-size: 0.75rem;
-    }
+.strength-checklist li::before {
+font-size: 0.75rem;
+}
 
-    .check-unmet {
-      color: var(--text-muted);
-    }
+.check-unmet {
+color: var(--text-muted);
+}
 
-    .check-unmet::before {
-      content: '✗';
-      color: #c0392b;
-      font-weight: bold;
-    }
+.check-unmet::before {
+content: '✗';
+color: #c0392b;
+font-weight: bold;
+}
 
-    .check-met {
-      color: #2d6a2e;
-    }
+.check-met {
+color: #2d6a2e;
+}
 
-    .check-met::before {
-      content: '✓';
-      color: #27ae60;
-      font-weight: bold;
-    }
+.check-met::before {
+content: '✓';
+color: #27ae60;
+font-weight: bold;
+}
 
-    .form-footer {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
+.form-footer {
+text-align: center;
+margin-top: 16px;
+font-size: 0.85rem;
+color: var(--text-muted);
+}
 
-    .form-footer a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-    }
+.form-footer a {
+color: var(--primary);
+text-decoration: none;
+font-weight: 600;
+}
 
-    .form-footer a:hover {
-      text-decoration: underline;
-    }
+.form-footer a:hover {
+text-decoration: underline;
+}
 
-    /* Feedback Alerts */
-    .feedback-message {
-      padding: 10px 14px;
-      border-radius: var(--radius);
-      font-size: 0.88rem;
-      margin-bottom: 20px;
-      display: none;
-    }
+/* Feedback Alerts */
+.feedback-message {
+padding: 10px 14px;
+border-radius: var(--radius);
+font-size: 0.88rem;
+margin-bottom: 20px;
+display: none;
+}
 
-    .feedback-message.error {
-      display: block;
-      background-color: var(--error-bg);
-      color: var(--error-text);
-      border: 1px solid #f3c2c2;
-    }
+.feedback-message.error {
+display: block;
+background-color: var(--error-bg);
+color: var(--error-text);
+border: 1px solid #f3c2c2;
+}
 
-    .feedback-message.success {
-      display: block;
-      background-color: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid #c2e0c2;
-    }
-  </style>
+.feedback-message.success {
+display: block;
+background-color: var(--success-bg);
+color: var(--success-text);
+border: 1px solid #c2e0c2;
+}
+</style>
 </head>
 <body>
 
-  <div class="register-container">
-    <div class="brand-header">
-      <h1>TaskFlow</h1>
-      <p>Create a new team account</p>
-    </div>
+<div class="register-container">
+<div class="brand-header">
+<h1>TaskFlow</h1>
+<p>Create a new team account</p>
+</div>
 
-    <!-- Inline Error / Success Alert -->
-    <div id="feedback-message" class="feedback-message"></div>
+<!-- Inline Error / Success Alert -->
+<div id="feedback-message" class="feedback-message"></div>
 
-    <form id="register-form" novalidate>
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input 
-          type="text" 
-          id="username" 
-          class="form-control" 
-          placeholder="Enter username" 
-          autocomplete="off"
-        />
-      </div>
+<form id="register-form" novalidate>
+<div class="form-group">
+<label for="username">Username</label>
+<input 
+type="text" 
+id="username" 
+class="form-control" 
+placeholder="Enter username" 
+autocomplete="off"
+/>
+</div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="password-wrapper">
-          <input 
-            type="password" 
-            id="password" 
-            class="form-control" 
-            placeholder="Enter password"
-            autocomplete="new-password"
-          />
-          <button type="button" class="toggle-password" id="toggle-password" aria-label="Show password">👁</button>
-        </div>
-        <div class="strength-section">
-          <div class="strength-header">
-            <span class="strength-label">Strength</span>
-            <span class="strength-label" id="password-strength-label"></span>
-          </div>
-          <progress id="password-strength-meter" class="strength-meter strength-meter--score-0" value="0" max="5"></progress>
-          <ul id="password-checklist" class="strength-checklist">
-            <li class="check-unmet">At least 8 characters</li>
-            <li class="check-unmet">At least 1 uppercase letter</li>
-            <li class="check-unmet">At least 1 lowercase letter</li>
-            <li class="check-unmet">At least 1 number</li>
-            <li class="check-unmet">At least 1 special character</li>
-          </ul>
-        </div>
-      </div>
+<div class="form-group">
+<label for="email">Email</label>
+<input 
+type="email" 
+id="email" 
+class="form-control" 
+placeholder="Enter email address" 
+autocomplete="email"
+/>
+</div>
 
-      <div class="form-group">
-        <label for="role">Role</label>
-        <select id="role" class="form-control">
-          <option value="">Select a role</option>
-          <option value="Admin">Admin</option>
-          <option value="Manager">Manager</option>
-          <option value="Team Member">Team Member</option>
-        </select>
-      </div>
+<div class="form-group">
+<label for="password">Password</label>
+<div class="password-wrapper">
+<input 
+type="password" 
+id="password" 
+class="form-control" 
+placeholder="Enter password"
+autocomplete="new-password"
+/>
+<button type="button" class="toggle-password" id="toggle-password" aria-label="Show password">👁</button>
+</div>
+<div class="strength-section">
+<div class="strength-header">
+<span class="strength-label">Strength</span>
+<span class="strength-label" id="password-strength-label"></span>
+</div>
+<progress id="password-strength-meter" class="strength-meter strength-meter--score-0" value="0" max="5"></progress>
+<ul id="password-checklist" class="strength-checklist">
+<li class="check-unmet">At least 8 characters</li>
+<li class="check-unmet">At least 1 uppercase letter</li>
+<li class="check-unmet">At least 1 lowercase letter</li>
+<li class="check-unmet">At least 1 number</li>
+<li class="check-unmet">At least 1 special character</li>
+</ul>
+</div>
+</div>
 
-      <button type="submit" class="btn-submit">Register</button>
-    </form>
+<div class="form-group">
+<label for="role">Role</label>
+<select id="role" class="form-control">
+<option value="">Select a role</option>
+<option value="Admin">Admin</option>
+<option value="Manager">Manager</option>
+<option value="Team Member">Team Member</option>
+</select>
+</div>
 
-    <p class="form-footer">Already have an account? <a href="login.html">Sign in</a></p>
-  </div>
+<button type="submit" class="btn-submit">Register</button>
+</form>
 
-  <!-- Attach JavaScript Logic -->
-  <script src="../modules/register.js"></script>
+<p class="form-footer">Already have an account? <a href="login.html">Sign in</a></p>
+</div>
+
+<!-- Attach JavaScript Logic -->
+<script src="../modules/jwt.js" defer></script>
+<script src="../modules/register.js" defer></script>
 </body>
 </html>

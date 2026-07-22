@@ -29,7 +29,19 @@ function populateSelect(select, items, placeholder) {
 
 function loadDependencies() {
   projects = globalThis.DataStore.getProjects().map((item) => normalizeReference(item, 'project')).filter(Boolean);
-  members = globalThis.DataStore.getMembers().map((item) => normalizeReference(item, 'member')).filter(Boolean);
+  var allMembers = globalThis.DataStore.getMembers().map((item) => normalizeReference(item, 'member')).filter(Boolean);
+
+  var session = window.TaskFlowSession;
+  if (session && session.role === 'Team Member') {
+    var memberId = session.memberId || session.email;
+    members = allMembers.filter(function (m) {
+      return String(m.id) === String(memberId) ||
+             String(m.label).toLowerCase() === String(session.email).toLowerCase();
+    });
+  } else {
+    members = allMembers;
+  }
+
   populateSelect(projectSelect, projects, 'Select a project');
   populateSelect(memberSelect, members, 'Select a member');
 
@@ -124,14 +136,9 @@ function showTaskCreation(event) {
 if (form) {
   form.addEventListener('submit', handleSubmit);
   form.addEventListener('reset', () => window.setTimeout(clearFormState, 0));
-  taskNavigation?.addEventListener('click', showTaskCreation);
-  document.getElementById('nav-dashboard')?.addEventListener('click', () => {
-    taskSection.style.display = 'none';
-  });
-  document.getElementById('nav-prompt-builder')?.addEventListener('click', () => {
-    taskSection.style.display = 'none';
-  });
+  window.showCreateTaskForm = showTaskCreation;
   window.addEventListener('taskflow:projects-changed', loadDependencies);
   window.addEventListener('taskflow:members-changed', loadDependencies);
   loadDependencies();
+  window.loadTaskCreationDeps = loadDependencies;
 }

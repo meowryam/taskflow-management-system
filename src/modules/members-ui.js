@@ -203,6 +203,9 @@
     if (!section) return;
 
     const members = Members.getAllMembers();
+    var canDelete = window.Permissions && window.TaskFlowSession
+      ? window.Permissions.check(window.TaskFlowSession.role, 'manage_team')
+      : false;
 
     section.innerHTML = `
       <div class="members-card">
@@ -237,7 +240,7 @@
                 <p>${m.role}</p>
                 <p>${m.email}</p>
                 <p>${m.taskCount} task(s) assigned</p>
-                <button class="member-delete-btn delete-member-btn" data-id="${m.id}">Delete</button>
+                ${canDelete ? '<button class="member-delete-btn delete-member-btn" data-id="' + m.id + '">Delete</button>' : ''}
               </div>
             </div>
           `

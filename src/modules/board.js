@@ -178,7 +178,7 @@
       var navItems = document.querySelectorAll('.sidebar__item');
       navItems.forEach(function (item) {
         var label = item.querySelector('.sidebar__label');
-        if (label && label.textContent.trim().toLowerCase().indexOf('board') !== -1) {
+        if (label && label.textContent.trim().toLowerCase() === 'board') {
           item.classList.add('sidebar__item--active');
         } else {
           item.classList.remove('sidebar__item--active');
@@ -192,7 +192,7 @@
     var navItems = document.querySelectorAll('.sidebar__item');
     navItems.forEach(function (item) {
       var label = item.querySelector('.sidebar__label');
-      if (label && label.textContent.trim().toLowerCase().indexOf('board') !== -1) {
+      if (label && label.textContent.trim().toLowerCase() === 'board') {
         item.addEventListener('click', function (e) {
           e.preventDefault();
           activateBoardView();

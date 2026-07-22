@@ -541,7 +541,7 @@ body {
       </div>
 
       <h1 class="login-card__heading" id="login-heading">Sign in to your account</h1>
-      <p class="login-card__subheading">Demo: <strong>demo@taskflow.local</strong> / <strong>taskflow123</strong></p>
+    
 
       <!-- ============================================================
            LOGIN FORM — shown when user is NOT logged in
@@ -549,13 +549,13 @@ body {
       <form class="login-form" id="loginForm" novalidate autocomplete="off">
 
         <div class="login-form__field">
-          <label class="login-form__label" for="loginEmail">Email</label>
+          <label class="login-form__label" for="loginEmail">Username or Email</label>
           <input
             class="login-form__input"
-            type="email"
+            type="text"
             id="loginEmail"
             name="email"
-            placeholder="you@taskflow.local"
+            placeholder="username or you@taskflow.local"
             autocomplete="username"
             aria-describedby="emailHint"
             required
@@ -660,6 +660,12 @@ body {
   </main>
 
   <div class="login-toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Google Identity Services (loaded asynchronously) -->
+  <script>
+    window.TASKFLOW_GOOGLE_CLIENT_ID = '53414606442-ap70jlb8jjon4j7qgs28t5rjdbcps3ce.apps.googleusercontent.com';
+  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script src="../modules/jwt.js" defer></script>
   <script src="../modules/permissions.js" defer></script>

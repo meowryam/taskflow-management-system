@@ -88,7 +88,58 @@
       color: var(--color-gray-400, #a89b78);
       font-size: var(--font-size-sm, 0.875rem);
     }
+
+    /* Tasks list view */
+    .tasks-view { padding: 0; }
+    .tasks-view__header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .tasks-view__header h2 { margin: 0; font-size: var(--font-size-xl, 1.5rem); }
+    .tasks-view__create-btn {
+      padding: 8px 18px; border-radius: 6px; font-size: 14px; font-weight: 600;
+      cursor: pointer; background: var(--color-primary, #6b4f2a); color: #fff;
+      border: none; transition: 0.15s ease;
+    }
+    .tasks-view__create-btn:hover { opacity: 0.9; }
+    .tasks-view__count { margin-bottom: 12px; font-size: 14px; color: var(--color-gray-500, #7d7256); }
+    .tasks-view__table-wrapper { overflow-x: auto; }
+
+    .filter-bar { margin-bottom: 16px; background: var(--card-bg, #fff); border-radius: 8px; padding: 16px; }
+    .filter-bar__row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+    .filter-bar__group { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+    .filter-bar__group--wide { flex: 1; min-width: 200px; }
+    .filter-bar__group--action { min-width: auto; }
+    .filter-bar__label { font-size: 12px; font-weight: 600; color: var(--color-gray-500, #7d7256); }
+    .filter-bar__input, .filter-bar__select {
+      padding: 7px 10px; border: 1px solid var(--color-gray-200, #e6dcc0);
+      border-radius: 6px; font-size: 13px; font-family: inherit;
+      background: var(--color-white, #fffdf8); color: var(--color-gray-800, #2c2820);
+    }
+    .filter-bar__clear-btn {
+      padding: 7px 14px; border: 1px solid var(--color-gray-200, #e6dcc0);
+      border-radius: 6px; font-size: 13px; cursor: pointer;
+      background: var(--color-white, #fffdf8); color: var(--color-gray-600, #5c5340);
+    }
+    .filter-bar__clear-btn:hover { background: var(--color-gray-50, #faf6ec); }
+
+    .task-table { width: 100%; border-collapse: collapse; background: var(--card-bg, #fff); border-radius: 8px; overflow: hidden; }
+    .task-table th, .task-table td {
+      text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-gray-200, #e6dcc0);
+      font-size: 13px;
+    }
+    .task-table th { font-weight: 600; color: var(--color-gray-600, #5c5340); background: var(--color-gray-50, #faf6ec); }
+    .task-table__empty { text-align: center; color: var(--color-gray-400, #a89b78); padding: 40px 12px !important; }
   </style>
+
+  <script src="src/modules/jwt.js"></script>
+  <script>
+    (function() {
+      if (!window.JWT.getSession()) {
+        window.location.replace('src/html_files/login.html');
+      }
+    })();
+  </script>
 </head>
 <body>
 
@@ -231,6 +282,8 @@
       </div>
 
       <div class="header__right">
+        <span class="header__user-name" id="headerUserName"></span>
+        <button id="headerSignoutBtn" class="pm-btn pm-btn--danger pm-btn--small" style="margin-right:12px;">Sign Out</button>
         <!-- Placeholder for future user menu / search / notifications -->
         <div class="header__search-placeholder">Search…</div>
         <div class="header__avatar" aria-label="User avatar">
@@ -254,8 +307,8 @@
 
         <!-- Welcome section -->
         <div class="dashboard__welcome">
-          <h2 class="dashboard__greeting">Welcome back!</h2>
-          <p class="dashboard__subtitle">Here’s what’s happening across your workspace.</p>
+          <h2 class="dashboard__greeting" id="dashboardGreeting">Welcome back!</h2>
+          <p class="dashboard__subtitle">Here's what's happening across your workspace.</p>
         </div>
 
         <!-- Summary statistic cards -->
@@ -267,7 +320,7 @@
               </svg>
             </div>
             <div class="stat-card__info">
-              <h3 class="stat-card__value" aria-label="Total projects">12</h3>
+              <h3 class="stat-card__value" id="statTotalProjects" aria-label="Total projects">0</h3>
               <p class="stat-card__label">Total Projects</p>
             </div>
           </article>
@@ -280,7 +333,7 @@
               </svg>
             </div>
             <div class="stat-card__info">
-              <h3 class="stat-card__value" aria-label="Active tasks">48</h3>
+              <h3 class="stat-card__value" id="statActiveTasks" aria-label="Active tasks">0</h3>
               <p class="stat-card__label">Active Tasks</p>
             </div>
           </article>
@@ -295,7 +348,7 @@
               </svg>
             </div>
             <div class="stat-card__info">
-              <h3 class="stat-card__value" aria-label="Team members">8</h3>
+              <h3 class="stat-card__value" id="statTeamMembers" aria-label="Team members">0</h3>
               <p class="stat-card__label">Team Members</p>
             </div>
           </article>
@@ -308,7 +361,7 @@
               </svg>
             </div>
             <div class="stat-card__info">
-              <h3 class="stat-card__value" aria-label="Completed this week">23</h3>
+              <h3 class="stat-card__value" id="statCompletedWeek" aria-label="Completed this week">0</h3>
               <p class="stat-card__label">Completed This Week</p>
             </div>
           </article>
@@ -329,7 +382,7 @@
             </div>
           </section>
 
-          <!-- Quick Actions placeholder -->
+          <!-- Quick Actions -->
           <section class="panel panel--quick-actions" aria-label="Quick actions">
             <div class="panel__header">
               <h3 class="panel__title">Quick Actions</h3>
@@ -418,6 +471,95 @@
           </div>
           <p id="taskFormMessage" class="task-form__message" role="status" aria-live="polite"></p>
         </form>
+      </section>
+
+      <!-- ========================================================
+           TASKS VIEW — search, filter, sort
+           ======================================================== -->
+      <section id="tasks-view-section" aria-label="Tasks" style="display: none;">
+        <div class="tasks-view">
+          <div class="tasks-view__header">
+            <h2>Tasks</h2>
+            <button class="tasks-view__create-btn" id="goToCreateTask" type="button">+ Create Task</button>
+          </div>
+
+          <!-- Filter bar -->
+          <div class="filter-bar">
+            <div class="filter-bar__row">
+              <div class="filter-bar__group filter-bar__group--wide">
+                <label for="filterSearch" class="filter-bar__label">Search</label>
+                <input id="filterSearch" type="text" class="filter-bar__input" placeholder="Search by task title..." />
+              </div>
+              <div class="filter-bar__group">
+                <label for="filterStatus" class="filter-bar__label">Status</label>
+                <select id="filterStatus" class="filter-bar__select">
+                  <option value="">All Statuses</option>
+                  <option value="Todo">Todo</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Review">Review</option>
+                  <option value="Done">Done</option>
+                </select>
+              </div>
+              <div class="filter-bar__group">
+                <label for="filterPriority" class="filter-bar__label">Priority</label>
+                <select id="filterPriority" class="filter-bar__select">
+                  <option value="">All Priorities</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+              <div class="filter-bar__group">
+                <label for="filterProject" class="filter-bar__label">Project</label>
+                <select id="filterProject" class="filter-bar__select">
+                  <option value="">All Projects</option>
+                </select>
+              </div>
+              <div class="filter-bar__group">
+                <label for="filterMember" class="filter-bar__label">Member</label>
+                <select id="filterMember" class="filter-bar__select">
+                  <option value="">All Members</option>
+                </select>
+              </div>
+              <div class="filter-bar__group">
+                <label for="filterSort" class="filter-bar__label">Sort</label>
+                <select id="filterSort" class="filter-bar__select">
+                  <option value="">Default</option>
+                  <option value="asc">Due Date ↑</option>
+                  <option value="desc">Due Date ↓</option>
+                </select>
+              </div>
+              <div class="filter-bar__group filter-bar__group--action">
+                <label class="filter-bar__label">&nbsp;</label>
+                <button id="clearFiltersBtn" class="filter-bar__clear-btn" type="button">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results count -->
+          <div class="tasks-view__count" id="tasksCount">0 tasks found</div>
+
+          <!-- Task table -->
+          <div class="tasks-view__table-wrapper">
+            <table class="task-table" id="taskTable">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Project</th>
+                  <th>Assigned To</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Due Date</th>
+                </tr>
+              </thead>
+              <tbody id="taskTableBody">
+                <tr>
+                  <td colspan="6" class="task-table__empty">No tasks found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- ========================================================
@@ -582,7 +724,7 @@
         var ids = [
           'task-creation-section', 'prompt-builder-section',
           'projects-section', 'reports-section', 'activity-log-section',
-          'board-section', 'members-section'
+          'board-section', 'members-section', 'tasks-view-section'
         ];
         for (var i = 0; i < ids.length; i++) {
           var el = document.getElementById(ids[i]);
@@ -596,7 +738,7 @@
       var routes = {
         'nav-dashboard':      { sectionId: 'dashboard-selector', title: 'Dashboard' },
         'nav-projects':       { sectionId: 'projects-section',   title: 'Projects',      init: 'projects' },
-        'nav-tasks':          { sectionId: 'task-creation-section', title: 'Create Task' },
+        'nav-tasks':          { sectionId: 'tasks-view-section', title: 'Tasks' },
         'nav-board':          { sectionId: 'board-section',      title: 'Task Board',    init: 'board' },
         'nav-members':        { sectionId: 'members-section',    title: 'Team Members',  init: 'members' },
         'nav-reports':        { sectionId: 'reports-section',    title: 'Reports' },
@@ -645,6 +787,16 @@
         }
       }
 
+      /* ---- Create Task button inside tasks view ---- */
+      document.addEventListener('click', function (e) {
+        if (e.target.id === 'goToCreateTask') {
+          e.preventDefault();
+          if (typeof window.showCreateTaskForm === 'function') {
+            window.showCreateTaskForm();
+          }
+        }
+      });
+
       /* ---- Hamburger toggle ---- */
       if (toggleBtn && sidebar) {
         toggleBtn.addEventListener('click', function () {
@@ -689,11 +841,13 @@
   <!-- ES Module (tasks – uses import) -->
   <script type="module" src="src/modules/tasks.js"></script>
 
+  <!-- Search, Filter & Sorting UI -->
+  <script src="src/modules/filters-ui.js"></script>
+
   <!-- Standalone feature -->
   <script src="src/modules/promptBuilder.js"></script>
-  <script src="src/dataStore.js"></script>
-  <script src="src/modules/members.js"></script>
-  <script src="src/modules/members-ui.js"></script>
+  <script src="src/modules/dashboard.js"></script>
+  <script src="src/app.js"></script>
 
 </body>
 </html>
