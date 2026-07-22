@@ -22,11 +22,14 @@ const DataStore = (function () {
   }
 
   function addAssignmentCompatibility(task) {
-    if (task.assignedMemberId !== undefined && task.assignedUserId === undefined) {
+    const compatibleMemberId = Array.isArray(task.assignedMemberIds)
+      ? task.assignedMemberIds[0]
+      : task.assignedMemberId;
+    if (compatibleMemberId !== undefined && task.assignedUserId === undefined) {
       Object.defineProperty(task, 'assignedUserId', {
         configurable: true,
         enumerable: false,
-        value: task.assignedMemberId
+        value: compatibleMemberId
       });
     }
     return task;
