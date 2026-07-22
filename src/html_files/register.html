@@ -59,9 +59,8 @@ body {
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   background:
-    radial-gradient(circle at 15% 10%, rgba(154, 170, 99, 0.10), transparent 45%),
-    radial-gradient(circle at 85% 90%, rgba(66, 60, 46, 0.10), transparent 45%),
-    var(--color-gray-50);
+    linear-gradient(rgba(26, 23, 18, 0.55), rgba(26, 23, 18, 0.55)),
+    url('../../docs/screenshots/Login_bg_img.png') center/cover no-repeat fixed;
   color: var(--color-gray-800);
   display: flex;
   justify-content: center;
@@ -71,7 +70,9 @@ body {
 }
 
 .register-container {
-  background-color: var(--card-bg);
+  background-color: rgba(255, 253, 248, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: var(--card-radius);
   width: 100%;
   max-width: 420px;
