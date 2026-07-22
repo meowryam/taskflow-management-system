@@ -306,7 +306,7 @@ Each intern owned one module end to end: designing it, building it, testing it, 
 | 7 | [TahaSohail-Goat](https://github.com/TahaSohail-Goat) | Search, Filter and Sorting | ✅ |
 | 8 | [hassaanahmed-dev](https://github.com/hassaanahmed-dev) | Prompt Builder and Responsible AI | ✅ |
 | 9 | [inshrahmumtaz](https://github.com/inshrahmumtaz) | QA and Manual Testing | ✅ |
-| 10 | [muhammad-haris2](https://github.com/muhammad-haris2) | - | ✅ |
+| 10 | [muhammad-haris2](https://github.com/muhammad-haris2) | Team Members | ✅ |
 
 </div>
 
@@ -427,7 +427,7 @@ This project exists because of the combined effort of 10 talented interns across
 | Intern 7 | Search, Filter and Sorting | [@TahaSohail-Goat](https://github.com/TahaSohail-Goat) |
 | Intern 8 | Prompt Builder and Responsible AI  | [@hassaanahmed-dev](https://github.com/hassaanahmed-dev) |
 | Intern 9 | QA and Manual Testing | [@inshrahmumtaz](https://github.com/inshrahmumtaz) |
-| Intern 10 | - | [@muhammad-haris2](https://github.com/muhammad-haris2) |
+| Intern 10 | Team Members | [@muhammad-haris2](https://github.com/muhammad-haris2) |
 
 </div>
 
