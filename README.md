@@ -309,8 +309,6 @@ Each intern owned one module end to end: designing it, building it, testing it, 
 
 </div>
 
-> ℹ️ GitHub handles for Interns 6, 8, and 9 were not provided in the source material. Their modules (Team Members, Activity Log, and Reports Dashboard) are fully covered and functional in the final product.
-
 Each module followed the same discipline: an Issue describing the task, a dedicated branch, at least two meaningful commits, a Pull Request, and full documentation of the AI prompt used, the mistake AI made, and how it was manually corrected.
 
 ---
