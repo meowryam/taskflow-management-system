@@ -70,6 +70,9 @@ const Projects = (function () {
 
   function saveProjects(projects) {
     storage.writeCollection(PROJECTS_KEY, projects);
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('taskflow:projects-changed'));
+    }
   }
 
   function generateId() {

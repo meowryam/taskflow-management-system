@@ -51,12 +51,26 @@ const DataStore = (function () {
     writeCollection(STORAGE_KEYS.TASKS, tasks);
   }
 
+  function notifyProjectsChanged() {
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('taskflow:projects-changed'));
+    }
+  }
+
+  function notifyMembersChanged() {
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('taskflow:members-changed'));
+    }
+  }
+
   function saveProjects(projects) {
     writeCollection(STORAGE_KEYS.PROJECTS, projects);
+    notifyProjectsChanged();
   }
 
   function saveMembers(members) {
     writeCollection(STORAGE_KEYS.MEMBERS, members);
+    notifyMembersChanged();
   }
 
   function getTaskById(taskId) {

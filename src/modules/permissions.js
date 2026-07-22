@@ -23,7 +23,6 @@ const PERMISSION_MATRIX = {
     "use_prompt_builder",
   ],
   Manager: [
-    "create_project",
     "edit_project",
     "create_task",
     "edit_task",
@@ -35,7 +34,6 @@ const PERMISSION_MATRIX = {
     "use_prompt_builder",
   ],
   "Team Member": [
-    "create_task",
     "edit_task",
     "view_tasks",
     "view_activity_log",

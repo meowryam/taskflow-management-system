@@ -64,7 +64,7 @@
       'nav-projects':       perms.indexOf('create_project') !== -1 || perms.indexOf('edit_project') !== -1,
       'nav-tasks':          perms.indexOf('create_task') !== -1 || perms.indexOf('view_tasks') !== -1,
       'nav-board':          perms.indexOf('create_task') !== -1 || perms.indexOf('edit_task') !== -1,
-      'nav-members':        session.role !== 'Team Member',
+      'nav-members':        session.role !== 'Team Member' && perms.indexOf('manage_team') !== -1,
       'nav-reports':        perms.indexOf('view_reports') !== -1,
       'nav-activity-log':   perms.indexOf('view_activity_log') !== -1,
       'nav-prompt-builder': perms.indexOf('use_prompt_builder') !== -1,
@@ -76,6 +76,57 @@
         el.style.display = visible[id] ? '' : 'none';
       }
     });
+  }
+
+  function applyDashboardRoleFilters(session) {
+    var perms = window.Permissions.of(session.role);
+    var role = session.role;
+
+    // Hide "New Project" quick action for Team Members (no create_project permission)
+    var createProjectBtn = document.querySelector('.quick-action-card--project');
+    if (createProjectBtn) {
+      createProjectBtn.style.display = perms.indexOf('create_project') !== -1 ? '' : 'none';
+    }
+
+    // Hide "Invite Member" quick action for non-Admin roles (no manage_team permission)
+    var inviteMemberBtn = document.querySelector('.quick-action-card--member');
+    if (inviteMemberBtn) {
+      inviteMemberBtn.style.display = perms.indexOf('manage_team') !== -1 ? '' : 'none';
+    }
+
+    // Hide "Generate Report" quick action if no view_reports permission
+    var reportBtn = document.querySelector('.quick-action-card--report');
+    if (reportBtn) {
+      reportBtn.style.display = perms.indexOf('view_reports') !== -1 ? '' : 'none';
+    }
+
+    // Hide "Create Task" quick action for Team Members (no create_task permission)
+    var createTaskBtn = document.querySelector('.quick-action-card--task');
+    if (createTaskBtn) {
+      createTaskBtn.style.display = perms.indexOf('create_task') !== -1 ? '' : 'none';
+    }
+
+    // Hide "Quick Create" hero button for Team Members
+    var quickCreateBtn = document.querySelector('.hero-btn--primary');
+    if (quickCreateBtn) {
+      quickCreateBtn.style.display = perms.indexOf('create_project') !== -1 || perms.indexOf('create_task') !== -1 ? '' : 'none';
+    }
+
+    // Hide "View Reports" hero button if no view_reports permission
+    var viewReportsBtn = document.querySelector('.hero-btn--secondary');
+    if (viewReportsBtn) {
+      viewReportsBtn.style.display = perms.indexOf('view_reports') !== -1 ? '' : 'none';
+    }
+
+    // Update stat cards for Team Members - show only their assigned data
+    if (role === 'Team Member') {
+      var statsGrid = document.querySelector('.dashboard__stats-grid');
+      if (statsGrid) {
+        // Team Members only see relevant stats
+        var memberCountCard = document.querySelector('.stat-card--members');
+        if (memberCountCard) memberCountCard.style.display = 'none';
+      }
+    }
   }
 
   function init() {
@@ -92,6 +143,7 @@
     initHeader(session);
     initLogout();
     applySidebarFilters(session);
+    applyDashboardRoleFilters(session);
   }
 
   if (document.readyState === 'loading') {
