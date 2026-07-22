@@ -1,209 +1,372 @@
-// ============================================================================
-// TaskFlow — Activity Log Module
-// Tracks task/project/member changes and provides activity feed for dashboard.
-// ============================================================================
-(function () {
+/**
+ * activityLog.js — Activity Log service layer
+ * Persists audit entries in localStorage, aligned with dbo.ActivityLogs schema.
+ */
+
+const ActivityLog = (function () {
   'use strict';
 
-  var STORAGE_KEY = 'taskflow_activity_log';
-  var MAX_ENTRIES = 50;
+  const STORAGE_KEY = 'taskflow_activity_logs';
+  const ACTIVITY_CHANGED_EVENT = 'taskflow:activity-changed';
 
-  /* ── Storage ────────────────────────────────────────────── */
-  function load() {
+  const ENTITY_TYPES = Object.freeze(['Project', 'Task', 'Member']);
+  const ACTION_TYPES = Object.freeze([
+    'Created',
+    'Updated',
+    'Deleted',
+    'Assigned',
+    'Status Changed',
+    'Priority Changed',
+    'Completed'
+  ]);
+
+  function createId() {
+    if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+    return `log-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function readEntries() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const entries = raw ? JSON.parse(raw) : [];
+      return Array.isArray(entries) ? entries : [];
+    } catch {
       return [];
     }
   }
 
-  function save(entries) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(0, MAX_ENTRIES)));
-    } catch (e) { /* quota exceeded — silently drop */ }
+  function writeEntries(entries) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   }
 
-  /* ── Helpers ─────────────────────────────────────────────── */
-  function generateId() {
-    return 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  function notifyChanged() {
+    if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return;
+    window.dispatchEvent(new CustomEvent(ACTIVITY_CHANGED_EVENT));
   }
 
   function getCurrentUser() {
-    var session = window.TaskFlowSession || {};
-    var members = (typeof DataStore !== 'undefined') ? DataStore.getMembers() : [];
-    var member = members.find(function (m) {
-      return String(m.id) === String(session.memberId) || m.email === session.email;
-    });
+    const session = window.TaskFlowSession;
     return {
-      userId: session.memberId || 'unknown',
-      userName: member ? member.name : (session.name || 'User'),
-      userInitials: member ? member.initials : '?'
+      userId: session?.memberId ?? 0,
+      userName: session?.name ?? 'System'
     };
   }
 
-  function getTaskById(id) {
-    if (typeof DataStore === 'undefined') return null;
-    return DataStore.getTasks().find(function (t) { return String(t.id) === String(id); }) || null;
+  function getMemberName(memberId) {
+    const store = globalThis.DataStore;
+    if (!store || memberId == null) return 'Unknown member';
+    const member = store.getMembers().find(function (m) {
+      return String(m.id) === String(memberId);
+    });
+    return member ? member.name : 'Unknown member';
   }
 
-  function getProjectById(id) {
-    if (typeof DataStore === 'undefined') return null;
-    return DataStore.getProjects().find(function (p) { return String(p.id) === String(id); }) || null;
+  function getAssignedIds(task) {
+    if (Array.isArray(task?.assignedMemberIds) && task.assignedMemberIds.length) {
+      return task.assignedMemberIds;
+    }
+    const legacyId = task?.assignedMemberId ?? task?.assignedUserId;
+    return legacyId == null ? [] : [legacyId];
   }
 
-  function relativeTime(isoString) {
-    var now = new Date();
-    var then = new Date(isoString);
-    var diff = Math.floor((now - then) / 1000);
-    if (diff < 60) return 'Just now';
-    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
-    return then.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  function sortEntries(entries) {
+    return entries.slice().sort(function (a, b) {
+      const timeDiff = new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime();
+      if (timeDiff !== 0) return timeDiff;
+      return String(b.id).localeCompare(String(a.id));
+    });
   }
 
-  /* ── Add Entry ──────────────────────────────────────────── */
-  function addEntry(type, entityName, entityId, extra) {
-    var entries = load();
-    var user = getCurrentUser();
+  function record(entry) {
+    const actor = getCurrentUser();
+    const detail = String(entry.actionDetail || '').trim();
+    if (!detail) return null;
 
-    var descriptions = {
-      task_created:   'created task',
-      task_updated:   'updated task',
-      task_completed: 'completed task',
-      task_deleted:   'deleted task',
-      project_created: 'created project',
-      project_updated: 'updated project',
-      project_deleted: 'deleted project',
-      member_added:   'added team member',
-      member_removed: 'removed team member',
-      board_moved:    'moved task'
+    const logEntry = {
+      id: createId(),
+      userId: entry.userId != null ? entry.userId : actor.userId,
+      userName: entry.userName || actor.userName,
+      entityType: entry.entityType,
+      entityId: entry.entityId,
+      actionType: entry.actionType,
+      actionDetail: detail.slice(0, 1000),
+      occurredAt: entry.occurredAt || new Date().toISOString()
     };
 
-    var badgeTypes = {
-      task_created:   'created',
-      task_updated:   'updated',
-      task_completed: 'completed',
-      task_deleted:   'updated',
-      project_created: 'created',
-      project_updated: 'updated',
-      project_deleted: 'updated',
-      member_added:   'created',
-      member_removed: 'created',
-      board_moved:    'updated'
-    };
+    const entries = readEntries();
+    entries.push(logEntry);
+    writeEntries(entries);
+    notifyChanged();
+    return logEntry;
+  }
 
-    var avatarColors = [
-      'background:linear-gradient(135deg,#9AAA63,#b8c88a)',
-      'background:linear-gradient(135deg,#B6CAED,#cedcf3)',
-      'background:linear-gradient(135deg,#F3B7DA,#f8cfe7)',
-      'background:linear-gradient(135deg,#F6D868,#f9e494)',
-      'background:linear-gradient(135deg,#c4b5fd,#ddd6fe)',
-      'background:linear-gradient(135deg,#fdba74,#fed7aa)'
+  function getAll(options) {
+    const opts = options || {};
+    let entries = sortEntries(readEntries());
+
+    if (opts.entityType && opts.entityType !== 'all') {
+      entries = entries.filter(function (e) { return e.entityType === opts.entityType; });
+    }
+    if (opts.actionType && opts.actionType !== 'all') {
+      entries = entries.filter(function (e) { return e.actionType === opts.actionType; });
+    }
+    if (opts.search) {
+      const term = opts.search.toLowerCase();
+      entries = entries.filter(function (e) {
+        return e.actionDetail.toLowerCase().includes(term)
+          || (e.userName && e.userName.toLowerCase().includes(term));
+      });
+    }
+    if (opts.limit && opts.limit > 0) {
+      entries = entries.slice(0, opts.limit);
+    }
+
+    return entries;
+  }
+
+  function getRecent(limit) {
+    return getAll({ limit: limit || 5 });
+  }
+
+  function seed() {
+    if (localStorage.getItem(STORAGE_KEY)) return;
+
+    const store = globalThis.DataStore;
+    if (!store) return;
+
+    const projects = store.getProjects();
+    const tasks = store.getTasks();
+    const members = store.getMembers();
+    const sprint = projects.find(function (p) { return p.name === 'TaskFlow Sprint'; });
+    const task = tasks.find(function (t) { return t.title === 'Create project module'; });
+    const manager = members.find(function (m) { return m.role === 'Manager'; });
+    const member = members.find(function (m) { return m.role === 'Team Member'; });
+
+    if (!sprint || !task || !manager) return;
+
+    const baseTime = Date.now() - 3600000;
+    const seedEntries = [
+      {
+        id: createId(),
+        userId: manager.id,
+        userName: manager.name,
+        entityType: 'Project',
+        entityId: sprint.id,
+        actionType: 'Created',
+        actionDetail: 'Project "TaskFlow Sprint" was created.',
+        occurredAt: new Date(baseTime).toISOString()
+      },
+      {
+        id: createId(),
+        userId: manager.id,
+        userName: manager.name,
+        entityType: 'Task',
+        entityId: task.id,
+        actionType: 'Created',
+        actionDetail: 'Task "Create project module" was created.',
+        occurredAt: new Date(baseTime + 60000).toISOString()
+      }
     ];
 
-    var entry = {
-      id: generateId(),
-      type: type,
-      userId: user.userId,
-      userName: user.userName,
-      userInitials: user.userInitials,
-      entityName: entityName || 'Unknown',
-      entityId: entityId || '',
-      description: descriptions[type] || 'modified',
-      badgeType: badgeTypes[type] || 'updated',
-      avatarColor: avatarColors[Math.floor(Math.random() * avatarColors.length)],
-      timestamp: new Date().toISOString(),
-      extra: extra || ''
-    };
-
-    entries.unshift(entry);
-    save(entries);
-
-    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-      window.dispatchEvent(new CustomEvent('taskflow:activity-updated'));
+    if (member) {
+      seedEntries.push({
+        id: createId(),
+        userId: manager.id,
+        userName: manager.name,
+        entityType: 'Task',
+        entityId: task.id,
+        actionType: 'Assigned',
+        actionDetail: 'Task "Create project module" was assigned to ' + member.name + '.',
+        occurredAt: new Date(baseTime + 120000).toISOString()
+      });
     }
+
+    writeEntries(seedEntries);
   }
 
-  /* ── Event Handlers ─────────────────────────────────────── */
-  var lastKnown = { tasks: 0, projects: 0, members: 0 };
+  function logProjectCreated(project) {
+    record({
+      entityType: 'Project',
+      entityId: project.id,
+      actionType: 'Created',
+      actionDetail: 'Project "' + project.name + '" was created.'
+    });
+  }
 
-  function onTasksChanged(e) {
-    var detail = (e && e.detail) || {};
-    var task = getTaskById(detail.taskId);
+  function logProjectUpdated(project) {
+    record({
+      entityType: 'Project',
+      entityId: project.id,
+      actionType: 'Updated',
+      actionDetail: 'Project "' + project.name + '" was updated.'
+    });
+  }
 
-    if (detail.action === 'added' && task) {
-      addEntry('task_created', task.title, detail.taskId);
-    } else if (detail.action === 'deleted') {
-      addEntry('task_deleted', 'a task', detail.taskId);
-    } else if (detail.action === 'updated' && task) {
-      if (task.status === 'Done') {
-        addEntry('task_completed', task.title, detail.taskId);
+  function logProjectDeleted(project) {
+    record({
+      entityType: 'Project',
+      entityId: project.id,
+      actionType: 'Deleted',
+      actionDetail: 'Project "' + project.name + '" was deleted.'
+    });
+  }
+
+  function logTaskCreated(task) {
+    record({
+      entityType: 'Task',
+      entityId: task.id,
+      actionType: 'Created',
+      actionDetail: 'Task "' + task.title + '" was created.'
+    });
+
+    const assignedIds = getAssignedIds(task);
+    assignedIds.forEach(function (memberId) {
+      record({
+        entityType: 'Task',
+        entityId: task.id,
+        actionType: 'Assigned',
+        actionDetail: 'Task "' + task.title + '" was assigned to ' + getMemberName(memberId) + '.'
+      });
+    });
+  }
+
+  function logTaskUpdated(existingTask, updatedTask) {
+    const title = updatedTask.title || existingTask.title;
+
+    if (existingTask.status !== updatedTask.status) {
+      if (updatedTask.status === 'Done') {
+        record({
+          entityType: 'Task',
+          entityId: updatedTask.id,
+          actionType: 'Completed',
+          actionDetail: 'Task "' + title + '" was marked as completed.'
+        });
       } else {
-        addEntry('task_updated', task.title, detail.taskId);
+        record({
+          entityType: 'Task',
+          entityId: updatedTask.id,
+          actionType: 'Status Changed',
+          actionDetail: 'Task "' + title + '" status changed from ' + existingTask.status + ' to ' + updatedTask.status + '.'
+        });
       }
-    } else if (detail.action === 'board_move' && task) {
-      addEntry('board_moved', task.title, detail.taskId, 'to ' + (task.status || 'a column'));
+    }
+
+    if (existingTask.priority !== updatedTask.priority) {
+      record({
+        entityType: 'Task',
+        entityId: updatedTask.id,
+        actionType: 'Priority Changed',
+        actionDetail: 'Task "' + title + '" priority changed from ' + existingTask.priority + ' to ' + updatedTask.priority + '.'
+      });
+    }
+
+    const oldIds = getAssignedIds(existingTask).map(String).sort().join(',');
+    const newIds = getAssignedIds(updatedTask).map(String).sort().join(',');
+    if (oldIds !== newIds) {
+      getAssignedIds(updatedTask).forEach(function (memberId) {
+        record({
+          entityType: 'Task',
+          entityId: updatedTask.id,
+          actionType: 'Assigned',
+          actionDetail: 'Task "' + title + '" was assigned to ' + getMemberName(memberId) + '.'
+        });
+      });
+    }
+
+    const trackedFields = ['title', 'description', 'projectId', 'dueDate', 'startDate'];
+    const otherChanged = trackedFields.some(function (field) {
+      return String(existingTask[field] ?? '') !== String(updatedTask[field] ?? '');
+    });
+
+    if (
+      otherChanged
+      && existingTask.status === updatedTask.status
+      && existingTask.priority === updatedTask.priority
+      && oldIds === newIds
+    ) {
+      record({
+        entityType: 'Task',
+        entityId: updatedTask.id,
+        actionType: 'Updated',
+        actionDetail: 'Task "' + title + '" was updated.'
+      });
     }
   }
 
-  function onProjectsChanged() {
-    var store = typeof DataStore !== 'undefined' ? DataStore : null;
-    if (!store) return;
-    var projects = store.getProjects();
-    var count = projects.length;
-
-    if (count > lastKnown.projects) {
-      var latest = projects[projects.length - 1];
-      if (latest) addEntry('project_created', latest.name, latest.id);
-    } else if (count < lastKnown.projects) {
-      addEntry('project_deleted', 'a project', '');
-    }
-    lastKnown.projects = count;
+  function logTaskDeleted(task) {
+    record({
+      entityType: 'Task',
+      entityId: task.id,
+      actionType: 'Deleted',
+      actionDetail: 'Task "' + task.title + '" was deleted.'
+    });
   }
 
-  function onMembersChanged() {
-    var store = typeof DataStore !== 'undefined' ? DataStore : null;
-    if (!store) return;
-    var members = store.getMembers();
-    var count = members.length;
-
-    if (count > lastKnown.members) {
-      var latest = members[members.length - 1];
-      if (latest) addEntry('member_added', latest.name, latest.id);
-    } else if (count < lastKnown.members) {
-      addEntry('member_removed', 'a member', '');
+  function logStatusChanged(task, oldStatus, newStatus) {
+    const title = task.title || 'Untitled task';
+    if (newStatus === 'Done') {
+      record({
+        entityType: 'Task',
+        entityId: task.id,
+        actionType: 'Completed',
+        actionDetail: 'Task "' + title + '" was marked as completed.'
+      });
+      return;
     }
-    lastKnown.members = count;
+
+    record({
+      entityType: 'Task',
+      entityId: task.id,
+      actionType: 'Status Changed',
+      actionDetail: 'Task "' + title + '" status changed from ' + oldStatus + ' to ' + newStatus + '.'
+    });
   }
 
-  function initCounts() {
-    var store = typeof DataStore !== 'undefined' ? DataStore : null;
-    if (store) {
-      lastKnown.tasks = store.getTasks().length;
-      lastKnown.projects = store.getProjects().length;
-      lastKnown.members = store.getMembers().length;
-    }
+  function logMemberAdded(member) {
+    record({
+      entityType: 'Member',
+      entityId: member.id,
+      actionType: 'Created',
+      actionDetail: 'Member "' + member.name + '" was added to the team.'
+    });
   }
 
-  /* ── Public API ─────────────────────────────────────────── */
-  window.ActivityLog = {
-    getActivities: function () { return load(); },
-    addEntry: addEntry,
-    getRelativeTime: relativeTime,
-    getTaskById: getTaskById,
-    getProjectById: getProjectById
+  function logMemberDeleted(member) {
+    record({
+      entityType: 'Member',
+      entityId: member.id,
+      actionType: 'Deleted',
+      actionDetail: 'Member "' + member.name + '" was removed from the team.'
+    });
+  }
+
+  if (typeof globalThis !== 'undefined' && globalThis.DataStore) {
+    seed();
+  } else if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', seed);
+  }
+
+  return {
+    STORAGE_KEY,
+    ACTIVITY_CHANGED_EVENT,
+    ENTITY_TYPES,
+    ACTION_TYPES,
+    record,
+    getAll,
+    getRecent,
+    seed,
+    logProjectCreated,
+    logProjectUpdated,
+    logProjectDeleted,
+    logTaskCreated,
+    logTaskUpdated,
+    logTaskDeleted,
+    logStatusChanged,
+    logMemberAdded,
+    logMemberDeleted
   };
-
-  /* ── Init ───────────────────────────────────────────────── */
-  document.addEventListener('taskflow:tasks-changed', onTasksChanged);
-  document.addEventListener('taskflow:projects-changed', onProjectsChanged);
-  document.addEventListener('taskflow:members-changed', onMembersChanged);
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCounts);
-  } else {
-    initCounts();
-  }
 })();
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.ActivityLog = ActivityLog;
+}

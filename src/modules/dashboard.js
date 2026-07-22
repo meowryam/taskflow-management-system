@@ -399,13 +399,9 @@
     setText('statTeamMembers', String(teamMembers));
     setText('statCompletedWeek', String(completedThisWeek));
 
-    updateProgress(visibleTasks);
-    updateTaskDistribution(visibleTasks);
-    updateWeeklyChart(visibleTasks);
-    updateDeadlines(visibleTasks);
-    updateProjectProgress(visibleProjects, visibleTasks);
-    updateTeamMembers(allMembers);
-    renderActivityTimeline();
+    if (globalThis.ActivityLogUI && typeof globalThis.ActivityLogUI.renderDashboardFeed === 'function') {
+      globalThis.ActivityLogUI.renderDashboardFeed();
+    }
   }
 
   /* ── Init & Event Listeners ───────────────────────────── */
@@ -421,19 +417,8 @@
     init();
   }
 
-  document.addEventListener('taskflow:tasks-changed', function () {
-    refresh();
-    renderCalendar();
-  });
-  document.addEventListener('taskflow:members-changed', function () {
-    refresh();
-    renderCalendar();
-  });
-  document.addEventListener('taskflow:projects-changed', function () {
-    refresh();
-    renderCalendar();
-  });
-  document.addEventListener('taskflow:activity-updated', function () {
-    renderActivityTimeline();
-  });
+  document.addEventListener('taskflow:tasks-changed', refresh);
+  document.addEventListener('taskflow:members-changed', refresh);
+  document.addEventListener('taskflow:projects-changed', refresh);
+  document.addEventListener('taskflow:activity-changed', refresh);
 })();

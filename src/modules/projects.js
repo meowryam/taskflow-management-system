@@ -149,6 +149,10 @@ const Projects = (function () {
     projects.push(project);
     saveProjects(projects);
 
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.logProjectCreated(project);
+    }
+
     return { valid: true, errors: {}, project };
   }
 
@@ -172,12 +176,20 @@ const Projects = (function () {
     projects[index] = updated;
     saveProjects(projects);
 
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.logProjectUpdated(updated);
+    }
+
     return { valid: true, errors: {}, project: updated };
   }
 
   function deleteProjectById(id) {
+    const project = loadProjects().find((p) => p.id === id) || null;
     const projects = loadProjects().filter((p) => p.id !== id);
     saveProjects(projects);
+    if (project && typeof ActivityLog !== 'undefined') {
+      ActivityLog.logProjectDeleted(project);
+    }
   }
 
   // -- Deadline / status helpers ---------------------------------------------
