@@ -124,15 +124,9 @@ function showTaskCreation(event) {
 if (form) {
   form.addEventListener('submit', handleSubmit);
   form.addEventListener('reset', () => window.setTimeout(clearFormState, 0));
-  document.getElementById('nav-dashboard')?.addEventListener('click', () => {
-    taskSection.style.display = 'none';
-  });
-  document.getElementById('nav-prompt-builder')?.addEventListener('click', () => {
-    taskSection.style.display = 'none';
-  });
+  window.showCreateTaskForm = showTaskCreation;
   window.addEventListener('taskflow:projects-changed', loadDependencies);
   window.addEventListener('taskflow:members-changed', loadDependencies);
   loadDependencies();
+  window.loadTaskCreationDeps = loadDependencies;
 }
-
-window.showCreateTaskForm = showTaskCreation;
