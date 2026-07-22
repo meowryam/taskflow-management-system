@@ -135,3 +135,30 @@ test('emits change events after add, update, and delete', () => {
 
   assert.deepEqual(actions, ['added', 'updated', 'deleted']);
 });
+
+test('supports the complete Kanban movement workflow used by the Board', () => {
+  const numericProjects = [{ id: 1, name: 'TaskFlow' }];
+  const numericMembers = [{ id: 3, name: 'Team Member' }];
+  const created = service.createTask(validInput({
+    projectId: '1',
+    assignedMemberId: '3'
+  }), numericProjects, numericMembers).task;
+
+  assert.equal(created.projectId, 1);
+  assert.equal(created.assignedMemberId, 3);
+
+  for (const status of ['In Progress', 'Review', 'Done']) {
+    store.updateTask(created.id, { status });
+    const boardTask = store.getTaskById(created.id);
+    const assignedMember = numericMembers.find((member) => member.id === boardTask.assignedUserId);
+
+    assert.equal(boardTask.status, status);
+    assert.equal(assignedMember?.id, 3);
+    assert.equal(boardTask.title, created.title);
+  }
+
+  const persistedTask = JSON.parse(storedValues.get(store.STORAGE_KEYS.TASKS))[0];
+  assert.equal(persistedTask.status, 'Done');
+  assert.equal(persistedTask.assignedMemberId, 3);
+  assert.equal(Object.hasOwn(persistedTask, 'assignedUserId'), false);
+});

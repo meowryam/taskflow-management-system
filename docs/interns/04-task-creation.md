@@ -116,3 +116,209 @@ Edge cases are handled as follows:
 - Missing, empty, malformed, or wrongly shaped storage values: repository reads return `[]`.
 - Storage write failure: the UI reports failure and retains a usable form.
 - Missing task for update/delete: update returns `null`; delete returns `false`.
+
+
+# Prompt
+
+```
+## Role
+Act as a Senior Frontend Software Engineer and Software Architect with experience building scalable task management systems using vanilla HTML, CSS, and JavaScript.
+## Context
+I am implementing Intern 4 – Task Creation for the TaskFlow Management System in the CODOC Agentic Development Assessment.
+This project follows modular architecture with separate files for storage, business logic, and UI. The application currently uses LocalStorage but must be written so it can later be connected to a backend API or SQL Server database without major refactoring.
+Another intern is independently developing Intern 5 – Task Board (Kanban Board). My implementation must be fully compatible with theirs without requiring changes to either module.
+The Task Board will display four columns:
+## Todo
+In Progress
+Review
+Done
+It will render tasks using the data produced by my module.
+## Objective
+Build a complete Task Creation module.
+The module should include:
+
+Task creation form
+Validation
+Shared data handling
+LocalStorage integration
+Clean modular JavaScript
+Future backend compatibility
+Compatibility with the Kanban board module
+Functional Requirements
+Create a form containing:
+Task Title
+Description
+Project dropdown
+Assigned Member dropdown
+Due Date
+Priority dropdown
+Status dropdown
+Create Task button
+Reset button
+Validation requirements:
+Title is required.
+Project must be selected.
+Assigned member must be selected.
+Due date is required.
+Priority is required.
+Status is required.
+Display clear validation messages.
+Do not save invalid tasks.
+Task creation requirements:
+Generate a unique task ID.
+Create timestamps.
+Save tasks through a shared storage layer instead of directly manipulating UI components.
+Use one consistent task object.
+
+
+The task object should contain:
+{
+id,
+title,
+description,
+projectId,
+assignedMemberId,
+dueDate,
+priority,
+status,
+createdAt
+}
+
+
+**Do not** store project names or member names inside the task.
+Store only IDs.
+Kanban Compatibility Requirements
+The Task Board module must be able to use my data without modification.
+
+Only allow these exact status values:
+Todo
+In Progress
+Review
+Done
+Do not invent alternative names.
+Every task must include:
+title
+priority
+dueDate
+assignedMemberId
+projectId
+status
+Design the storage layer so Task Board can later perform:
+getTasks()
+getTaskById()
+addTask()
+updateTask()
+deleteTask()
+Ensure the Task Board can later update only the status field without rewriting the rest of the object.
+
+After successful task creation, provide a mechanism that allows other modules to refresh automatically (for example using a shared render function or custom event).
+
+# Architecture Requirements
+Separate:
+UI
+Validation
+Business logic
+Storage
+Avoid writing everything inside one event listener.
+Keep functions small and reusable.
+Use meaningful names.
+Avoid duplicated code.
+Avoid global variables where possible.
+Design the module so replacing LocalStorage with SQL Server API calls later requires minimal changes.
+
+# Edge Cases
+Handle:
+No projects exist
+No members exist
+Empty inputs
+Duplicate submissions
+Invalid dates
+Invalid status values
+Invalid priority values
+LocalStorage containing empty arrays
+LocalStorage missing expected keys
+Explain how each edge case is handled.
+
+# Constraints
+Do NOT:
+Use frameworks.
+Use external libraries.
+Overengineer the solution.
+Mix UI rendering with storage logic.
+Store redundant project or member names inside tasks.
+Create functionality outside the assignment scope.
+Add authentication.
+Add comments, attachments, subtasks, recurring tasks, or notifications.
+Output Format
+Provide the solution in this order:
+Folder structure
+File responsibilities
+Overall implementation plan
+Data model
+Validation strategy
+Storage strategy
+HTML
+CSS
+JavaScript (split by file/module)
+
+# Manual testing steps
+Integration points with Task Board
+Future SQL Server integration notes
+
+# Explanation of architectural decisions
+Before writing code, briefly explain the implementation plan and verify that every requirement from the assignment has been addressed.
+
+```
+
+## Handoff notes for Intern 5 – Task Board
+
+Task Creation and Task Board must use the existing global `DataStore` from `src/dataStore.js`. Do not introduce another LocalStorage key or a separate task collection. The shared keys use underscores: `taskflow_tasks`, `taskflow_projects`, and `taskflow_members`.
+
+The Board can load tasks and related display data with:
+
+```js
+const tasks = DataStore.getTasks();
+const projects = DataStore.getProjects();
+const members = DataStore.getMembers();
+```
+
+New tasks persist this canonical shape:
+
+```js
+{
+  id,
+  title,
+  description,
+  projectId,
+  assignedMemberId,
+  dueDate,
+  priority,
+  status,
+  createdAt
+}
+```
+
+Resolve project and member names at render time. Do not copy names into a task. For assignment lookup, prefer the canonical field while retaining compatibility with main's older seeded tasks:
+
+```js
+const memberId = task.assignedMemberId ?? task.assignedUserId;
+const member = members.find(item => String(item.id) === String(memberId));
+```
+
+The only supported columns and stored statuses are `Todo`, `In Progress`, `Review`, and `Done`. Move a card by sending a partial update so every other task property is preserved:
+
+```js
+DataStore.updateTask(task.id, { status: newStatus });
+```
+
+Do not replace the entire task object merely to change its column. `DataStore.getTasks()` provides a runtime-only `assignedUserId` compatibility alias for canonical tasks, so the current Board can render assignments without persisting a duplicate field. New Board code should use the canonical-first lookup above.
+
+Task Creation dispatches `taskflow:tasks-changed` after add, update, or delete. The Board should reload and render when it receives the event:
+
+```js
+window.addEventListener(DataStore.TASKS_CHANGED_EVENT, () => {
+  window.KanbanBoardModule?.refresh();
+});
+```
+
+When integrating scripts in the page, load `src/dataStore.js` before Task Creation or Board code. Navigating to the current Board already calls `loadData()`, so newly created tasks appear on navigation; listening for the event also supports live refresh when both modules are visible in a future layout.
