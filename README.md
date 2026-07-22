@@ -397,7 +397,7 @@ TaskFlow was validated through structured manual testing rather than automated t
 
 <div align="center">
 
-> 📸 Screenshots of the Dashboard, Kanban Board, Reports view, and Prompt Builder live in the **[/screenshots](./screenshots)** folder.
+> 📸 Screenshots of the Dashboard, Kanban Board, Reports view, and Prompt Builder live in the **[/screenshots](./docs/screenshots)** folder.
 
 | Dashboard | Task Board | Reports |
 |:---:|:---:|:---:|
