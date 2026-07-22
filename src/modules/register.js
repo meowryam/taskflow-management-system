@@ -8,7 +8,8 @@ const STORAGE_KEY = 'taskflow_users';
 // Default initial users (Matches standard data structure from /scripts)
 const INITIAL_USERS = [
   { id: 1, username: 'admin_user', password: 'password123', role: 'Admin', createdAt: '2026-01-01T00:00:00.000Z' },
-  { id: 2, username: 'manager_john', password: 'password123', role: 'Manager', createdAt: '2026-01-02T00:00:00.000Z' }
+  { id: 2, username: 'manager_john', password: 'password123', role: 'Manager', createdAt: '2026-01-02T00:00:00.000Z' },
+  { id: 3, username: 'team_member', password: 'password123', role: 'Team Member', createdAt: '2026-01-03T00:00:00.000Z' }
 ];
 
 /* ==========================================
