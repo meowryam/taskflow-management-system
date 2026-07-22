@@ -1,53 +1,111 @@
 const DataStore = (function () {
-  const STORAGE_KEYS = {
+  const STORAGE_KEYS = Object.freeze({
     TASKS: 'taskflow_tasks',
     PROJECTS: 'taskflow_projects',
     MEMBERS: 'taskflow_members'
-  };
+  });
+  const TASKS_CHANGED_EVENT = 'taskflow:tasks-changed';
+  const TASK_STATUSES = Object.freeze(['Todo', 'In Progress', 'Review', 'Done']);
 
-  function init() {
-    if (!localStorage.getItem(STORAGE_KEYS.TASKS)) {
-      seed();
+  function readCollection(key) {
+    try {
+      const data = localStorage.getItem(key);
+      const collection = data ? JSON.parse(data) : [];
+      return Array.isArray(collection) ? collection : [];
+    } catch {
+      return [];
     }
+  }
+
+  function writeCollection(key, collection) {
+    localStorage.setItem(key, JSON.stringify(collection));
+  }
+
+  function addAssignmentCompatibility(task) {
+    if (task.assignedMemberId !== undefined && task.assignedUserId === undefined) {
+      Object.defineProperty(task, 'assignedUserId', {
+        configurable: true,
+        enumerable: false,
+        value: task.assignedMemberId
+      });
+    }
+    return task;
   }
 
   function getTasks() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEYS.TASKS);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
+    return readCollection(STORAGE_KEYS.TASKS).map(addAssignmentCompatibility);
   }
 
   function getProjects() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEYS.PROJECTS);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
+    return readCollection(STORAGE_KEYS.PROJECTS);
   }
 
   function getMembers() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEYS.MEMBERS);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
+    return readCollection(STORAGE_KEYS.MEMBERS);
   }
 
   function saveTasks(tasks) {
-    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+    writeCollection(STORAGE_KEYS.TASKS, tasks);
   }
 
   function saveProjects(projects) {
-    localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
+    writeCollection(STORAGE_KEYS.PROJECTS, projects);
   }
 
   function saveMembers(members) {
-    localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+    writeCollection(STORAGE_KEYS.MEMBERS, members);
+  }
+
+  function getTaskById(taskId) {
+    return getTasks().find((task) => String(task.id) === String(taskId)) || null;
+  }
+
+  function validateTaskStatus(status) {
+    if (!TASK_STATUSES.includes(status)) {
+      throw new TypeError('Task status must be Todo, In Progress, Review, or Done.');
+    }
+  }
+
+  function notifyTasksChanged(action, taskId) {
+    if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return;
+    window.dispatchEvent(new CustomEvent(TASKS_CHANGED_EVENT, {
+      detail: { action, taskId }
+    }));
+  }
+
+  function addTask(task) {
+    validateTaskStatus(task.status);
+    const tasks = getTasks();
+    if (tasks.some((item) => String(item.id) === String(task.id))) {
+      throw new Error(`A task with ID ${task.id} already exists.`);
+    }
+
+    tasks.push({ ...task });
+    saveTasks(tasks);
+    notifyTasksChanged('added', task.id);
+    return { ...task };
+  }
+
+  function updateTask(taskId, changes) {
+    if (Object.hasOwn(changes, 'status')) validateTaskStatus(changes.status);
+    const tasks = getTasks();
+    const index = tasks.findIndex((task) => String(task.id) === String(taskId));
+    if (index === -1) return null;
+
+    tasks[index] = { ...tasks[index], ...changes, id: tasks[index].id };
+    saveTasks(tasks);
+    notifyTasksChanged('updated', tasks[index].id);
+    return { ...tasks[index] };
+  }
+
+  function deleteTask(taskId) {
+    const tasks = getTasks();
+    const remainingTasks = tasks.filter((task) => String(task.id) !== String(taskId));
+    if (remainingTasks.length === tasks.length) return false;
+
+    saveTasks(remainingTasks);
+    notifyTasksChanged('deleted', taskId);
+    return true;
   }
 
   function seed() {
@@ -56,12 +114,10 @@ const DataStore = (function () {
       { id: 2, name: 'Project Manager', email: 'manager@taskflow.local', role: 'Manager', initials: 'PM' },
       { id: 3, name: 'Team Member', email: 'member@taskflow.local', role: 'Team Member', initials: 'TM' }
     ];
-
     const projects = [
       { id: 1, name: 'TaskFlow Sprint', description: 'Build and integrate the TaskFlow management system.', deadline: getFutureDate(7), status: 'Active' },
       { id: 2, name: 'Website Launch', description: 'Prepare the product website for launch.', deadline: getFutureDate(30), status: 'Planned' }
     ];
-
     const tasks = [
       { id: 1, projectId: 1, title: 'Create project module', description: 'Implement project create, edit, delete, and list behavior.', assignedUserId: 3, dueDate: getFutureDate(2), priority: 'High', status: 'In Progress', createdAt: new Date().toISOString() },
       { id: 2, projectId: 1, title: 'Prepare manual test cases', description: 'Write test cases for the integrated TaskFlow product.', assignedUserId: 3, dueDate: getFutureDate(5), priority: 'Medium', status: 'Todo', createdAt: new Date().toISOString() },
@@ -87,14 +143,25 @@ const DataStore = (function () {
     return date.toISOString().split('T')[0];
   }
 
-  init();
+  if (!localStorage.getItem(STORAGE_KEYS.TASKS)) seed();
 
   return {
+    STORAGE_KEYS,
+    TASKS_CHANGED_EVENT,
+    TASK_STATUSES,
     getTasks,
+    getTaskById,
     getProjects,
     getMembers,
+    addTask,
+    updateTask,
+    deleteTask,
     saveTasks,
     saveProjects,
     saveMembers
   };
 })();
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.DataStore = DataStore;
+}

@@ -8,6 +8,7 @@
        STYLESHEET
        ============================================================ -->
   <link rel="stylesheet" href="src/styles/style.css" />
+  <link rel="stylesheet" href="src/styles/tasks.css" />
   <link rel="stylesheet" href="src/styles/promptBuilder.css" />
 </head>
 <body>
@@ -264,6 +265,82 @@
         </div>
       </section>
 
+      <!-- TASK CREATION VIEW: storage and behavior live in dedicated modules. -->
+      <section id="task-creation-section" class="task-creation" aria-labelledby="taskCreationTitle" style="display: none;">
+        <header class="task-creation__intro">
+          <h2 id="taskCreationTitle">Create a task</h2>
+          <p>Add work to a project and assign it to a team member.</p>
+        </header>
+
+        <form id="taskForm" class="task-form" novalidate>
+          <p id="taskAvailabilityMessage" class="task-form__availability" role="status"></p>
+
+          <div class="task-form__grid">
+            <div class="task-form__field task-form__field--wide">
+              <label for="taskTitle">Task Title</label>
+              <input id="taskTitle" name="title" type="text" maxlength="200" autocomplete="off" aria-describedby="titleError" />
+              <span id="titleError" class="task-form__error" aria-live="polite"></span>
+            </div>
+
+            <div class="task-form__field task-form__field--wide">
+              <label for="taskDescription">Description</label>
+              <textarea id="taskDescription" name="description" maxlength="2000"></textarea>
+            </div>
+
+            <div class="task-form__field">
+              <label for="taskProject">Project</label>
+              <select id="taskProject" name="projectId" aria-describedby="projectIdError">
+                <option value="">Select a project</option>
+              </select>
+              <span id="projectIdError" class="task-form__error" aria-live="polite"></span>
+            </div>
+
+            <div class="task-form__field">
+              <label for="taskAssignedMember">Assigned Member</label>
+              <select id="taskAssignedMember" name="assignedMemberId" aria-describedby="assignedMemberIdError">
+                <option value="">Select a member</option>
+              </select>
+              <span id="assignedMemberIdError" class="task-form__error" aria-live="polite"></span>
+            </div>
+
+            <div class="task-form__field">
+              <label for="taskDueDate">Due Date</label>
+              <input id="taskDueDate" name="dueDate" type="date" aria-describedby="dueDateError" />
+              <span id="dueDateError" class="task-form__error" aria-live="polite"></span>
+            </div>
+
+            <div class="task-form__field">
+              <label for="taskPriority">Priority</label>
+              <select id="taskPriority" name="priority" aria-describedby="priorityError">
+                <option value="">Select a priority</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+              <span id="priorityError" class="task-form__error" aria-live="polite"></span>
+            </div>
+
+            <div class="task-form__field">
+              <label for="taskStatus">Status</label>
+              <select id="taskStatus" name="status" aria-describedby="statusError">
+                <option value="">Select a status</option>
+                <option value="Todo">Todo</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Review">Review</option>
+                <option value="Done">Done</option>
+              </select>
+              <span id="statusError" class="task-form__error" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="task-form__actions">
+            <button id="createTaskButton" class="task-form__button task-form__button--primary" type="submit">Create Task</button>
+            <button class="task-form__button task-form__button--secondary" type="reset">Reset</button>
+          </div>
+          <p id="taskFormMessage" class="task-form__message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
       <!-- ========================================================
            PROMPT BUILDER VIEW — hidden by default
            ======================================================== -->
@@ -431,6 +508,8 @@
       }
     })();
   </script>
+  <script src="src/dataStore.js"></script>
+  <script type="module" src="src/modules/tasks.js"></script>
 
   <script src="src/modules/promptBuilder.js"></script>
 
