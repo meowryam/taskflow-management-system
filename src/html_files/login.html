@@ -4,31 +4,34 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TaskFlow · Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 
 /* ================================================================
-   0. Design tokens
+   0. Design tokens — aligned with dashboard (olive green)
    ================================================================ */
 :root {
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+  --font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --color-primary:        #6B4F2A;
-  --color-primary-dark:   #4A3420;
-  --color-primary-light:  rgba(107, 79, 42, 0.14);
+  --color-primary:        #9AAA63;
+  --color-primary-dark:   #7a8a4a;
+  --color-primary-light:  rgba(154, 170, 99, 0.14);
 
-  --color-success: #2F855A;
-  --color-danger:  #A8452F;
+  --color-success: #6b8e4e;
+  --color-danger:  #a8452f;
 
-  --color-white: #FFFDF8;
-  --color-gray-50:  #FAF6EC;
-  --color-gray-100: #F3ECDB;
-  --color-gray-200: #E6DCC0;
-  --color-gray-400: #A89B78;
-  --color-gray-500: #7D7256;
-  --color-gray-600: #5C5340;
-  --color-gray-700: #423C2E;
-  --color-gray-800: #2C2820;
-  --color-gray-900: #1A1712;
+  --color-white: #fffdf8;
+  --color-gray-50:  #faf6ec;
+  --color-gray-100: #f3ecdb;
+  --color-gray-200: #e6dcc0;
+  --color-gray-400: #a89b78;
+  --color-gray-500: #7d7256;
+  --color-gray-600: #5c5340;
+  --color-gray-700: #423c2e;
+  --color-gray-800: #2c2820;
+  --color-gray-900: #1a1712;
 
   --font-size-xs:   0.75rem;
   --font-size-sm:   0.875rem;
@@ -66,7 +69,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 15% 10%, rgba(107, 79, 42, 0.10), transparent 45%),
+    radial-gradient(circle at 15% 10%, rgba(154, 170, 99, 0.10), transparent 45%),
     radial-gradient(circle at 85% 90%, rgba(66, 60, 46, 0.10), transparent 45%),
     var(--color-gray-50);
   padding: var(--space-4);
