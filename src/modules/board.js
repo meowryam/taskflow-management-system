@@ -412,6 +412,11 @@
 
     if (typeof DataStore !== 'undefined') {
       DataStore.saveTasks(this.tasks);
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        window.dispatchEvent(new CustomEvent('taskflow:tasks-changed', {
+          detail: { action: 'board_move', taskId: taskId }
+        }));
+      }
     }
 
     this.renderBoard();
