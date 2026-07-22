@@ -283,7 +283,7 @@ TaskFlow was built in a tight, structured **2 day Agentic Development Sprint**.
 | Day | Mode | Focus |
 |---|---|---|
 | **Day 1** | 🧑‍💻 Solo, 9 interns | Each intern built one module independently on their own branch |
-| **Day 2** | 🤝 Group Alpha and Group Beta, 6 members each | Integration, bug fixes, testing, documentation, and final release |
+| **Day 2** | 🤝 Group Alpha and Group Beta, 4/5 members each | Integration, bug fixes, testing, documentation, and final release |
 
 </div>
 
