@@ -87,8 +87,21 @@
     return div.innerHTML;
   }
 
-  function refresh() {
+  function getTasksForCurrentUser() {
     var allTasks = DataStore.getTasks();
+    var session = window.TaskFlowSession;
+    if (!session) return allTasks;
+    if (session.role === 'Admin' || session.role === 'Manager') return allTasks;
+    if (!session.memberId) return allTasks.filter(function (t) {
+      return String(t.assignedUserId) === String(session.email);
+    });
+    return allTasks.filter(function (t) {
+      return String(t.assignedUserId) === String(session.memberId);
+    });
+  }
+
+  function refresh() {
+    var allTasks = getTasksForCurrentUser();
     var filters = getFilterValues();
 
     var mappedFilters = {

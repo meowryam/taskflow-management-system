@@ -10,20 +10,76 @@
     return monday;
   }
 
+  function getSession() {
+    return window.TaskFlowSession || null;
+  }
+
+  function filterTasksByRole(tasks) {
+    var session = getSession();
+    if (!session) return tasks;
+    if (session.role === 'Admin' || session.role === 'Manager') return tasks;
+    if (!session.memberId) return tasks.filter(function (t) {
+      return String(t.assignedUserId) === String(session.email);
+    });
+    return tasks.filter(function (t) {
+      return String(t.assignedUserId) === String(session.memberId);
+    });
+  }
+
+  function filterProjectsByRole(projects, tasks) {
+    var session = getSession();
+    if (!session) return projects;
+    if (session.role === 'Admin' || session.role === 'Manager') return projects;
+    var userTaskProjectIds = new Set();
+    tasks.forEach(function (t) {
+      if (t.projectId) userTaskProjectIds.add(String(t.projectId));
+    });
+    return projects.filter(function (p) {
+      return userTaskProjectIds.has(String(p.id));
+    });
+  }
+
+  function getOwnTasks() {
+    var session = getSession();
+    if (!session) return [];
+    var allTasks = globalThis.DataStore.getTasks();
+    if (session.role === 'Admin' || session.role === 'Manager') return allTasks;
+    if (!session.memberId) return allTasks.filter(function (t) {
+      return String(t.assignedUserId) === String(session.email);
+    });
+    return allTasks.filter(function (t) {
+      return String(t.assignedUserId) === String(session.memberId);
+    });
+  }
+
   function refresh() {
     var store = globalThis.DataStore;
     if (!store) return;
 
-    var tasks = store.getTasks();
-    var projects = store.getProjects();
-    var members = store.getMembers();
+    var session = getSession();
+    var allTasks = store.getTasks();
+    var allProjects = store.getProjects();
+    var allMembers = store.getMembers();
 
-    var totalProjects = projects.length;
-    var activeTasks = tasks.filter(function (t) { return t.status !== 'Done'; }).length;
-    var teamMembers = members.length;
+    var visibleProjects, visibleTasks, teamMembers;
+
+    if (session && (session.role === 'Team Member')) {
+      visibleTasks = filterTasksByRole(allTasks);
+      visibleProjects = filterProjectsByRole(allProjects, visibleTasks);
+      teamMembers = session.memberId
+        ? allMembers.filter(function (m) { return String(m.id) === String(session.memberId); }).length
+        : 1;
+    } else {
+      visibleTasks = allTasks;
+      visibleProjects = allProjects;
+      teamMembers = allMembers.length;
+    }
+
+    var totalProjects = visibleProjects.length;
+    var activeTasks = visibleTasks.filter(function (t) { return t.status !== 'Done'; }).length;
 
     var weekStart = getWeekStart();
-    var completedThisWeek = tasks.filter(function (t) {
+    var completedThisWeek = visibleTasks.filter(function (t) {
       if (t.status !== 'Done') return false;
       if (!t.createdAt) return false;
       return new Date(t.createdAt) >= weekStart;

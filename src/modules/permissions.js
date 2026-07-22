@@ -41,6 +41,21 @@ const PERMISSION_MATRIX = {
     "view_activity_log",
     "use_prompt_builder",
   ],
+  "Product Manager": [
+    "create_project",
+    "delete_project",
+    "edit_project",
+    "archive_project",
+    "create_task",
+    "edit_task",
+    "delete_task",
+    "reassign_task",
+    "view_reports",
+    "export_reports",
+    "manage_settings",
+    "view_activity_log",
+    "use_prompt_builder",
+  ],
 };
 
 window.Permissions = {

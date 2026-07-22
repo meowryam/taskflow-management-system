@@ -29,7 +29,19 @@ function populateSelect(select, items, placeholder) {
 
 function loadDependencies() {
   projects = globalThis.DataStore.getProjects().map((item) => normalizeReference(item, 'project')).filter(Boolean);
-  members = globalThis.DataStore.getMembers().map((item) => normalizeReference(item, 'member')).filter(Boolean);
+  var allMembers = globalThis.DataStore.getMembers().map((item) => normalizeReference(item, 'member')).filter(Boolean);
+
+  var session = window.TaskFlowSession;
+  if (session && session.role === 'Team Member') {
+    var memberId = session.memberId || session.email;
+    members = allMembers.filter(function (m) {
+      return String(m.id) === String(memberId) ||
+             String(m.label).toLowerCase() === String(session.email).toLowerCase();
+    });
+  } else {
+    members = allMembers;
+  }
+
   populateSelect(projectSelect, projects, 'Select a project');
   populateSelect(memberSelect, members, 'Select a member');
 
