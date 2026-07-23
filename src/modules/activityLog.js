@@ -131,8 +131,8 @@ const ActivityLog = (function () {
   function seed() {
     if (localStorage.getItem(STORAGE_KEY)) return;
 
-    const store = globalThis.DataStore;
-    if (!store) return;
+    if (typeof DataStore === 'undefined') return;
+    const store = DataStore;
 
     const projects = store.getProjects();
     const tasks = store.getTasks();
@@ -352,10 +352,12 @@ const ActivityLog = (function () {
     return { success: true };
   }
 
-  if (typeof globalThis !== 'undefined' && globalThis.DataStore) {
+  if (typeof DataStore !== 'undefined') {
     seed();
   } else if (typeof document !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', seed);
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof DataStore !== 'undefined') seed();
+    });
   }
 
   return {

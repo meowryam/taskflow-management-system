@@ -1889,7 +1889,7 @@
       var notifDot = document.querySelector('.header__notif-dot');
       if (!bell || !dropdown || !notifList) return;
 
-      var lastNotifCount = 0;
+      var lastNotifCount = -1;
 
       function getRelativeTime(dateStr) {
         if (!dateStr) return '';
@@ -1921,17 +1921,24 @@
       }
 
       function renderNotifications() {
-        var entries = (window.ActivityLog && ActivityLog.readEntries) ? ActivityLog.readEntries() : [];
-        var recent = entries.slice(-10).reverse();
-        var count = entries.length;
+        var entries, count, recent;
+        if (window.ActivityLog && typeof ActivityLog.getAll === 'function') {
+          entries = ActivityLog.getAll();
+          count = entries.length;
+          recent = entries.slice(0, 10);
+        } else {
+          entries = [];
+          count = 0;
+          recent = [];
+        }
 
-        // Update dot badge
         if (notifDot) {
           if (count > lastNotifCount) {
             notifDot.style.display = '';
             notifDot.style.background = '#a8452f';
+          } else if (count === 0) {
+            notifDot.style.display = 'none';
           }
-          if (count === 0) notifDot.style.display = 'none';
         }
 
         if (recent.length === 0) {
@@ -1942,7 +1949,7 @@
         var html = '';
         for (var i = 0; i < recent.length; i++) {
           var e = recent[i];
-          var time = getRelativeTime(e.timestamp || e.occurredAt || e.createdAt);
+          var time = getRelativeTime(e.occurredAt || e.timestamp || e.createdAt);
           var entityType = e.entityType || e.type || '';
           var desc = e.actionDetail || e.description || e.actionType || 'Activity';
           var user = e.userName || e.performedBy || e.user || '';
@@ -1955,8 +1962,7 @@
         }
         notifList.innerHTML = html;
 
-        // Click handler for notification items
-        notifList.querySelectorAll('.notif-item').forEach(function (item) {
+        Array.prototype.forEach.call(notifList.querySelectorAll('.notif-item'), function (item) {
           item.addEventListener('click', function () {
             var route = item.getAttribute('data-route');
             dropdown.style.display = 'none';
@@ -1971,7 +1977,7 @@
         var isOpen = dropdown.style.display !== 'none';
         dropdown.style.display = isOpen ? 'none' : 'block';
         if (!isOpen) {
-          lastNotifCount = (window.ActivityLog && ActivityLog.readEntries) ? ActivityLog.readEntries().length : 0;
+          lastNotifCount = (window.ActivityLog && ActivityLog.getAll) ? ActivityLog.getAll().length : 0;
           if (notifDot) notifDot.style.display = lastNotifCount > 0 ? '' : 'none';
         }
       });
