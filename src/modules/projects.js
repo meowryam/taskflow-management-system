@@ -36,6 +36,14 @@ const Projects = (function () {
   const NAME_MAX_LENGTH = 100;
   const DESCRIPTION_MAX_LENGTH = 500;
 
+  // Local copy of taskValidation.js's getTodayIso, kept in sync manually.
+  // This file is loaded as a classic script (see index.html), so it cannot
+  // `import` the shared helper from taskValidation.js's ES module.
+  function getTodayIso(date = new Date()) {
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 10);
+  }
+
   // -- Storage -----------------------------------------------------------
   // TEMPORARY localStorage wrapper, scoped to this file only.
   // Shape (readCollection/writeCollection/generateId) intentionally mirrors
@@ -117,18 +125,23 @@ const Projects = (function () {
       errors.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
     }
 
+    const today = getTodayIso();
     const startDateTime = new Date(startDate).getTime();
     if (!startDate) {
       errors.startDate = "Start date is required.";
     } else if (Number.isNaN(startDateTime)) {
       errors.startDate = "Start date must be a valid date.";
+    } else if (startDate < today) {
+      errors.startDate = `Choose a start date on or after ${today}. A project cannot start before today.`;
     }
 
     if (!deadline) {
       errors.deadline = "Deadline is required.";
     } else if (Number.isNaN(new Date(deadline).getTime())) {
       errors.deadline = "Deadline must be a valid date.";
-    } else if (startDate && !Number.isNaN(startDateTime) && new Date(deadline).getTime() < startDateTime) {
+    } else if (deadline < today) {
+      errors.deadline = `Choose an end date on or after ${today}. A project cannot end before today.`;
+    } else if (startDate && !Number.isNaN(startDateTime) && deadline < startDate) {
       errors.deadline = "End date cannot be before the start date.";
     }
 
@@ -457,11 +470,16 @@ const Projects = (function () {
     form.className = "pm-form";
     form.noValidate = true;
 
+    const today = getTodayIso();
     const nameRow = buildFieldRow("pm-name", "Name", "input", { type: "text", value: project ? project.name : "" });
     const descRow = buildFieldRow("pm-description", "Description", "textarea", { value: project ? project.description : "" });
-    const startDateRow = buildFieldRow("pm-start-date", "Start Date", "input", { type: "date", value: project ? project.startDate : "" });
-    const deadlineRow = buildFieldRow("pm-deadline", "End Date", "input", { type: "date", value: project ? project.deadline : "" });
+    const startDateRow = buildFieldRow("pm-start-date", "Start Date", "input", { type: "date", value: project ? project.startDate : "", min: today });
+    const deadlineRow = buildFieldRow("pm-deadline", "End Date", "input", { type: "date", value: project ? project.deadline : "", min: (project && project.startDate > today) ? project.startDate : today });
     const statusRow = buildStatusRow(project ? project.status : "Active");
+
+    startDateRow.input.addEventListener("change", () => {
+      deadlineRow.input.min = startDateRow.input.value > today ? startDateRow.input.value : today;
+    });
 
     form.appendChild(nameRow.row);
     form.appendChild(descRow.row);
@@ -536,6 +554,7 @@ const Projects = (function () {
     const input = document.createElement(tag);
     input.id = id;
     if (opts.type) input.type = opts.type;
+    if (opts.min) input.min = opts.min;
     input.value = opts.value || "";
     row.appendChild(input);
 
