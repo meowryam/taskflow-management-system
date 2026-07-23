@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="src/styles/tasks.css" />
   <link rel="stylesheet" href="src/styles/promptBuilder.css" />
   <link rel="stylesheet" href="src/styles/board.css" id="board-css" />
+  <link rel="stylesheet" href="src/styles/reports.css" />
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -1185,12 +1186,445 @@
       <section id="projects-section" aria-label="Projects" style="display: none;"></section>
 
       <!-- ========================================================
-           REPORTS VIEW — placeholder (module coming soon)
+           REPORTS VIEW — Premium Analytics Dashboard
            ======================================================== -->
       <section id="reports-section" aria-label="Reports" style="display: none;">
-        <div class="placeholder-card">
-          <h2>Reports</h2>
-          <p>The Reports module is coming soon. Check back later.</p>
+        <div class="reports">
+
+          <!-- Empty State -->
+          <div class="reports__empty" id="rptEmptyState" style="display:none;">
+            <div class="reports__empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/>
+              </svg>
+            </div>
+            <h3 class="reports__empty-title">No Data Available Yet</h3>
+            <p class="reports__empty-text">Create projects and tasks to start generating reports and analytics.</p>
+            <button class="reports__empty-btn" onclick="window.navigateTo('projects')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create Your First Project
+            </button>
+          </div>
+
+          <!-- Header -->
+          <div class="reports__header" id="rptStatsSection">
+            <div class="reports__header-left">
+              <h2>Reports</h2>
+              <div class="reports__header-subtitle">
+                <span><span class="dot"></span> Analytics Overview</span>
+                <span id="rptCurrentDate"></span>
+                <span id="rptLastUpdated"></span>
+              </div>
+            </div>
+            <div class="reports__header-actions">
+              <button class="reports__action-btn reports__action-btn--primary" id="rptExportPDF" aria-label="Export PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Export PDF
+              </button>
+              <button class="reports__action-btn" id="rptExportCSV" aria-label="Export CSV">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+              </button>
+              <button class="reports__action-btn" id="rptPrint" aria-label="Print Report">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 12H4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print
+              </button>
+              <button class="reports__action-btn" id="rptRefresh" aria-label="Refresh Data">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div class="reports__stats" id="rptStatsSection">
+            <article class="stat-card stat-card--projects">
+              <div class="stat-card__top">
+                <div class="stat-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 7C3 5.89543 3.89543 5 5 5H9L11 8H19C20.1046 8 21 8.89543 21 10V17C21 18.1046 20.1046 19 19 19H5C3.89543 19 3 18.1046 3 17V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span class="stat-card__trend stat-card__trend--neutral">Total</span>
+              </div>
+              <h3 class="stat-card__value" id="rptTotalProjects">0</h3>
+              <p class="stat-card__label">Total Projects</p>
+            </article>
+
+            <article class="stat-card stat-card--tasks">
+              <div class="stat-card__top">
+                <div class="stat-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                    <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span class="stat-card__trend stat-card__trend--neutral">Total</span>
+              </div>
+              <h3 class="stat-card__value" id="rptTotalTasks">0</h3>
+              <p class="stat-card__label">Total Tasks</p>
+            </article>
+
+            <article class="stat-card stat-card--completed">
+              <div class="stat-card__top">
+                <div class="stat-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="22 4 12 14.01 9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span class="stat-card__trend stat-card__trend--up">Done</span>
+              </div>
+              <h3 class="stat-card__value" id="rptCompletedTasks">0</h3>
+              <p class="stat-card__label">Completed Tasks</p>
+            </article>
+
+            <article class="stat-card stat-card--pending">
+              <div class="stat-card__top">
+                <div class="stat-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span class="stat-card__trend stat-card__trend--down">Pending</span>
+              </div>
+              <h3 class="stat-card__value" id="rptPendingTasks">0</h3>
+              <p class="stat-card__label">Pending Tasks</p>
+            </article>
+
+            <article class="stat-card stat-card--overdue">
+              <div class="stat-card__top">
+                <div class="stat-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <span class="stat-card__trend stat-card__trend--down">Overdue</span>
+              </div>
+              <h3 class="stat-card__value" id="rptOverdueTasks">0</h3>
+              <p class="stat-card__label">Overdue Tasks</p>
+            </article>
+
+            <article class="stat-card stat-card--highpri">
+              <div class="stat-card__top">
+                <div class="stat-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span class="stat-card__trend stat-card__trend--down">High</span>
+              </div>
+              <h3 class="stat-card__value" id="rptHighPriority">0</h3>
+              <p class="stat-card__label">High Priority Tasks</p>
+            </article>
+
+            <article class="stat-card stat-card--rate">
+              <div class="stat-card__top">
+                <div class="stat-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" stroke="currentColor" stroke-width="2"/>
+                    <path d="M22 12A10 10 0 0 0 12 2v10z" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </div>
+                <span class="stat-card__trend stat-card__trend--up">Rate</span>
+              </div>
+              <h3 class="stat-card__value" id="rptCompletionRate">0%</h3>
+              <p class="stat-card__label">Completion Rate</p>
+            </article>
+
+            <article class="stat-card stat-card--members">
+              <div class="stat-card__top">
+                <div class="stat-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/>
+                    <path d="M3 20C3 16.6863 5.68629 14 9 14C12.3137 14 15 16.6863 15 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M16 8.5C17.1046 8.5 18 7.60457 18 6.5C18 5.39543 17.1046 4.5 16 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M16 14C18.7614 14 21 16.2386 21 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <span class="stat-card__trend stat-card__trend--neutral">Team</span>
+              </div>
+              <h3 class="stat-card__value" id="rptActiveMembers">0</h3>
+              <p class="stat-card__label">Active Members</p>
+            </article>
+          </div>
+
+          <!-- Executive Snapshot -->
+          <div class="reports__exec-snapshot" id="rptExecSection">
+            <div class="reports__exec-header">
+              <div class="reports__exec-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <div>
+                <div class="reports__exec-title">Executive Snapshot</div>
+                <div class="reports__exec-subtitle">TaskFlow Summary</div>
+              </div>
+            </div>
+            <div class="reports__exec-content" id="rptExecContent"></div>
+            <div class="reports__exec-health" id="rptExecHealth"></div>
+            <div id="rptExecSummary" style="text-align:center;color:rgba(44,40,32,0.4);font-size:0.8rem;margin-top:10px;"></div>
+          </div>
+
+          <!-- Filters -->
+          <div class="reports__filters" id="rptFilters">
+            <div class="reports__filter-group reports__filter-group--wide">
+              <label class="reports__filter-label" for="rptFilterSearch">Search</label>
+              <input type="text" id="rptFilterSearch" class="reports__filter-input" placeholder="Search by task title...">
+            </div>
+            <div class="reports__filter-group">
+              <label class="reports__filter-label" for="rptFilterProject">Project</label>
+              <select id="rptFilterProject" class="reports__filter-select">
+                <option value="">All Projects</option>
+              </select>
+            </div>
+            <div class="reports__filter-group">
+              <label class="reports__filter-label" for="rptFilterMember">Member</label>
+              <select id="rptFilterMember" class="reports__filter-select">
+                <option value="">All Members</option>
+              </select>
+            </div>
+            <div class="reports__filter-group">
+              <label class="reports__filter-label" for="rptFilterPriority">Priority</label>
+              <select id="rptFilterPriority" class="reports__filter-select">
+                <option value="">All Priorities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div class="reports__filter-group">
+              <label class="reports__filter-label" for="rptFilterStatus">Status</label>
+              <select id="rptFilterStatus" class="reports__filter-select">
+                <option value="">All Statuses</option>
+                <option value="Todo">Todo</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Review">Review</option>
+                <option value="Done">Done</option>
+              </select>
+            </div>
+            <div class="reports__filter-group">
+              <label class="reports__filter-label" for="rptFilterDateFrom">From</label>
+              <input type="date" id="rptFilterDateFrom" class="reports__filter-input">
+            </div>
+            <div class="reports__filter-group">
+              <label class="reports__filter-label" for="rptFilterDateTo">To</label>
+              <input type="date" id="rptFilterDateTo" class="reports__filter-input">
+            </div>
+            <div class="reports__filter-group">
+              <label class="reports__filter-label" for="rptFilterSort">Sort</label>
+              <select id="rptFilterSort" class="reports__filter-select">
+                <option value="default">Default</option>
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="alpha">Alphabetical</option>
+                <option value="completion">Completion %</option>
+                <option value="priority">Priority</option>
+                <option value="duedate">Due Date</option>
+                <option value="project">Project</option>
+                <option value="member">Member</option>
+              </select>
+            </div>
+            <div class="reports__filter-group reports__filter-group--action">
+              <label class="reports__filter-label">&nbsp;</label>
+              <button class="reports__filter-clear-btn" id="rptClearFilters" type="button">Clear Filters</button>
+            </div>
+          </div>
+
+          <!-- Charts Section -->
+          <div id="rptChartsSection">
+            <h3 class="reports__section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+              Analytics Charts
+            </h3>
+            <div class="reports__charts-grid">
+              <!-- Task Status Distribution -->
+              <div class="reports__chart-card">
+                <div class="reports__chart-card-header">
+                  <span class="reports__chart-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    Task Status Distribution
+                  </span>
+                  <span class="reports__chart-card-badge">All Tasks</span>
+                </div>
+                <div class="reports__chart-body">
+                  <div class="reports__donut-wrap" id="rptStatusDonut"></div>
+                </div>
+              </div>
+
+              <!-- Priority Distribution -->
+              <div class="reports__chart-card">
+                <div class="reports__chart-card-header">
+                  <span class="reports__chart-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+                    Priority Distribution
+                  </span>
+                  <span class="reports__chart-card-badge">All Tasks</span>
+                </div>
+                <div class="reports__chart-body">
+                  <div class="reports__donut-wrap" id="rptPriorityDonut"></div>
+                </div>
+              </div>
+
+              <!-- Tasks per Project -->
+              <div class="reports__chart-card">
+                <div class="reports__chart-card-header">
+                  <span class="reports__chart-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Tasks per Project
+                  </span>
+                  <span class="reports__chart-card-badge">Top 10</span>
+                </div>
+                <div class="reports__chart-body" id="rptTasksPerProject"></div>
+              </div>
+
+              <!-- Member Workload -->
+              <div class="reports__chart-card">
+                <div class="reports__chart-card-header">
+                  <span class="reports__chart-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    Member Workload
+                  </span>
+                  <span class="reports__chart-card-badge">All Members</span>
+                </div>
+                <div class="reports__chart-body" id="rptMemberWorkload"></div>
+              </div>
+
+              <!-- Completion Trend -->
+              <div class="reports__chart-card">
+                <div class="reports__chart-card-header">
+                  <span class="reports__chart-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg>
+                    Completion Trend
+                  </span>
+                  <span class="reports__chart-card-badge">Last 6 Weeks</span>
+                </div>
+                <div class="reports__chart-body" id="rptCompletionTrend"></div>
+              </div>
+
+              <!-- Project Progress Comparison -->
+              <div class="reports__chart-card">
+                <div class="reports__chart-card-header">
+                  <span class="reports__chart-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg>
+                    Project Progress Comparison
+                  </span>
+                  <span class="reports__chart-card-badge">Active Projects</span>
+                </div>
+                <div class="reports__chart-body" id="rptProjectProgressChart"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project Analytics Table -->
+          <div class="reports__table-wrap" id="rptProjectTableSection">
+            <div class="reports__table-header">
+              <span class="reports__table-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7C3 5.89543 3.89543 5 5 5H9L11 8H19C20.1046 8 21 8.89543 21 10V17C21 18.1046 20.1046 19 19 19H5C3.89543 19 3 18.1046 3 17V7Z"/></svg>
+                Project Analytics
+              </span>
+              <span class="reports__table-badge" id="rptProjectTableBadge">0 projects</span>
+            </div>
+            <div class="reports__table-scroll">
+              <table class="reports__table">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Completion</th>
+                    <th>Total Tasks</th>
+                    <th>Completed</th>
+                    <th>Pending</th>
+                    <th>Overdue</th>
+                    <th>Priority Dist</th>
+                    <th>Deadline</th>
+                  </tr>
+                </thead>
+                <tbody id="rptProjectTableBody">
+                  <tr><td colspan="9" style="text-align:center;color:rgba(44,40,32,0.35);padding:40px 12px;">No projects found</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Upcoming Deadlines + Overdue Tasks -->
+          <div class="reports__deadlines-grid" id="rptDeadlinesSection">
+            <!-- Upcoming Deadlines -->
+            <div class="reports__chart-card">
+              <div class="reports__chart-card-header">
+                <span class="reports__chart-card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Upcoming Deadlines
+                </span>
+                <span class="reports__chart-card-badge">Nearest</span>
+              </div>
+              <div class="reports__chart-body" id="rptUpcomingDeadlines"></div>
+            </div>
+
+            <!-- Overdue Tasks -->
+            <div class="reports__table-wrap" id="rptOverdueSection" style="margin-top:0;">
+              <div class="reports__table-header">
+                <span class="reports__table-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Overdue Tasks
+                </span>
+                <span class="reports__table-badge" id="rptOverdueBadge" style="background:rgba(239,68,68,0.08);color:#dc2626;">0 overdue</span>
+              </div>
+              <div class="reports__table-scroll">
+                <table class="reports__table">
+                  <thead>
+                    <tr>
+                      <th>Task</th>
+                      <th>Project</th>
+                      <th>Member</th>
+                      <th>Priority</th>
+                      <th>Due Date</th>
+                      <th>Days Overdue</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rptOverdueBody">
+                    <tr><td colspan="7" style="text-align:center;color:rgba(44,40,32,0.35);padding:40px 12px;">No overdue tasks. Everything is on track!</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Team Performance -->
+          <div id="rptTeamSection">
+            <div class="reports__chart-card" style="margin-bottom:0;">
+              <div class="reports__chart-card-header">
+                <span class="reports__chart-card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  Team Performance
+                </span>
+                <span class="reports__chart-card-badge" id="rptTeamBadge">0 members</span>
+              </div>
+              <div class="reports__chart-body">
+                <div class="reports__team-grid" id="rptTeamPerformance"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Smart Insights -->
+          <div id="rptInsightsSection">
+            <h3 class="reports__section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Smart Insights
+            </h3>
+            <div class="reports__insights-grid" id="rptSmartInsights">
+              <div class="widget-empty" style="grid-column:1/-1;">
+                <div class="widget-empty__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                <span class="widget-empty__text">No insights available yet</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -1378,6 +1812,7 @@
   <script src="src/modules/promptBuilder.js"></script>
   <script src="src/modules/activityLog.js"></script>
   <script src="src/modules/dashboard.js"></script>
+  <script src="src/modules/reports.js"></script>
 
   <!-- Dashboard helpers & theme initialization -->
   <script>
