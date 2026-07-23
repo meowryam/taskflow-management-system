@@ -196,8 +196,16 @@
     window.addEventListener('taskflow:members-changed', function () { loadDropdowns(); refresh(); });
   }
 
+  function setSearchQuery(query) {
+    if (!searchInput) return;
+    searchInput.value = query || '';
+    refresh();
+  }
+
   if (searchInput) {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
     else setup();
   }
+
+  window.setTaskSearchQuery = setSearchQuery;
 })();
