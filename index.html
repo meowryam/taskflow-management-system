@@ -800,14 +800,27 @@
                 </div>
                 <div class="task-form__date-fields">
                   <div class="task-form__field">
-                    <label for="taskStartDate">Start Date</label>
+                    <label class="task-form__date-label" for="taskStartDate">
+                      Start Date
+                      <span class="task-form__required">Required</span>
+                    </label>
                     <input id="taskStartDate" name="startDate" type="date" aria-describedby="startDateHint startDateError" />
-                    <span id="startDateHint" class="task-form__hint"></span>
+                    <div id="startDateHint" class="task-form__date-guidance" aria-live="polite">
+                      <strong id="startDateRule"></strong>
+                      <span id="startDateReason"></span>
+                    </div>
                     <span id="startDateError" class="task-form__error" aria-live="polite"></span>
                   </div>
                   <div class="task-form__field">
-                    <label for="taskDueDate">Due Date</label>
-                    <input id="taskDueDate" name="dueDate" type="date" aria-describedby="dueDateError" />
+                    <label class="task-form__date-label" for="taskDueDate">
+                      Due Date
+                      <span class="task-form__required">Required</span>
+                    </label>
+                    <input id="taskDueDate" name="dueDate" type="date" aria-describedby="dueDateHint dueDateError" />
+                    <div id="dueDateHint" class="task-form__date-guidance" aria-live="polite">
+                      <strong id="dueDateRule"></strong>
+                      <span id="dueDateReason"></span>
+                    </div>
                     <span id="dueDateError" class="task-form__error" aria-live="polite"></span>
                   </div>
                 </div>
