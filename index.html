@@ -326,10 +326,18 @@
           <kbd class="header__search-kbd">⌘/</kbd>
         </div>
         <!-- Notification bell -->
-        <button class="header__icon-btn" aria-label="Notifications" style="background:none;border:none;cursor:pointer;padding:8px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;transition:all 0.25s ease;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="header__notif-dot"></span>
-        </button>
+        <div class="header__notif-wrapper" style="position:relative;">
+          <button class="header__icon-btn" id="notifBellBtn" aria-label="Notifications" style="background:none;border:none;cursor:pointer;padding:8px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;transition:all 0.25s ease;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="header__notif-dot"></span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown" style="display:none;position:absolute;top:calc(100% + 8px);right:0;width:320px;background:#fffdf8;border:1px solid #e6dcc0;border-radius:12px;box-shadow:0 12px 32px rgba(32,30,27,0.12);z-index:1000;overflow:hidden;">
+            <div style="padding:12px 16px;border-bottom:1px solid #f3ecdb;font-weight:600;font-size:0.875rem;color:#423c2e;">Notifications</div>
+            <div id="notifList" style="max-height:300px;overflow-y:auto;">
+              <div style="padding:16px;text-align:center;color:#a89b78;font-size:0.875rem;">No new notifications</div>
+            </div>
+          </div>
+        </div>
         <span class="header__user-name" id="headerUserName"></span>
         <button id="headerSignoutBtn" class="pm-btn pm-btn--danger pm-btn--small">Sign Out</button>
         <div class="header__avatar" aria-label="User avatar">
@@ -805,14 +813,14 @@
             </div>
             <div class="panel__body">
               <div class="quick-actions-grid">
-                <button class="quick-action-card quick-action-card--project" onclick="navigateTo('projects')">
+                <button class="quick-action-card quick-action-card--project" onclick="window.createQuickProject()">
                   <div class="quick-action-card__icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7C3 5.89543 3.89543 5 5 5H9L11 8H19C20.1046 8 21 8.89543 21 10V17C21 18.1046 20.1046 19 19 19H5C3.89543 19 3 18.1046 3 17V7Z"/></svg>
                   </div>
                   <span class="quick-action-card__label">New Project</span>
-                  <span class="quick-action-card__desc">Start a workspace</span>
+                  <span class="quick-action-card__desc">Create a new project</span>
                 </button>
-                <button class="quick-action-card quick-action-card--task" onclick="window.showCreateTaskForm ? window.showCreateTaskForm() : navigateTo('tasks')">
+                <button class="quick-action-card quick-action-card--task" onclick="window.showCreateTaskForm ? window.showCreateTaskForm() : (function(){ window.navigateTo('tasks'); setTimeout(function(){ if(window.showCreateTaskForm) window.showCreateTaskForm(); },500); })()">
                   <div class="quick-action-card__icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </div>
@@ -840,12 +848,12 @@
                   <span class="quick-action-card__label">Open Board</span>
                   <span class="quick-action-card__desc">Kanban view</span>
                 </button>
-                <button class="quick-action-card quick-action-card--upload" onclick="navigateTo('activity')">
+                <button class="quick-action-card quick-action-card--activity" onclick="navigateTo('activity')">
                   <div class="quick-action-card__icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                   </div>
-                  <span class="quick-action-card__label">Upload Files</span>
-                  <span class="quick-action-card__desc">Share documents</span>
+                  <span class="quick-action-card__label">Activity Log</span>
+                  <span class="quick-action-card__desc">View recent updates</span>
                 </button>
               </div>
             </div>
@@ -1873,6 +1881,77 @@
       }
     })();
 
+    // Notification bell toggle
+    (function () {
+      var bell = document.getElementById('notifBellBtn');
+      var dropdown = document.getElementById('notifDropdown');
+      if (bell && dropdown) {
+        bell.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var isOpen = dropdown.style.display !== 'none';
+          dropdown.style.display = isOpen ? 'none' : 'block';
+        });
+        document.addEventListener('click', function () {
+          dropdown.style.display = 'none';
+        });
+        dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+      }
+    })();
+
+    // Make search functional
+    (function () {
+      var searchEl = document.querySelector('.header__search-placeholder');
+      if (!searchEl) return;
+      var origContent = searchEl.innerHTML;
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Search tasks...';
+      input.style.cssText = 'width:100%;border:none;background:transparent;outline:none;font-family:inherit;font-size:0.875rem;color:#423c2e;';
+      var resultsBox = document.createElement('div');
+      resultsBox.style.cssText = 'display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fffdf8;border:1px solid #e6dcc0;border-radius:8px;box-shadow:0 8px 24px rgba(32,30,27,0.1);z-index:1000;max-height:240px;overflow-y:auto;font-size:0.875rem;';
+      var wrapper = document.createElement('div');
+      wrapper.style.cssText = 'position:relative;flex:1;';
+      searchEl.innerHTML = '';
+      searchEl.style.cursor = 'default';
+      searchEl.appendChild(input);
+      searchEl.appendChild(resultsBox);
+      searchEl.style.position = 'relative';
+      searchEl.style.flex = '1';
+
+      input.addEventListener('input', function () {
+        var q = input.value.trim();
+        if (!q || q.length < 2) { resultsBox.style.display = 'none'; return; }
+        var tasks = (window.DataStore && DataStore.getTasks()) || [];
+        var matches = tasks.filter(function (t) {
+          return t.title && t.title.toLowerCase().includes(q.toLowerCase());
+        }).slice(0, 8);
+        if (matches.length === 0) {
+          resultsBox.innerHTML = '<div style="padding:12px 16px;color:#a89b78;">No tasks found</div>';
+          resultsBox.style.display = 'block';
+          return;
+        }
+        var html = '';
+        matches.forEach(function (t) {
+          var statusColors = { 'Todo':'#d3c4a0', 'In Progress':'#B6CAED', 'Review':'#F6D868', 'Done':'#9AAA63' };
+          var c = statusColors[t.status] || '#d3c4a0';
+          html += '<div style="padding:10px 16px;border-bottom:1px solid #f3ecdb;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background=\'#faf6ec\'" onmouseout="this.style.background=\'\'" onclick="window.navigateTo(\'tasks\')">' +
+            '<div style="font-weight:500;color:#2c2820;">' + t.title.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), function(m) { return '<strong>' + m + '</strong>'; }) + '</div>' +
+            '<div style="display:flex;gap:8px;margin-top:4px;"><span style="font-size:0.75rem;padding:1px 6px;border-radius:4px;background:' + c + '20;color:' + c + ';font-weight:500;">' + (t.status || '') + '</span>' +
+            '<span style="font-size:0.75rem;color:#a89b78;">' + (t.dueDate || 'No due date') + '</span></div></div>';
+        });
+        resultsBox.innerHTML = html;
+        resultsBox.style.display = 'block';
+      });
+
+      input.addEventListener('blur', function () {
+        setTimeout(function () { resultsBox.style.display = 'none'; }, 200);
+      });
+
+      input.addEventListener('focus', function () {
+        if (input.value.trim().length >= 2) resultsBox.style.display = 'block';
+      });
+    })();
+
     // Global navigation helper (used by quick action cards)
     window.navigateTo = function (section) {
       var navMap = {
@@ -1895,6 +1974,15 @@
 
     window.createQuickProject = function () {
       window.navigateTo('projects');
+      setTimeout(function () {
+        var createBtn = document.querySelector('.pm-btn--primary, [class*="create-project"], #projects-section .btn-primary, .project-form__submit');
+        if (!createBtn) {
+          var addBtn = document.querySelector('#projects-section button:first-child, .projects__header button, [onclick*="create"], [onclick*="add"]');
+          if (addBtn) addBtn.click();
+        }
+        var nameInput = document.querySelector('#projects-section input[type="text"], #projects-section [name="name"], #projects-section [name="projectName"]');
+        if (nameInput) nameInput.focus();
+      }, 300);
     };
 
     window.viewReports = function () {
