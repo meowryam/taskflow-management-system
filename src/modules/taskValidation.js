@@ -48,7 +48,6 @@ export function validateTaskInput(input, availableProjects, availableMembers, to
 
   if (!input.startDate) errors.startDate = 'Start date is required.';
   else if (!isRealIsoDate(input.startDate)) errors.startDate = 'Enter a valid start date.';
-  else if (input.startDate < today) errors.startDate = 'Start date cannot be before today.';
 
   if (!input.dueDate) errors.dueDate = 'Due date is required.';
   else if (!isRealIsoDate(input.dueDate)) errors.dueDate = 'Enter a valid due date.';
