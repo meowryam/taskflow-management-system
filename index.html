@@ -1658,11 +1658,18 @@
 
       /* ---- Create Task button inside tasks view ---- */
       document.addEventListener('click', function (e) {
-        if (e.target.id === 'goToCreateTask') {
-          e.preventDefault();
-          if (typeof window.showCreateTaskForm === 'function') {
-            window.showCreateTaskForm();
-          }
+        if (!e.target.closest('#goToCreateTask')) return;
+        e.preventDefault();
+        if (typeof window.showCreateTaskForm === 'function') {
+          window.showCreateTaskForm();
+        } else {
+          alert(
+            'Task creation could not load.\n\n' +
+            'Do not open index.html by double-clicking it.\n' +
+            'Run this in the project folder:\n\n' +
+            '  python3 -m http.server 8000\n\n' +
+            'Then open: http://localhost:8000/index.html'
+          );
         }
       });
 
