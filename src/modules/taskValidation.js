@@ -18,6 +18,7 @@ function isRealIsoDate(value) {
 export function validateTaskInput(input, availableProjects, availableMembers, today = getTodayIso()) {
   const errors = {};
   const projectIds = new Set(availableProjects.map((project) => String(project.id)));
+  const selectedProject = availableProjects.find((project) => String(project.id) === input.projectId);
   const memberIds = new Set(availableMembers.map((member) => String(member.id)));
   const selectedMemberIds = Array.isArray(input.assignedMemberIds)
     ? input.assignedMemberIds.filter(Boolean)
@@ -48,6 +49,11 @@ export function validateTaskInput(input, availableProjects, availableMembers, to
 
   if (!input.startDate) errors.startDate = 'Start date is required.';
   else if (!isRealIsoDate(input.startDate)) errors.startDate = 'Enter a valid start date.';
+  else if (selectedProject
+    && isRealIsoDate(String(selectedProject.startDate || ''))
+    && input.startDate < selectedProject.startDate) {
+    errors.startDate = `Start date cannot be before the project start date (${selectedProject.startDate}).`;
+  }
 
   if (!input.dueDate) errors.dueDate = 'Due date is required.';
   else if (!isRealIsoDate(input.dueDate)) errors.dueDate = 'Enter a valid due date.';
