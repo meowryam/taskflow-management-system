@@ -1934,7 +1934,8 @@
         matches.forEach(function (t) {
           var statusColors = { 'Todo':'#d3c4a0', 'In Progress':'#B6CAED', 'Review':'#F6D868', 'Done':'#9AAA63' };
           var c = statusColors[t.status] || '#d3c4a0';
-          html += '<div style="padding:10px 16px;border-bottom:1px solid #f3ecdb;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background=\'#faf6ec\'" onmouseout="this.style.background=\'\'" onclick="window.navigateTo(\'tasks\')">' +
+          var taskTitle = (t.title || '').replace(/'/g, "\\'");
+          html += '<div style="padding:10px 16px;border-bottom:1px solid #f3ecdb;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background=\'#faf6ec\'" onmouseout="this.style.background=\'\'" onclick="window.navigateTo(\'tasks\');setTimeout(function(){if(window.setTaskSearchQuery)window.setTaskSearchQuery(\'' + taskTitle + '\');},300)">' +
             '<div style="font-weight:500;color:#2c2820;">' + t.title.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), function(m) { return '<strong>' + m + '</strong>'; }) + '</div>' +
             '<div style="display:flex;gap:8px;margin-top:4px;"><span style="font-size:0.75rem;padding:1px 6px;border-radius:4px;background:' + c + '20;color:' + c + ';font-weight:500;">' + (t.status || '') + '</span>' +
             '<span style="font-size:0.75rem;color:#a89b78;">' + (t.dueDate || 'No due date') + '</span></div></div>';
