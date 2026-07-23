@@ -123,7 +123,7 @@
         '<span class="task-card__badge task-card__priority task-card__priority--' + priorityClass + '">' + priorityIcon(task.priority) + escapeHtml(task.priority) + '</span>' +
       '</div>' +
       '<div class="task-card__schedule">' +
-        '<span><strong>Created</strong>' + escapeHtml(task.startDate || (task.createdAt || '').slice(0, 10) || '—') + '</span>' +
+        '<span><strong>Starts</strong>' + escapeHtml(task.startDate || (task.createdAt || '').slice(0, 10) || '—') + '</span>' +
         '<span><strong>Due</strong>' + escapeHtml(task.dueDate || '—') + '</span>' +
       '</div>' +
       '<div class="task-card__members">' + createMemberMarkup(members) + '</div>';

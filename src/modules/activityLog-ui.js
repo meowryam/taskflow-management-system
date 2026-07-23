@@ -573,9 +573,10 @@ const ActivityLogUI = (function () {
     }
   }
 
-  if (typeof document !== 'undefined' && typeof ActivityLog !== 'undefined') {
-    document.addEventListener(ActivityLog.ACTIVITY_CHANGED_EVENT, function () {
+  if (typeof window !== 'undefined' && typeof ActivityLog !== 'undefined') {
+    window.addEventListener(ActivityLog.ACTIVITY_CHANGED_EVENT, function () {
       refreshMountedPage();
+      renderDashboardFeed();
     });
   }
 

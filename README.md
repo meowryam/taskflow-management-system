@@ -27,11 +27,12 @@
 git clone https://github.com/meowryam/taskflow-management-system.git
 cd taskflow-management-system
 
-# No build step, no dependencies. Just open it.
-open index.html
+# No build step. Serve locally so ES modules (task creation) load correctly.
+python3 -m http.server 8000
+# Then open http://localhost:8000/index.html
 ```
 
-> 💡 TaskFlow runs entirely in the browser with zero setup. No npm install, no server, no configuration files. Clone it and go.
+> TaskFlow runs in the browser with LocalStorage. Task creation uses ES modules, so open the app through a local HTTP server rather than double-clicking `index.html`.
 
 ---
 
@@ -186,10 +187,17 @@ cd taskflow-management-system
 <summary><b>2️⃣ Open the app</b></summary>
 <br/>
 
-Simply open `index.html` in your browser, either by double clicking the file or serving it locally:
+Simply serve the project locally and open the app in your browser:
 
 ```bash
-# Optional: serve locally for a cleaner experience
+python3 -m http.server 8000
+# Open http://localhost:8000/index.html
+```
+
+Task creation relies on ES modules, which browsers block on the `file://` protocol. Use a local server instead of double-clicking `index.html`.
+
+```bash
+# Alternative
 npx serve .
 ```
 

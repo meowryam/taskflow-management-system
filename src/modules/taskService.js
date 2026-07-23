@@ -47,15 +47,15 @@ function resolveTaskValues(input, projects, members) {
   };
 }
 
-function prepareTask(input, projects, members, now) {
+function prepareTask(input, projects, members, creationDate) {
   const normalizedInput = normalizeTaskInput(input);
-  const validation = validateTaskInput(normalizedInput, projects, members, getTodayIso(now));
+  const validation = validateTaskInput(normalizedInput, projects, members, creationDate);
   if (!validation.isValid) return { values: null, ...validation };
   return { values: resolveTaskValues(normalizedInput, projects, members), isValid: true, errors: {} };
 }
 
 export function createTask(input, projects, members, now = new Date()) {
-  const prepared = prepareTask({ ...input, startDate: getTodayIso(now) }, projects, members, now);
+  const prepared = prepareTask(input, projects, members, getTodayIso(now));
   if (!prepared.isValid) return { task: null, ...prepared };
   const timestamp = now.toISOString();
   const task = {
@@ -76,10 +76,8 @@ export function createTask(input, projects, members, now = new Date()) {
 export function editTask(taskId, input, projects, members, now = new Date()) {
   const existingTask = globalThis.DataStore.getTaskById(taskId);
   if (!existingTask) return { task: null, isValid: false, errors: { form: 'Task not found.' } };
-  const preservedStartDate = existingTask.startDate
-    || existingTask.createdAt?.slice(0, 10)
-    || getTodayIso(now);
-  const prepared = prepareTask({ ...input, startDate: preservedStartDate }, projects, members, now);
+  const creationDate = existingTask.createdAt?.slice(0, 10) || getTodayIso(now);
+  const prepared = prepareTask(input, projects, members, creationDate);
   if (!prepared.isValid) return { task: null, ...prepared };
 
   const changes = {
@@ -104,6 +102,7 @@ export function normalizeTaskForEditing(task, today = getTodayIso()) {
     projectId: task.projectId == null ? '' : String(task.projectId),
     memberCount: Math.max(1, assignedMemberIds.length),
     assignedMemberIds: assignedMemberIds.map(String),
+    creationDate: task.createdAt?.slice(0, 10) || today,
     startDate: task.startDate || task.createdAt?.slice(0, 10) || today,
     dueDate: task.dueDate || '',
     priority: task.priority || '',

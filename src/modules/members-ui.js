@@ -314,8 +314,8 @@
             .join("")}
         </div>`;
 
-    section.innerHTML = `
-      <div class="members-view">
+    const formCard = canManage
+      ? `
         <div class="widget-card">
           <div class="widget-card__header">
             <div class="widget-card__title">
@@ -346,7 +346,12 @@
               </div>
             </form>
           </div>
-        </div>
+        </div>`
+      : "";
+
+    section.innerHTML = `
+      <div class="members-view">
+        ${formCard}
 
         <div class="widget-card">
           <div class="widget-card__header">
@@ -512,5 +517,7 @@
     // are needed anymore.
     const membersNav = document.getElementById("nav-members");
     if (membersNav) membersNav.addEventListener("click", showMembers);
+
+    window.renderMembersPage = renderMembers;
   });
 })();

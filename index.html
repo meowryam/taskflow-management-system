@@ -36,7 +36,7 @@
       cursor: pointer; border: 1px solid transparent; transition: 0.15s ease;
     }
     .pm-btn--primary {
-      background: var(--color-primary, #6b7a3a); color: #fff; border-color: var(--color-primary, #6b7a3a);
+      background: var(--color-primary, #9AAA63); color: #fff; border-color: var(--color-primary, #9AAA63);
     }
     .pm-btn--primary:hover { opacity: 0.9; }
     .pm-btn--secondary {
@@ -102,7 +102,7 @@
     .tasks-view__header h2 { margin: 0; font-size: var(--font-size-xl, 1.5rem); }
     .tasks-view__create-btn {
       padding: 8px 18px; border-radius: 6px; font-size: 14px; font-weight: 600;
-      cursor: pointer; background: var(--color-primary, #6b4f2a); color: #fff;
+      cursor: pointer; background: var(--color-primary, #9AAA63); color: #fff;
       border: none; transition: 0.15s ease;
     }
     .tasks-view__create-btn:hover { opacity: 0.9; }
@@ -177,7 +177,7 @@
               </svg>
             </span>
             <span class="sidebar__label">Dashboard</span>
-            <span class="sidebar__badge">3</span>
+            <span class="sidebar__badge" id="navDashboardBadge">—</span>
           </a>
         </li>
         <li class="sidebar__item" id="nav-projects">
@@ -199,7 +199,7 @@
               </svg>
             </span>
             <span class="sidebar__label">Tasks</span>
-            <span class="sidebar__badge sidebar__badge--warn">5</span>
+            <span class="sidebar__badge sidebar__badge--warn" id="navTasksBadge">—</span>
           </a>
         </li>
         <li class="sidebar__item" id="nav-board">
@@ -280,8 +280,8 @@
         </svg>
       </div>
       <div class="sidebar__user-info">
-        <span class="sidebar__user-name" id="sidebarUserName">Admin User</span>
-        <span class="sidebar__user-role">Administrator</span>
+        <span class="sidebar__user-name" id="sidebarUserName">—</span>
+        <span class="sidebar__user-role" id="sidebarUserRole">—</span>
       </div>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar__user-chevron"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
@@ -316,7 +316,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           <span class="header__breadcrumb-item header__breadcrumb-item--active">Dashboard</span>
         </nav>
-        <h1 class="header__title" style="display:none;">Dashboard</h1>
+        <h1 class="header__title">Dashboard</h1>
       </div>
 
       <div class="header__right">
@@ -421,7 +421,7 @@
               </div>
               <span class="stat-card__trend stat-card__trend--up">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                +8%
+                —
               </span>
             </div>
             <h3 class="stat-card__value" id="statTotalProjects">0</h3>
@@ -445,7 +445,7 @@
               </div>
               <span class="stat-card__trend stat-card__trend--up">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                +12%
+                —
               </span>
             </div>
             <h3 class="stat-card__value" id="statActiveTasks">0</h3>
@@ -471,7 +471,7 @@
               </div>
               <span class="stat-card__trend stat-card__trend--up">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                +5%
+                —
               </span>
             </div>
             <h3 class="stat-card__value" id="statTeamMembers">0</h3>
@@ -495,7 +495,7 @@
               </div>
               <span class="stat-card__trend stat-card__trend--up">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                +24%
+                —
               </span>
             </div>
             <h3 class="stat-card__value" id="statCompletedWeek">0</h3>
@@ -520,7 +520,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#9AAA63;margin-right:8px;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                 Overall Progress
               </h3>
-              <span class="progress-panel__percentage" id="progressPercentage">68%</span>
+              <span class="progress-panel__percentage" id="progressPercentage">—%</span>
             </div>
             <div class="progress-bar">
               <div class="progress-bar__fill progress-bar__fill--animate" data-target="68"></div>
@@ -529,17 +529,17 @@
               <div class="progress-stat">
                 <span class="progress-stat__dot progress-stat__dot--done"></span>
                 <span class="progress-stat__label">Done</span>
-                <span class="progress-stat__value" id="progressDoneCount">12</span>
+                 <span class="progress-stat__value" id="progressDoneCount">—</span>
               </div>
               <div class="progress-stat">
                 <span class="progress-stat__dot progress-stat__dot--active"></span>
                 <span class="progress-stat__label">Active</span>
-                <span class="progress-stat__value" id="progressActiveCount">5</span>
+                 <span class="progress-stat__value" id="progressActiveCount">—</span>
               </div>
               <div class="progress-stat">
                 <span class="progress-stat__dot progress-stat__dot--pending"></span>
                 <span class="progress-stat__label">Pending</span>
-                <span class="progress-stat__value" id="progressPendingCount">8</span>
+                 <span class="progress-stat__value" id="progressPendingCount">—</span>
               </div>
             </div>
           </div>
@@ -560,15 +560,7 @@
               <span class="widget-card__badge">This Week</span>
             </div>
             <div class="widget-card__body">
-              <div class="weekly-chart" id="weeklyChart">
-                <div class="weekly-chart__bar-group"><div class="weekly-chart__bar" style="height:40%"></div><span class="weekly-chart__label">Mon</span><span class="weekly-chart__value">4</span></div>
-                <div class="weekly-chart__bar-group"><div class="weekly-chart__bar weekly-chart__bar--pink" style="height:65%"></div><span class="weekly-chart__label">Tue</span><span class="weekly-chart__value">7</span></div>
-                <div class="weekly-chart__bar-group"><div class="weekly-chart__bar weekly-chart__bar--blue" style="height:50%"></div><span class="weekly-chart__label">Wed</span><span class="weekly-chart__value">5</span></div>
-                <div class="weekly-chart__bar-group"><div class="weekly-chart__bar weekly-chart__bar--today" style="height:85%"></div><span class="weekly-chart__label">Thu</span><span class="weekly-chart__value">9</span></div>
-                <div class="weekly-chart__bar-group"><div class="weekly-chart__bar weekly-chart__bar--yellow" style="height:30%"></div><span class="weekly-chart__label">Fri</span><span class="weekly-chart__value">3</span></div>
-                <div class="weekly-chart__bar-group"><div class="weekly-chart__bar" style="height:20%"></div><span class="weekly-chart__label">Sat</span><span class="weekly-chart__value">2</span></div>
-                <div class="weekly-chart__bar-group"><div class="weekly-chart__bar weekly-chart__bar--pink" style="height:15%"></div><span class="weekly-chart__label">Sun</span><span class="weekly-chart__value">1</span></div>
-              </div>
+              <div class="weekly-chart" id="weeklyChart"></div>
             </div>
           </article>
 
@@ -586,29 +578,17 @@
                 <div class="donut-chart">
                   <svg viewBox="0 0 36 36">
                     <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(154,170,99,0.08)" stroke-width="4"/>
-                    <circle cx="18" cy="18" r="15" fill="none" stroke="#9AAA63" stroke-width="4" stroke-dasharray="60 100" stroke-dashoffset="25" stroke-linecap="round">
-                      <animate attributeName="stroke-dashoffset" from="100" to="25" dur="1.2s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
-                    </circle>
-                    <circle cx="18" cy="18" r="15" fill="none" stroke="#F3B7DA" stroke-width="4" stroke-dasharray="35 100" stroke-dashoffset="-35" stroke-linecap="round">
-                      <animate attributeName="stroke-dashoffset" from="100" to="-35" dur="1.2s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
-                    </circle>
-                    <circle cx="18" cy="18" r="15" fill="none" stroke="#B6CAED" stroke-width="4" stroke-dasharray="25 100" stroke-dashoffset="-70" stroke-linecap="round">
-                      <animate attributeName="stroke-dashoffset" from="100" to="-70" dur="1.2s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
-                    </circle>
-                    <circle cx="18" cy="18" r="15" fill="none" stroke="#F6D868" stroke-width="4" stroke-dasharray="15 100" stroke-dashoffset="-95" stroke-linecap="round">
-                      <animate attributeName="stroke-dashoffset" from="100" to="-95" dur="1.2s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
-                    </circle>
                   </svg>
                   <div class="donut-chart__center">
-                    <span class="donut-chart__total" id="donutTotal">25</span>
+                    <span class="donut-chart__total" id="donutTotal">—</span>
                     <span class="donut-chart__total-label">total</span>
                   </div>
                 </div>
                 <div class="donut-legend">
-                  <div class="donut-legend__item"><span class="donut-legend__dot" style="background:#9AAA63"></span> Done <span class="donut-legend__count" id="donutDone">12</span></div>
-                  <div class="donut-legend__item"><span class="donut-legend__dot" style="background:#F3B7DA"></span> In Progress <span class="donut-legend__count" id="donutProgress">7</span></div>
-                  <div class="donut-legend__item"><span class="donut-legend__dot" style="background:#B6CAED"></span> Review <span class="donut-legend__count" id="donutReview">4</span></div>
-                  <div class="donut-legend__item"><span class="donut-legend__dot" style="background:#F6D868"></span> Todo <span class="donut-legend__count" id="donutTodo">2</span></div>
+                  <div class="donut-legend__item"><span class="donut-legend__dot" style="background:#9AAA63"></span> Done <span class="donut-legend__count" id="donutDone">—</span></div>
+                  <div class="donut-legend__item"><span class="donut-legend__dot" style="background:#F3B7DA"></span> In Progress <span class="donut-legend__count" id="donutProgress">—</span></div>
+                  <div class="donut-legend__item"><span class="donut-legend__dot" style="background:#B6CAED"></span> Review <span class="donut-legend__count" id="donutReview">—</span></div>
+                  <div class="donut-legend__item"><span class="donut-legend__dot" style="background:#F6D868"></span> Todo <span class="donut-legend__count" id="donutTodo">—</span></div>
                 </div>
               </div>
             </div>
@@ -621,41 +601,10 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/></svg>
                 Upcoming Deadlines
               </h3>
-              <span class="widget-card__badge" id="deadlineCount">3 deadlines</span>
+              <span class="widget-card__badge" id="deadlineCount">0 deadlines</span>
             </div>
             <div class="widget-card__body">
-              <div class="deadline-list" id="deadlineList">
-                <div class="deadline-item">
-                  <div class="deadline-item__icon deadline-item__icon--urgent">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                  </div>
-                  <div class="deadline-item__info">
-                    <div class="deadline-item__name">Q3 Design Review</div>
-                    <div class="deadline-item__date">Tomorrow · 2:00 PM</div>
-                  </div>
-                  <span class="deadline-item__countdown deadline-item__countdown--urgent">1 day</span>
-                </div>
-                <div class="deadline-item">
-                  <div class="deadline-item__icon deadline-item__icon--soon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  </div>
-                  <div class="deadline-item__info">
-                    <div class="deadline-item__name">API Integration Sprint</div>
-                    <div class="deadline-item__date">Jul 28 · 10:00 AM</div>
-                  </div>
-                  <span class="deadline-item__countdown deadline-item__countdown--soon">5 days</span>
-                </div>
-                <div class="deadline-item">
-                  <div class="deadline-item__icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/></svg>
-                  </div>
-                  <div class="deadline-item__info">
-                    <div class="deadline-item__name">Monthly Report</div>
-                    <div class="deadline-item__date">Aug 1 · 5:00 PM</div>
-                  </div>
-                  <span class="deadline-item__countdown deadline-item__countdown--normal">9 days</span>
-                </div>
-              </div>
+              <div class="deadline-list" id="deadlineList"></div>
             </div>
           </article>
 
@@ -666,39 +615,10 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Team Members
               </h3>
-              <span class="widget-card__badge" id="teamOnlineBadge">3 online</span>
+              <span class="widget-card__badge" id="teamOnlineBadge">0 members</span>
             </div>
             <div class="widget-card__body">
-              <div class="team-online-list" id="teamList">
-                <div class="team-member-row">
-                  <div class="team-member-row__avatar team-member-row__avatar--online" style="background:linear-gradient(135deg,#9AAA63,#b8c88a)">AS</div>
-                  <div class="team-member-row__info">
-                    <div class="team-member-row__name">Alicia Stone</div>
-                    <div class="team-member-row__role">Product Manager</div>
-                  </div>
-                </div>
-                <div class="team-member-row">
-                  <div class="team-member-row__avatar team-member-row__avatar--online" style="background:linear-gradient(135deg,#B6CAED,#cedcf3)">RK</div>
-                  <div class="team-member-row__info">
-                    <div class="team-member-row__name">Ravi Kumar</div>
-                    <div class="team-member-row__role">Lead Developer</div>
-                  </div>
-                </div>
-                <div class="team-member-row">
-                  <div class="team-member-row__avatar team-member-row__avatar--online" style="background:linear-gradient(135deg,#F3B7DA,#f8cfe7)">MP</div>
-                  <div class="team-member-row__info">
-                    <div class="team-member-row__name">Maria Perez</div>
-                    <div class="team-member-row__role">UI Designer</div>
-                  </div>
-                </div>
-                <div class="team-member-row">
-                  <div class="team-member-row__avatar team-member-row__avatar--busy" style="background:linear-gradient(135deg,#F6D868,#f9e494)">JL</div>
-                  <div class="team-member-row__info">
-                    <div class="team-member-row__name">James Liu</div>
-                    <div class="team-member-row__role">QA Engineer</div>
-                  </div>
-                </div>
-              </div>
+              <div class="team-online-list" id="teamList"></div>
             </div>
           </article>
 
@@ -712,44 +632,7 @@
               <span class="widget-card__badge">Active</span>
             </div>
             <div class="widget-card__body">
-              <div class="project-progress-list" id="projectProgressList">
-                <div class="project-progress-item">
-                  <div class="project-progress-item__header">
-                    <span class="project-progress-item__name">Mobile App Redesign</span>
-                    <span class="project-progress-item__pct">85%</span>
-                  </div>
-                  <div class="project-progress-item__bar">
-                    <div class="project-progress-item__fill" style="width:85%"></div>
-                  </div>
-                </div>
-                <div class="project-progress-item">
-                  <div class="project-progress-item__header">
-                    <span class="project-progress-item__name">Backend Migration</span>
-                    <span class="project-progress-item__pct">62%</span>
-                  </div>
-                  <div class="project-progress-item__bar">
-                    <div class="project-progress-item__fill" style="width:62%"></div>
-                  </div>
-                </div>
-                <div class="project-progress-item">
-                  <div class="project-progress-item__header">
-                    <span class="project-progress-item__name">Marketing Landing Page</span>
-                    <span class="project-progress-item__pct">40%</span>
-                  </div>
-                  <div class="project-progress-item__bar">
-                    <div class="project-progress-item__fill" style="width:40%"></div>
-                  </div>
-                </div>
-                <div class="project-progress-item">
-                  <div class="project-progress-item__header">
-                    <span class="project-progress-item__name">API v2 Development</span>
-                    <span class="project-progress-item__pct">28%</span>
-                  </div>
-                  <div class="project-progress-item__bar">
-                    <div class="project-progress-item__fill" style="width:28%"></div>
-                  </div>
-                </div>
-              </div>
+              <div class="project-progress-list" id="projectProgressList"></div>
             </div>
           </article>
 
@@ -848,7 +731,7 @@
                   <span class="quick-action-card__label">Open Board</span>
                   <span class="quick-action-card__desc">Kanban view</span>
                 </button>
-                <button class="quick-action-card quick-action-card--upload" onclick="navigateTo('activity')">
+                <button class="quick-action-card quick-action-card--activity" onclick="navigateTo('activity')">
                   <div class="quick-action-card__icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                   </div>
@@ -910,15 +793,34 @@
             <div class="task-form__field task-form__field--wide">
               <fieldset class="task-form__date-group">
                 <legend>Task Schedule</legend>
+                <div class="task-form__field task-form__field--meta">
+                  <label for="taskCreationDate">Creation Date</label>
+                  <input id="taskCreationDate" name="creationDate" type="date" readonly aria-readonly="true" />
+                  <span class="task-form__hint">Auto-filled</span>
+                </div>
                 <div class="task-form__date-fields">
-                  <div class="task-form__field task-form__field--meta">
-                    <label for="taskStartDate">Creation Date</label>
-                    <input id="taskStartDate" name="startDate" type="date" aria-describedby="startDateError" readonly />
+                  <div class="task-form__field">
+                    <label class="task-form__date-label" for="taskStartDate">
+                      Start Date
+                      <span class="task-form__required">Required</span>
+                    </label>
+                    <input id="taskStartDate" name="startDate" type="date" aria-describedby="startDateHint startDateError" />
+                    <div id="startDateHint" class="task-form__date-guidance" aria-live="polite">
+                      <strong id="startDateRule"></strong>
+                      <span id="startDateReason"></span>
+                    </div>
                     <span id="startDateError" class="task-form__error" aria-live="polite"></span>
                   </div>
                   <div class="task-form__field">
-                    <label for="taskDueDate">Due Date</label>
-                    <input id="taskDueDate" name="dueDate" type="date" aria-describedby="dueDateError" />
+                    <label class="task-form__date-label" for="taskDueDate">
+                      Due Date
+                      <span class="task-form__required">Required</span>
+                    </label>
+                    <input id="taskDueDate" name="dueDate" type="date" aria-describedby="dueDateHint dueDateError" />
+                    <div id="dueDateHint" class="task-form__date-guidance" aria-live="polite">
+                      <strong id="dueDateRule"></strong>
+                      <span id="dueDateReason"></span>
+                    </div>
                     <span id="dueDateError" class="task-form__error" aria-live="polite"></span>
                   </div>
                 </div>
@@ -1197,7 +1099,7 @@
           </div>
 
           <!-- Header -->
-          <div class="reports__header" id="rptStatsSection">
+          <div class="reports__header" id="rptHeaderSection">
             <div class="reports__header-left">
               <h2>Reports</h2>
               <div class="reports__header-subtitle">
@@ -1357,7 +1259,7 @@
             </div>
             <div class="reports__exec-content" id="rptExecContent"></div>
             <div class="reports__exec-health" id="rptExecHealth"></div>
-            <div id="rptExecSummary" style="text-align:center;color:rgba(44,40,32,0.4);font-size:0.8rem;margin-top:10px;"></div>
+            <div id="rptExecSummary" style="text-align:left;color:rgba(44,40,32,0.5);font-size:0.82rem;line-height:1.6;margin-top:6px;padding:0 4px;"></div>
           </div>
 
           <!-- Delivery Analytics -->
@@ -1373,7 +1275,7 @@
           </div>
 
           <!-- Filters -->
-          <div class="reports__filters" id="rptFilters">
+          <!-- <div class="reports__filters" id="rptFilters">
             <div class="reports__filter-group reports__filter-group--wide">
               <label class="reports__filter-label" for="rptFilterSearch">Search</label>
               <input type="text" id="rptFilterSearch" class="reports__filter-input" placeholder="Search by task title...">
@@ -1435,7 +1337,7 @@
               <label class="reports__filter-label">&nbsp;</label>
               <button class="reports__filter-clear-btn" id="rptClearFilters" type="button">Clear Filters</button>
             </div>
-          </div>
+          </div> -->
 
           <!-- Charts Section -->
           <div id="rptChartsSection">
@@ -1765,15 +1667,27 @@
             activityLogMounted = true;
           }
         }
+
+        /* Render members list when navigating to Team Members */
+        if (route.init === 'members' && typeof window.renderMembersPage === 'function') {
+          window.renderMembersPage();
+        }
       }
 
       /* ---- Create Task button inside tasks view ---- */
       document.addEventListener('click', function (e) {
-        if (e.target.id === 'goToCreateTask') {
-          e.preventDefault();
-          if (typeof window.showCreateTaskForm === 'function') {
-            window.showCreateTaskForm();
-          }
+        if (!e.target.closest('#goToCreateTask')) return;
+        e.preventDefault();
+        if (typeof window.showCreateTaskForm === 'function') {
+          window.showCreateTaskForm();
+        } else {
+          alert(
+            'Task creation could not load.\n\n' +
+            'Do not open index.html by double-clicking it.\n' +
+            'Run this in the project folder:\n\n' +
+            '  python3 -m http.server 8000\n\n' +
+            'Then open: http://localhost:8000/index.html'
+          );
         }
       });
 
@@ -1831,7 +1745,6 @@
 
   <!-- Standalone feature -->
   <script src="src/modules/promptBuilder.js"></script>
-  <script src="src/modules/activityLog.js"></script>
   <script src="src/modules/dashboard.js"></script>
   <script src="src/modules/reports.js"></script>
 
@@ -1853,23 +1766,6 @@
         lucide.createIcons();
       }
 
-      // Theme toggle
-      var themeToggle = document.getElementById('themeToggle');
-      if (themeToggle) {
-        themeToggle.addEventListener('click', function () {
-          var html = document.documentElement;
-          var current = html.getAttribute('data-theme') || 'light';
-          var next = current === 'dark' ? 'light' : 'dark';
-          html.setAttribute('data-theme', next);
-          localStorage.setItem('taskflow-theme', next);
-        });
-        // Restore saved theme
-        var saved = localStorage.getItem('taskflow-theme');
-        if (saved) {
-          document.documentElement.setAttribute('data-theme', saved);
-        }
-      }
-
       // Activity count update
       var activityTimeline = document.getElementById('activityTimeline');
       var activityCount = document.getElementById('activityCount');
@@ -1881,21 +1777,126 @@
       }
     })();
 
-    // Notification bell toggle
+    // Dynamic notification bell
     (function () {
       var bell = document.getElementById('notifBellBtn');
       var dropdown = document.getElementById('notifDropdown');
-      if (bell && dropdown) {
-        bell.addEventListener('click', function (e) {
-          e.stopPropagation();
-          var isOpen = dropdown.style.display !== 'none';
-          dropdown.style.display = isOpen ? 'none' : 'block';
-        });
-        document.addEventListener('click', function () {
-          dropdown.style.display = 'none';
-        });
-        dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+      var notifList = document.getElementById('notifList');
+      var notifDot = document.querySelector('.header__notif-dot');
+      if (!bell || !dropdown || !notifList) return;
+
+      var lastNotifCount = -1;
+
+      function getRelativeTime(dateStr) {
+        if (!dateStr) return '';
+        var now = new Date();
+        var d = new Date(dateStr);
+        var diffMs = now - d;
+        var diffMin = Math.floor(diffMs / 60000);
+        if (diffMin < 1) return 'Just now';
+        if (diffMin < 60) return diffMin + 'm ago';
+        var diffHrs = Math.floor(diffMin / 60);
+        if (diffHrs < 24) return diffHrs + 'h ago';
+        var diffDays = Math.floor(diffHrs / 24);
+        if (diffDays < 7) return diffDays + 'd ago';
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       }
+
+      function getEntityIcon(entityType) {
+        if (entityType === 'Task') return '&#x25CF;';
+        if (entityType === 'Project') return '&#x25B6;';
+        if (entityType === 'Member') return '&#x25C9;';
+        return '&#x25CF;';
+      }
+
+      function getEntityRoute(entityType) {
+        if (entityType === 'Task') return 'tasks';
+        if (entityType === 'Project') return 'projects';
+        if (entityType === 'Member') return 'members';
+        return 'tasks';
+      }
+
+      function renderNotifications() {
+        var entries, count, recent;
+        if (window.ActivityLog && typeof ActivityLog.getAll === 'function') {
+          entries = ActivityLog.getAll();
+          count = entries.length;
+          recent = entries.slice(0, 10);
+        } else {
+          entries = [];
+          count = 0;
+          recent = [];
+        }
+
+        if (notifDot) {
+          if (count > lastNotifCount) {
+            notifDot.style.display = '';
+            notifDot.style.background = '#a8452f';
+          } else if (count === 0) {
+            notifDot.style.display = 'none';
+          }
+        }
+
+        if (recent.length === 0) {
+          notifList.innerHTML = '<div style="padding:16px;text-align:center;color:#a89b78;font-size:0.875rem;">No notifications yet</div>';
+          return;
+        }
+
+        var html = '';
+        for (var i = 0; i < recent.length; i++) {
+          var e = recent[i];
+          var time = getRelativeTime(e.occurredAt || e.timestamp || e.createdAt);
+          var entityType = e.entityType || e.type || '';
+          var desc = e.actionDetail || e.description || e.actionType || 'Activity';
+          var user = e.userName || e.performedBy || e.user || '';
+          html += '<div class="notif-item" data-route="' + getEntityRoute(entityType) + '" style="padding:10px 16px;border-bottom:1px solid #f3ecdb;cursor:pointer;transition:background 0.15s;display:flex;gap:10px;align-items:flex-start;" onmouseover="this.style.background=\'#faf6ec\'" onmouseout="this.style.background=\'\'">' +
+            '<span style="font-size:1rem;flex-shrink:0;margin-top:2px;">' + getEntityIcon(entityType) + '</span>' +
+            '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:0.8125rem;color:#2c2820;line-height:1.4;">' + (user ? '<strong>' + user.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</strong> ' : '') + desc.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' +
+            '<div style="font-size:0.75rem;color:#a89b78;margin-top:2px;">' + time + ' ' + (entityType ? '&middot; ' + entityType : '') + '</div>' +
+            '</div></div>';
+        }
+        notifList.innerHTML = html;
+
+        Array.prototype.forEach.call(notifList.querySelectorAll('.notif-item'), function (item) {
+          item.addEventListener('click', function () {
+            var route = item.getAttribute('data-route');
+            dropdown.style.display = 'none';
+            if (window.navigateTo) window.navigateTo(route);
+          });
+        });
+      }
+
+      // Bell toggle
+      bell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = dropdown.style.display !== 'none';
+        dropdown.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+          lastNotifCount = (window.ActivityLog && ActivityLog.getAll) ? ActivityLog.getAll().length : 0;
+          if (notifDot) notifDot.style.display = lastNotifCount > 0 ? '' : 'none';
+        }
+      });
+
+      document.addEventListener('click', function () { dropdown.style.display = 'none'; });
+      dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+
+      // Listen for real-time updates
+      function updateNotif() { renderNotifications(); }
+
+      window.addEventListener('taskflow:activity-changed', updateNotif);
+      window.addEventListener('taskflow:tasks-changed', function () {
+        setTimeout(updateNotif, 100);
+      });
+      window.addEventListener('taskflow:members-changed', function () {
+        setTimeout(updateNotif, 100);
+      });
+      window.addEventListener('taskflow:projects-changed', function () {
+        setTimeout(updateNotif, 100);
+      });
+
+      // Initial render
+      renderNotifications();
     })();
 
     // Make search functional

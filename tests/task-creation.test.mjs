@@ -16,7 +16,7 @@ const service = await import('../src/modules/taskService.js');
 const validation = await import('../src/modules/taskValidation.js');
 
 const now = new Date('2030-01-10T12:00:00.000Z');
-const projects = [{ id: 1, name: 'TaskFlow' }];
+const projects = [{ id: 1, name: 'TaskFlow', startDate: '2030-01-08' }];
 const members = [
   { id: 1, name: 'Member One' },
   { id: 2, name: 'Member Two' },
@@ -45,7 +45,7 @@ beforeEach(() => {
 });
 
 test('creates the new canonical task model with multiple member IDs and timestamps', () => {
-  const result = service.createTask(validInput(), projects, members, now);
+  const result = service.createTask(validInput({ creationDate: '1999-01-01' }), projects, members, now);
 
   assert.equal(result.isValid, true);
   assert.deepEqual(Object.keys(result.task), [
@@ -94,18 +94,33 @@ test('enforces member count, available-member limit, complete selection, and uni
   assert.match(incomplete.errors.assignedMemberIds, /every assignment field/);
 });
 
-test('autofills start date and rejects invalid due dates', () => {
-  const automaticStart = service.createTask(validInput({ startDate: '2040-12-31' }), projects, members, now);
+test('accepts a user-selected start date and rejects invalid date ranges', () => {
+  const selectedStart = service.createTask(validInput({ startDate: '2030-01-12' }), projects, members, now);
   store.saveTasks([]);
   const pastDue = service.createTask(validInput({ dueDate: '2030-01-09' }), projects, members, now);
   const reversed = service.createTask(validInput({ startDate: '2030-01-15', dueDate: '2030-01-14' }), projects, members, now);
 
-  assert.equal(automaticStart.task.startDate, '2030-01-10');
-  assert.match(pastDue.errors.dueDate, /before today/);
-  assert.equal(reversed.isValid, true);
-  assert.equal(reversed.task.startDate, '2030-01-10');
-  assert.equal(reversed.task.dueDate, '2030-01-14');
-  store.saveTasks([]);
+  assert.equal(selectedStart.task.startDate, '2030-01-12');
+  assert.match(pastDue.errors.dueDate, /on or after 2030-01-10/);
+  assert.equal(reversed.isValid, false);
+  assert.match(reversed.errors.dueDate, /on or after 2030-01-15/);
+  assert.equal(store.getTasks().length, 0);
+});
+
+test('rejects a task start date before its creation date', () => {
+  const result = service.createTask(validInput({ startDate: '2030-01-09' }), projects, members, now);
+
+  assert.equal(result.isValid, false);
+  assert.match(result.errors.startDate, /on or after 2030-01-10/);
+  assert.equal(store.getTasks().length, 0);
+});
+
+test('rejects a task start date before the selected project start date', () => {
+  const laterProject = [{ ...projects[0], startDate: '2030-01-12' }];
+  const result = service.createTask(validInput({ startDate: '2030-01-11' }), laterProject, members, now);
+
+  assert.equal(result.isValid, false);
+  assert.match(result.errors.startDate, /on or after 2030-01-12/);
   assert.equal(store.getTasks().length, 0);
 });
 
@@ -116,6 +131,7 @@ test('edits a task with the same validation while preserving createdAt', () => {
     title: 'Updated task',
     memberCount: 3,
     assignedMemberIds: ['1', '2', '3'],
+    creationDate: '1999-01-01',
     startDate: '2030-01-11',
     status: 'Review'
   }), projects, members, editedAt);
@@ -126,6 +142,20 @@ test('edits a task with the same validation while preserving createdAt', () => {
   assert.equal(result.task.createdAt, created.createdAt);
   assert.equal(result.task.updatedAt, editedAt.toISOString());
   assert.equal(store.getTasks().length, 1);
+});
+
+test('uses the original task creation date, not the edit date, for date constraints', () => {
+  const created = service.createTask(validInput(), projects, members, now).task;
+  const editedAt = new Date('2030-01-20T15:30:00.000Z');
+  const result = service.editTask(created.id, validInput({
+    startDate: '2030-01-10',
+    dueDate: '2030-01-15'
+  }), projects, members, editedAt);
+
+  assert.equal(result.isValid, true);
+  assert.equal(result.task.createdAt, now.toISOString());
+  assert.equal(result.task.startDate, '2030-01-10');
+  assert.equal(result.task.dueDate, '2030-01-15');
 });
 
 test('normalizes legacy single-member tasks for editing and removes legacy fields on save', () => {
@@ -139,7 +169,9 @@ test('normalizes legacy single-member tasks for editing and removes legacy field
 
   assert.deepEqual(editingInput.assignedMemberIds, ['2']);
   assert.equal(editingInput.startDate, '2029-12-01');
+  assert.equal(editingInput.creationDate, '2029-12-01');
 
+  editingInput.startDate = '2030-01-08';
   const result = service.editTask(9, editingInput, projects, members, now);
   const persisted = JSON.parse(storedValues.get(store.STORAGE_KEYS.TASKS))[0];
   assert.equal(result.isValid, true);

@@ -43,35 +43,6 @@ var SUMMARY_PROMPT = {
 
 /* ── Context Data ─────────────────────────────────────────────── */
 var PromptContextStore = {
-  fallbackData: {
-    members: [
-      { id: 'member-1', name: 'Hassan Ahmed', role: 'Frontend Developer', email: 'hassan@taskflow.local' },
-      { id: 'member-2', name: 'Ali', role: 'Backend Developer', email: 'ali@taskflow.local' },
-      { id: 'member-3', name: 'Sara', role: 'QA Engineer', email: 'sara@taskflow.local' },
-    ],
-    projects: [
-      {
-        id: 'project-1',
-        name: 'TaskFlow Management System',
-        description: 'A project management platform for managing projects, tasks, members, and reports.',
-        status: 'In Progress',
-      },
-    ],
-    tasks: [
-      {
-        id: 'task-1',
-        projectId: 'project-1',
-        title: 'Implement Authentication Module',
-        description: 'Add a secure login flow, session persistence, and route protection.',
-        assignedMemberIds: ['member-1'],
-        priority: 'High',
-        status: 'In Progress',
-        dueDate: '2026-08-15',
-        completionPercentage: 60,
-      },
-    ],
-  },
-
   getSnapshot: function () {
     var store = window.DataStore;
     var projects = store && typeof store.getProjects === 'function' ? store.getProjects() : [];
@@ -80,10 +51,11 @@ var PromptContextStore = {
 
     if (!projects.length && !tasks.length && !members.length) {
       return {
-        projects: PromptContextStore.fallbackData.projects.slice(),
-        tasks: PromptContextStore.fallbackData.tasks.slice(),
-        members: PromptContextStore.fallbackData.members.slice(),
-        isFallback: true,
+        projects: [],
+        tasks: [],
+        members: [],
+        isFallback: false,
+        isEmpty: true,
       };
     }
 
@@ -92,6 +64,7 @@ var PromptContextStore = {
       tasks: tasks,
       members: members,
       isFallback: false,
+      isEmpty: false,
     };
   },
 
@@ -118,6 +91,7 @@ var PromptContextStore = {
       tasks: visibleTasks,
       members: snapshot.members,
       isFallback: snapshot.isFallback,
+      isEmpty: snapshot.isEmpty,
     };
   },
 
@@ -543,6 +517,8 @@ var PromptGenerator = {
   },
 };
 
+var PROMPT_DRAFT_KEY = 'promptBuilderDraft';
+
 /* ── UI Controller ───────────────────────────────────────────── */
 var UiController = {
   els: {},
@@ -554,8 +530,9 @@ var UiController = {
   init: function () {
     UiController._cacheElements();
     UiController._bindEvents();
-    UiController._restoreLastType();
+    UiController._restoreDraft();
     UiController._refreshContextData();
+    UiController._applyPendingDraft();
     UiController._updateDefaults();
   },
 
@@ -596,17 +573,30 @@ var UiController = {
   },
 
   _bindEvents: function () {
+    var draftFields = [
+      'promptType', 'projectId', 'taskId', 'techStack', 'context',
+      'mainTask', 'constraints', 'expectedFormat', 'edgeCases'
+    ];
+
     UiController.els.promptType.addEventListener('change', function () {
       UiController._updateDefaults();
-      UiController._saveLastType();
+      UiController._saveDraft();
     });
 
     UiController.els.projectId.addEventListener('change', function () {
       UiController._handleProjectChange();
+      UiController._saveDraft();
     });
 
     UiController.els.taskId.addEventListener('change', function () {
       UiController._renderTaskContext();
+      UiController._saveDraft();
+    });
+
+    draftFields.forEach(function (fieldName) {
+      var field = UiController.els[fieldName];
+      if (!field || fieldName === 'promptType') return;
+      field.addEventListener('input', UiController._saveDraft);
     });
 
     UiController.els.generateBtn.addEventListener('click', function (e) {
@@ -699,13 +689,8 @@ var UiController = {
 
   _renderDataStatus: function () {
     var snapshot = UiController.state.snapshot;
-    if (!snapshot.projects.length) {
-      UiController.els.dataStatus.textContent = 'No projects are available yet. Create a project to generate context-aware prompts.';
-      return;
-    }
-
-    if (snapshot.isFallback) {
-      UiController.els.dataStatus.textContent = 'Using isolated fallback data because project, task, and member records are not available yet.';
+    if (snapshot.isEmpty || !snapshot.projects.length) {
+      UiController.els.dataStatus.textContent = 'No projects are available yet. Create a project in TaskFlow to generate context-aware prompts.';
       return;
     }
 
@@ -846,20 +831,71 @@ var UiController = {
     }
   },
 
-  _saveLastType: function () {
+  _saveDraft: function () {
+    if (!UiController.els.promptType) return;
     try {
-      localStorage.setItem('promptBuilderLastType', UiController.els.promptType.value);
+      localStorage.setItem(PROMPT_DRAFT_KEY, JSON.stringify({
+        promptType: UiController.els.promptType.value,
+        projectId: UiController.els.projectId.value,
+        taskId: UiController.els.taskId.value,
+        techStack: UiController.els.techStack.value,
+        context: UiController.els.context.value,
+        mainTask: UiController.els.mainTask.value,
+        constraints: UiController.els.constraints.value,
+        expectedFormat: UiController.els.expectedFormat.value,
+        edgeCases: UiController.els.edgeCases.value,
+        output: UiController.els.output.textContent || '',
+      }));
     } catch (e) {
       /* localStorage unavailable */
     }
   },
 
-  _restoreLastType: function () {
+  _restoreDraft: function () {
     try {
-      var saved = localStorage.getItem('promptBuilderLastType');
-      if (saved && PROMPT_CONFIG[saved]) {
-        UiController.els.promptType.value = saved;
-      }
+      var raw = localStorage.getItem(PROMPT_DRAFT_KEY);
+      if (!raw) return;
+      UiController.state.pendingDraft = JSON.parse(raw);
+    } catch (e) {
+      /* localStorage unavailable */
+    }
+  },
+
+  _applyPendingDraft: function () {
+    var draft = UiController.state.pendingDraft;
+    if (!draft) return;
+
+    if (draft.promptType && PROMPT_CONFIG[draft.promptType]) {
+      UiController.els.promptType.value = draft.promptType;
+    }
+    if (draft.projectId && PromptContextStore.findProjectById(UiController.state.snapshot.projects, draft.projectId)) {
+      UiController.els.projectId.value = draft.projectId;
+    }
+    UiController._populateTaskOptions();
+    if (draft.taskId && PromptContextStore.findTaskById(UiController.state.snapshot.tasks, draft.taskId)) {
+      UiController.els.taskId.value = draft.taskId;
+    }
+
+    UiController.els.techStack.value = draft.techStack || '';
+    UiController.els.context.value = draft.context || '';
+    UiController.els.mainTask.value = draft.mainTask || '';
+    UiController.els.constraints.value = draft.constraints || '';
+    UiController.els.expectedFormat.value = draft.expectedFormat || '';
+    UiController.els.edgeCases.value = draft.edgeCases || '';
+    if (draft.output) {
+      UiController.els.output.textContent = draft.output;
+      UiController.els.copyBtn.disabled = false;
+    }
+
+    UiController._renderProjectContext();
+    UiController._renderTaskContext();
+    delete UiController.state.pendingDraft;
+  },
+
+  _clearDraft: function () {
+    try {
+      localStorage.removeItem(PROMPT_DRAFT_KEY);
+      localStorage.removeItem('promptBuilderLastType');
     } catch (e) {
       /* localStorage unavailable */
     }
@@ -880,6 +916,7 @@ var UiController = {
     var prompt = PromptGenerator.generate(data);
     UiController.els.output.textContent = prompt;
     UiController.els.copyBtn.disabled = false;
+    UiController._saveDraft();
   },
 
   _handleSummaryGenerate: function () {
@@ -897,6 +934,7 @@ var UiController = {
     var prompt = PromptGenerator.generateProjectSummary(data);
     UiController.els.output.textContent = prompt;
     UiController.els.copyBtn.disabled = false;
+    UiController._saveDraft();
   },
 
   _renderValidation: function (errors) {
@@ -963,6 +1001,7 @@ var UiController = {
     UiController.els.output.textContent = '';
     UiController.els.copyBtn.disabled = true;
     UiController._clearValidation();
+    UiController._clearDraft();
     UiController._updateDefaults();
     UiController._populateTaskOptions();
     UiController._renderProjectContext();

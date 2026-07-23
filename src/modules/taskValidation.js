@@ -15,9 +15,10 @@ function isRealIsoDate(value) {
     && date.getUTCDate() === day;
 }
 
-export function validateTaskInput(input, availableProjects, availableMembers, today = getTodayIso()) {
+export function validateTaskInput(input, availableProjects, availableMembers, creationDate = getTodayIso()) {
   const errors = {};
   const projectIds = new Set(availableProjects.map((project) => String(project.id)));
+  const selectedProject = availableProjects.find((project) => String(project.id) === input.projectId);
   const memberIds = new Set(availableMembers.map((member) => String(member.id)));
   const selectedMemberIds = Array.isArray(input.assignedMemberIds)
     ? input.assignedMemberIds.filter(Boolean)
@@ -48,12 +49,22 @@ export function validateTaskInput(input, availableProjects, availableMembers, to
 
   if (!input.startDate) errors.startDate = 'Start date is required.';
   else if (!isRealIsoDate(input.startDate)) errors.startDate = 'Enter a valid start date.';
+  else if (input.startDate < creationDate) {
+    errors.startDate = `Choose a start date on or after ${creationDate}. A task cannot start before it is created.`;
+  }
+  else if (selectedProject
+    && isRealIsoDate(String(selectedProject.startDate || ''))
+    && input.startDate < selectedProject.startDate) {
+    errors.startDate = `Choose a start date on or after ${selectedProject.startDate}. The selected project starts on this date.`;
+  }
 
   if (!input.dueDate) errors.dueDate = 'Due date is required.';
   else if (!isRealIsoDate(input.dueDate)) errors.dueDate = 'Enter a valid due date.';
-  else if (input.dueDate < today) errors.dueDate = 'Due date cannot be before today.';
+  else if (input.dueDate < creationDate) {
+    errors.dueDate = `Choose a due date on or after ${creationDate}. A task cannot be due before it is created.`;
+  }
   else if (isRealIsoDate(input.startDate) && input.dueDate < input.startDate) {
-    errors.dueDate = 'Due date cannot be before the start date.';
+    errors.dueDate = `Choose a due date on or after ${input.startDate}. A task cannot be due before it starts.`;
   }
 
   if (!input.priority) errors.priority = 'Select a priority.';

@@ -10,7 +10,7 @@
 
 const JWT_SECRET = "taskflow-jwt-demosecret-2026";
 const JWT_STORAGE_KEY = "taskflow_jwt";
-const TOKEN_EXPIRY_SECONDS = 3600;
+const TOKEN_EXPIRY_SECONDS = 86400;
 
 /* ---- internal helpers (not exported on window) ---- */
 

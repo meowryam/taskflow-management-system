@@ -125,28 +125,35 @@ const DataStore = (function () {
     return true;
   }
 
+  // Seed is available as a utility but does NOT auto-run.
+  // The app starts with no data; users create their own projects and tasks.
+  // Call DataStore.seedDemoData() explicitly to load sample data for testing.
+
   function seed() {
-    const members = [
-      { id: 1, name: 'TaskFlow Admin', email: 'admin@taskflow.local', role: 'Admin', initials: 'TA' },
-      { id: 2, name: 'Project Manager', email: 'manager@taskflow.local', role: 'Manager', initials: 'PM' },
-      { id: 3, name: 'Team Member', email: 'member@taskflow.local', role: 'Team Member', initials: 'TM' }
+    var members = [
+      { id: 1, name: 'Demo Admin', email: 'admin@demo.local', role: 'Admin', initials: 'DA' },
+      { id: 2, name: 'Demo Manager', email: 'manager@demo.local', role: 'Manager', initials: 'DM' },
+      { id: 3, name: 'Demo Member', email: 'member@demo.local', role: 'Team Member', initials: 'DN' }
     ];
-    const projects = [
-      { id: 1, name: 'TaskFlow Sprint', description: 'Build and integrate the TaskFlow management system.', deadline: getFutureDate(7), status: 'Active' },
-      { id: 2, name: 'Website Launch', description: 'Prepare the product website for launch.', deadline: getFutureDate(30), status: 'Planned' }
+    var projects = [
+      { id: 1, name: 'Sample Sprint', description: 'Example project with sample data for demonstration purposes.', startDate: new Date().toISOString().split('T')[0], deadline: getFutureDate(7), status: 'Active', createdAt: new Date().toISOString() },
+      { id: 2, name: 'Sample Launch', description: 'Example product launch project for demonstration purposes.', startDate: new Date().toISOString().split('T')[0], deadline: getFutureDate(30), status: 'Active', createdAt: new Date().toISOString() }
     ];
-    const tasks = [
-      { id: 1, projectId: 1, title: 'Create project module', description: 'Implement project create, edit, delete, and list behavior.', assignedUserId: 3, dueDate: getFutureDate(2), priority: 'High', status: 'In Progress', createdAt: new Date().toISOString() },
-      { id: 2, projectId: 1, title: 'Prepare manual test cases', description: 'Write test cases for the integrated TaskFlow product.', assignedUserId: 3, dueDate: getFutureDate(5), priority: 'Medium', status: 'Todo', createdAt: new Date().toISOString() },
-      { id: 3, projectId: 1, title: 'Initialize application layout', description: 'Create the initial application structure and dashboard shell.', assignedUserId: 1, dueDate: getPastDate(1), priority: 'Low', status: 'Done', createdAt: new Date().toISOString() },
-      { id: 4, projectId: 2, title: 'Create landing page', description: 'Build the responsive landing page.', assignedUserId: 2, dueDate: getFutureDate(10), priority: 'High', status: 'Todo', createdAt: new Date().toISOString() },
-      { id: 5, projectId: 2, title: 'Setup domain and hosting', description: 'Configure DNS and deploy to production server.', assignedUserId: 1, dueDate: null, priority: 'High', status: 'Review', createdAt: new Date().toISOString() }
+    var tasks = [
+      { id: 1, projectId: 1, title: 'Sample: Setup project', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [3, 1], dueDate: getFutureDate(2), priority: 'High', status: 'In Progress', createdAt: new Date().toISOString() },
+      { id: 2, projectId: 1, title: 'Sample: Write test cases', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [3], dueDate: getFutureDate(5), priority: 'Medium', status: 'Todo', createdAt: new Date().toISOString() },
+      { id: 3, projectId: 1, title: 'Sample: Initialize layout', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [1], dueDate: getPastDate(1), priority: 'Low', status: 'Done', createdAt: new Date().toISOString() },
+      { id: 4, projectId: 2, title: 'Sample: Landing page', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [2, 3], dueDate: getFutureDate(10), priority: 'High', status: 'Todo', createdAt: new Date().toISOString() },
+      { id: 5, projectId: 2, title: 'Sample: DNS setup', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [1], dueDate: null, priority: 'High', status: 'Review', createdAt: new Date().toISOString() }
     ];
 
     saveMembers(members);
     saveProjects(projects);
     saveTasks(tasks);
   }
+
+  // DO NOT auto-seed — users create their own real data.
+  // To load demo data for testing, run: DataStore.seedDemoData() in the console.
 
   function getFutureDate(daysFromNow) {
     const date = new Date();
@@ -160,7 +167,8 @@ const DataStore = (function () {
     return date.toISOString().split('T')[0];
   }
 
-  if (!localStorage.getItem(STORAGE_KEYS.TASKS)) seed();
+  // Demo data seed is available via DataStore.seedDemoData() for testing.
+  // No auto-seeding — the app starts empty. Users create their own data.
 
   return {
     STORAGE_KEYS,
@@ -175,7 +183,8 @@ const DataStore = (function () {
     deleteTask,
     saveTasks,
     saveProjects,
-    saveMembers
+    saveMembers,
+    seedDemoData: seed
   };
 })();
 

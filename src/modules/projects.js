@@ -36,6 +36,14 @@ const Projects = (function () {
   const NAME_MAX_LENGTH = 100;
   const DESCRIPTION_MAX_LENGTH = 500;
 
+  // Local copy of taskValidation.js's getTodayIso, kept in sync manually.
+  // This file is loaded as a classic script (see index.html), so it cannot
+  // `import` the shared helper from taskValidation.js's ES module.
+  function getTodayIso(date = new Date()) {
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 10);
+  }
+
   // -- Storage -----------------------------------------------------------
   // TEMPORARY localStorage wrapper, scoped to this file only.
   // Shape (readCollection/writeCollection/generateId) intentionally mirrors
@@ -83,7 +91,18 @@ const Projects = (function () {
   function getRelatedTaskCount(projectId) {
     const tasks = storage.readCollection(TASKS_KEY);
     if (!Array.isArray(tasks)) return 0;
-    return tasks.filter((t) => t && t.projectId === projectId).length;
+    return tasks.filter(
+      (t) => t && String(t.projectId) === String(projectId)
+    ).length;
+  }
+
+  function hasPermission(permission) {
+    if (!window.Permissions || !window.TaskFlowSession) return true;
+    return window.Permissions.check(window.TaskFlowSession.role, permission);
+  }
+
+  function permissionError(message) {
+    return { valid: false, errors: { _: message } };
   }
 
   // -- Validation ----------------------------------------------------------
@@ -106,18 +125,23 @@ const Projects = (function () {
       errors.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
     }
 
+    const today = getTodayIso();
     const startDateTime = new Date(startDate).getTime();
     if (!startDate) {
       errors.startDate = "Start date is required.";
     } else if (Number.isNaN(startDateTime)) {
       errors.startDate = "Start date must be a valid date.";
+    } else if (startDate < today) {
+      errors.startDate = `Choose a start date on or after ${today}. A project cannot start before today.`;
     }
 
     if (!deadline) {
       errors.deadline = "Deadline is required.";
     } else if (Number.isNaN(new Date(deadline).getTime())) {
       errors.deadline = "Deadline must be a valid date.";
-    } else if (startDate && !Number.isNaN(startDateTime) && new Date(deadline).getTime() < startDateTime) {
+    } else if (deadline < today) {
+      errors.deadline = `Choose an end date on or after ${today}. A project cannot end before today.`;
+    } else if (startDate && !Number.isNaN(startDateTime) && deadline < startDate) {
       errors.deadline = "End date cannot be before the start date.";
     }
 
@@ -145,6 +169,10 @@ const Projects = (function () {
   }
 
   function createProject(input) {
+    if (!hasPermission("create_project")) {
+      return permissionError("You don't have permission to create projects.");
+    }
+
     const result = validateProject(input);
     if (!result.valid) return result;
 
@@ -169,6 +197,10 @@ const Projects = (function () {
   }
 
   function updateProject(id, input) {
+    if (!hasPermission("edit_project")) {
+      return permissionError("You don't have permission to edit projects.");
+    }
+
     const result = validateProject(input);
     if (!result.valid) return result;
 
@@ -197,12 +229,26 @@ const Projects = (function () {
   }
 
   function deleteProjectById(id) {
+    if (!hasPermission("delete_project")) {
+      return { success: false, error: "You don't have permission to delete projects." };
+    }
+
+    const relatedCount = getRelatedTaskCount(id);
+    if (relatedCount > 0) {
+      return {
+        success: false,
+        error: `Cannot delete this project: ${relatedCount} task(s) still reference it. Reassign or delete those tasks first.`,
+        taskCount: relatedCount,
+      };
+    }
+
     const project = loadProjects().find((p) => p.id === id) || null;
     const projects = loadProjects().filter((p) => p.id !== id);
     saveProjects(projects);
     if (project && typeof ActivityLog !== 'undefined') {
       ActivityLog.logProjectDeleted(project);
     }
+    return { success: true };
   }
 
   // -- Deadline / status helpers ---------------------------------------------
@@ -381,7 +427,9 @@ const Projects = (function () {
       editingId = null;
       renderForm(null);
     });
-    header.appendChild(newBtn);
+    if (hasPermission("create_project")) {
+      header.appendChild(newBtn);
+    }
 
     view.appendChild(header);
 
@@ -422,11 +470,16 @@ const Projects = (function () {
     form.className = "pm-form";
     form.noValidate = true;
 
+    const today = getTodayIso();
     const nameRow = buildFieldRow("pm-name", "Name", "input", { type: "text", value: project ? project.name : "" });
     const descRow = buildFieldRow("pm-description", "Description", "textarea", { value: project ? project.description : "" });
-    const startDateRow = buildFieldRow("pm-start-date", "Start Date", "input", { type: "date", value: project ? project.startDate : "" });
-    const deadlineRow = buildFieldRow("pm-deadline", "End Date", "input", { type: "date", value: project ? project.deadline : "" });
+    const startDateRow = buildFieldRow("pm-start-date", "Start Date", "input", { type: "date", value: project ? project.startDate : "", min: today });
+    const deadlineRow = buildFieldRow("pm-deadline", "End Date", "input", { type: "date", value: project ? project.deadline : "", min: (project && project.startDate > today) ? project.startDate : today });
     const statusRow = buildStatusRow(project ? project.status : "Active");
+
+    startDateRow.input.addEventListener("change", () => {
+      deadlineRow.input.min = startDateRow.input.value > today ? startDateRow.input.value : today;
+    });
 
     form.appendChild(nameRow.row);
     form.appendChild(descRow.row);
@@ -501,6 +554,7 @@ const Projects = (function () {
     const input = document.createElement(tag);
     input.id = id;
     if (opts.type) input.type = opts.type;
+    if (opts.min) input.min = opts.min;
     input.value = opts.value || "";
     row.appendChild(input);
 
@@ -657,43 +711,53 @@ const Projects = (function () {
     const actions = document.createElement("div");
     actions.className = "project-card__actions";
 
-    const editBtn = document.createElement("button");
-    editBtn.type = "button";
-    editBtn.className = "pm-btn pm-btn--secondary pm-btn--small";
-    editBtn.textContent = "Edit";
-    editBtn.addEventListener("click", () => {
-      editingId = project.id;
-      renderForm(project);
-    });
-    actions.appendChild(editBtn);
+    if (hasPermission("edit_project")) {
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "pm-btn pm-btn--secondary pm-btn--small";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => {
+        editingId = project.id;
+        renderForm(project);
+      });
+      actions.appendChild(editBtn);
+    }
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.type = "button";
-    deleteBtn.className = "pm-btn pm-btn--danger pm-btn--small";
-    deleteBtn.textContent = "Delete";
-    deleteBtn.addEventListener("click", () => handleDeleteClick(project));
-    actions.appendChild(deleteBtn);
+    if (hasPermission("delete_project")) {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "pm-btn pm-btn--danger pm-btn--small";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.addEventListener("click", () => handleDeleteClick(project));
+      actions.appendChild(deleteBtn);
+    }
 
-    card.appendChild(actions);
+    if (actions.childElementCount > 0) {
+      card.appendChild(actions);
+    }
 
     return card;
   }
 
   function handleDeleteClick(project) {
     const relatedCount = getRelatedTaskCount(project.id);
-    let confirmed;
     if (relatedCount > 0) {
-      confirmed = window.confirm(
+      window.alert(
         `"${project.name}" has ${relatedCount} related task${relatedCount === 1 ? "" : "s"}. ` +
-          "Deleting this project will not delete those tasks automatically, but they will be left pointing at a missing project. Continue?"
+          "Delete or reassign those tasks before removing this project."
       );
-    } else {
-      confirmed = window.confirm(`Delete project "${project.name}"? This cannot be undone.`);
+      return;
     }
 
+    const confirmed = window.confirm(`Delete project "${project.name}"? This cannot be undone.`);
     if (!confirmed) return;
 
-    deleteProjectById(project.id);
+    const result = deleteProjectById(project.id);
+    if (result && result.success === false && result.error) {
+      window.alert(result.error);
+      return;
+    }
+
     renderList();
   }
 

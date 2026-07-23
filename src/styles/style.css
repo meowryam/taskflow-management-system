@@ -485,6 +485,12 @@ svg {
   letter-spacing: -0.02em;
 }
 
+@media (max-width: 768px) {
+  .header__breadcrumb {
+    display: none;
+  }
+}
+
 .header__right {
   display: flex;
   align-items: center;
@@ -2084,7 +2090,7 @@ svg {
 .quick-action-card--member::before { background: linear-gradient(135deg, rgba(182,202,237,0.08), rgba(243,183,218,0.06)); }
 .quick-action-card--report::before { background: linear-gradient(135deg, rgba(246,216,104,0.08), rgba(154,170,99,0.06)); }
 .quick-action-card--calendar::before { background: linear-gradient(135deg, rgba(243,183,218,0.08), rgba(182,202,237,0.06)); }
-.quick-action-card--upload::before { background: linear-gradient(135deg, rgba(182,202,237,0.08), rgba(246,216,104,0.06)); }
+.quick-action-card--activity::before { background: linear-gradient(135deg, rgba(182,202,237,0.08), rgba(246,216,104,0.06)); }
 
 .quick-action-card:hover::before {
   opacity: 1;
@@ -2116,7 +2122,7 @@ svg {
 .quick-action-card--member .quick-action-card__icon { background: linear-gradient(135deg, #B6CAED, #cedcf3); color: #4a6fa5; }
 .quick-action-card--report .quick-action-card__icon { background: linear-gradient(135deg, #F6D868, #f9e494); color: #8a6d20; }
 .quick-action-card--calendar .quick-action-card__icon { background: linear-gradient(135deg, #F3B7DA, #B6CAED); color: #6a4a7a; }
-.quick-action-card--upload .quick-action-card__icon { background: linear-gradient(135deg, #B6CAED, #9AAA63); }
+.quick-action-card--activity .quick-action-card__icon { background: linear-gradient(135deg, #B6CAED, #9AAA63); }
 
 .quick-action-card:hover .quick-action-card__icon {
   transform: scale(1.1) rotate(-5deg);
@@ -2318,6 +2324,22 @@ svg {
 
   .progress-panel {
     padding: 18px 16px;
+  }
+
+  .filter-bar__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-bar__group,
+  .filter-bar__group--wide {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .weekly-chart {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -2569,6 +2591,18 @@ svg {
 [data-theme="dark"] .notif-dropdown > div:first-child {
   color: #f3ecdb !important;
   border-color: #423c2e !important;
+}
+
+[data-theme="dark"] .notif-item {
+  border-color: #423c2e !important;
+}
+
+[data-theme="dark"] .notif-item:hover {
+  background: #423c2e !important;
+}
+
+[data-theme="dark"] .notif-item div {
+  color: #f3ecdb !important;
 }
 
 [data-theme="dark"] .header__search-placeholder input {
