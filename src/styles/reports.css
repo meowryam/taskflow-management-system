@@ -110,121 +110,7 @@
   gap: 18px;
 }
 
-/* Same stat-card styles as dashboard */
-.stat-card {
-  background: rgba(255,255,255,0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.55);
-  border-radius: 24px;
-  padding: 26px 24px 22px;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.03), 0 6px 16px rgba(154,170,99,0.05);
-  position: relative;
-  overflow: hidden;
-  animation: slideUpFade 0.55s cubic-bezier(0.16,1,0.3,1) both;
-  cursor: default;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--sc-g1,#9AAA63), var(--sc-g2,#B6CAED), var(--sc-g1,#9AAA63));
-  background-size: 200% 100%;
-  opacity: 0.6;
-  transition: opacity 0.4s ease;
-}
-
-.stat-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 24px;
-  background: linear-gradient(135deg, var(--sc-g1,#9AAA63) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-}
-
-.stat-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 12px 40px rgba(154,170,99,0.14), 0 4px 12px rgba(0,0,0,0.06);
-  border-color: rgba(154,170,99,0.2);
-}
-
-.stat-card:hover::after { opacity: 0.03; }
-.stat-card:hover::before { opacity: 0.9; }
-
-.stat-card__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.stat-card__icon {
-  width: 50px; height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 16px;
-  color: #fff;
-  transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.stat-card:hover .stat-card__icon {
-  transform: scale(1.12) rotate(-4deg);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-}
-
-.stat-card__icon svg {
-  width: 24px; height: 24px;
-  stroke-width: 1.8;
-}
-
-.stat-card__value {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: #1a1712;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-  transition: color 0.3s ease;
-}
-
-.stat-card:hover .stat-card__value { color: #000; }
-
-.stat-card__label {
-  font-size: 0.78rem;
-  color: rgba(44,40,32,0.42);
-  font-weight: 600;
-  margin-top: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-
-.stat-card__trend {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 12px;
-  border-radius: 50px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  transition: all 0.3s ease;
-}
-
-.stat-card__trend--up { background: rgba(34,197,94,0.1); color: #16a34a; }
-.stat-card__trend--down { background: rgba(239,68,68,0.08); color: #dc2626; }
-.stat-card__trend--neutral { background: rgba(154,170,99,0.08); color: #7a8a4a; }
-
-/* Card color variants */
+/* Card color variants (extends dashboard .stat-card — do NOT redefine .stat-card here) */
 .stat-card--projects { --sc-g1: #9AAA63; --sc-g2: #B6CAED; }
 .stat-card--tasks { --sc-g1: #F3B7DA; --sc-g2: #F6D868; }
 .stat-card--completed { --sc-g1: #22c55e; --sc-g2: #86efac; }
@@ -242,6 +128,29 @@
 .stat-card--highpri .stat-card__icon { background: linear-gradient(135deg, #f97316, #fb923c); }
 .stat-card--rate .stat-card__icon { background: linear-gradient(135deg, #7C3AED, #a78bfa); }
 .stat-card--members .stat-card__icon { background: linear-gradient(135deg, #B6CAED, #cedcf3); color: #4a6fa5; }
+
+/* KPI card description row */
+.stat-card__desc {
+  font-size: 0.7rem;
+  color: rgba(44,40,32,0.35);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* KPI mini progress (thin bar under value) */
+.stat-card__mini-bar {
+  margin-top: 12px;
+  height: 3px;
+  background: rgba(154,170,99,0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stat-card__mini-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+}
 
 /* === Filters Row === */
 .reports__filters {
@@ -1120,6 +1029,296 @@
 
 .reports__skeleton--tall { height: 240px; }
 .reports__skeleton--row { height: 60px; border-radius: 14px; margin-bottom: 8px; }
+
+/* ============================================================
+   ENTERPRISE REPORTING COMPONENTS
+   ============================================================ */
+
+/* --- Section Header with description --- */
+.rpt-section-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 16px;
+}
+.rpt-section-header h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rpt-section-header h3 svg {
+  color: #9AAA63;
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+}
+.rpt-section-header p {
+  font-size: 0.82rem;
+  color: rgba(44,40,32,0.4);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* --- Risk Level Badges --- */
+.rpt-risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.rpt-risk-badge--low { background: rgba(34,197,94,0.1); color: #16a34a; }
+.rpt-risk-badge--medium { background: rgba(245,158,11,0.1); color: #d97706; }
+.rpt-risk-badge--high { background: rgba(239,68,68,0.1); color: #dc2626; }
+.rpt-risk-badge--critical { background: rgba(127,29,29,0.1); color: #7f1d1d; }
+
+/* --- Health Score Ring --- */
+.rpt-health-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rpt-health-score-ring {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 3px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.58rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.rpt-health-score-ring--green { border-color: #22c55e; color: #22c55e; background: rgba(34,197,94,0.06); }
+.rpt-health-score-ring--amber { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.06); }
+.rpt-health-score-ring--red { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.06); }
+.rpt-health-score-ring--gray { border-color: #9ca3af; color: #9ca3af; background: rgba(156,163,175,0.06); }
+.rpt-health-score-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* --- Delivery Analytics --- */
+.rpt-delivery-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.rpt-delivery-card {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 16px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  animation: slideUpFade 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.rpt-delivery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(154,170,99,0.08);
+  border-color: rgba(154,170,99,0.15);
+}
+.rpt-delivery-card:nth-child(1) { animation-delay: 0s; }
+.rpt-delivery-card:nth-child(2) { animation-delay: 0.08s; }
+.rpt-delivery-card:nth-child(3) { animation-delay: 0.16s; }
+.rpt-delivery-card:nth-child(4) { animation-delay: 0.24s; }
+.rpt-delivery-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.rpt-delivery-icon svg { width: 20px; height: 20px; stroke-width: 2; }
+.rpt-delivery-icon--today { background: rgba(154,170,99,0.12); color: #7a8a4a; }
+.rpt-delivery-icon--week { background: rgba(182,202,237,0.15); color: #4a6fa5; }
+.rpt-delivery-icon--month { background: rgba(243,183,218,0.12); color: #b8699a; }
+.rpt-delivery-icon--overdue { background: rgba(239,68,68,0.1); color: #dc2626; }
+.rpt-delivery-info { flex: 1; min-width: 0; }
+.rpt-delivery-value {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1a1712;
+  line-height: 1;
+}
+.rpt-delivery-label {
+  font-size: 0.7rem;
+  color: rgba(44,40,32,0.4);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+/* --- Risk Analysis --- */
+.rpt-risk-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.rpt-risk-card {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 16px;
+  padding: 20px 22px;
+  transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  animation: slideUpFade 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.rpt-risk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(154,170,99,0.08);
+  border-color: rgba(154,170,99,0.15);
+}
+.rpt-risk-card:nth-child(1) { animation-delay: 0s; }
+.rpt-risk-card:nth-child(2) { animation-delay: 0.08s; }
+.rpt-risk-card:nth-child(3) { animation-delay: 0.16s; }
+.rpt-risk-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.rpt-risk-card-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rpt-risk-card-title svg { width: 16px; height: 16px; stroke-width: 2; }
+.rpt-risk-card-count {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1712;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.rpt-risk-card-desc {
+  font-size: 0.72rem;
+  color: rgba(44,40,32,0.4);
+  font-weight: 500;
+}
+.rpt-risk-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.rpt-risk-card-list::-webkit-scrollbar { width: 3px; }
+.rpt-risk-card-list::-webkit-scrollbar-thumb { background: rgba(154,170,99,0.15); border-radius: 10px; }
+.rpt-risk-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.76rem;
+  color: var(--color-gray-600);
+  padding: 4px 0;
+}
+.rpt-risk-item-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.rpt-risk-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rpt-risk-item-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 50px;
+  flex-shrink: 0;
+}
+
+/* --- Enhanced Enterprise Table --- */
+.rpt-table--enterprise th {
+  padding: 14px 16px !important;
+  font-size: 0.68rem !important;
+  background: rgba(255,255,255,0.85) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 2px solid rgba(154,170,99,0.12) !important;
+}
+.rpt-table--enterprise td {
+  padding: 14px 16px !important;
+  font-size: 0.83rem !important;
+}
+.rpt-row--at-risk { background: rgba(239,68,68,0.025); }
+.rpt-row--at-risk:hover td { background: rgba(239,68,68,0.06) !important; }
+
+/* --- Workload Summary Tags --- */
+.rpt-workload-summary {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.rpt-workload-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.rpt-workload-tag--over { background: rgba(239,68,68,0.08); color: #dc2626; }
+.rpt-workload-tag--busy { background: rgba(249,115,22,0.08); color: #c2410c; }
+.rpt-workload-tag--balanced { background: rgba(34,197,94,0.08); color: #16a34a; }
+.rpt-workload-tag--under { background: rgba(182,202,237,0.12); color: #4a6fa5; }
+.rpt-workload-tag-count { font-weight: 800; font-size: 0.9rem; }
+
+/* --- Chart legend row --- */
+.rpt-legend-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.rpt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: rgba(44,40,32,0.4);
+}
+.rpt-legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
 
 /* ============================================================
    RESPONSIVE
