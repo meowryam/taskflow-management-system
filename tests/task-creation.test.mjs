@@ -53,6 +53,7 @@ test('creates the new canonical task model with multiple member IDs and timestam
     'startDate', 'dueDate', 'priority', 'status', 'createdAt', 'updatedAt'
   ]);
   assert.deepEqual(result.task.assignedMemberIds, [1, 2]);
+  assert.equal(result.task.startDate, '2030-01-10');
   assert.equal(result.task.createdAt, now.toISOString());
   assert.equal(result.task.updatedAt, now.toISOString());
   assert.equal(store.getTasks().length, 1);
@@ -93,14 +94,18 @@ test('enforces member count, available-member limit, complete selection, and uni
   assert.match(incomplete.errors.assignedMemberIds, /every assignment field/);
 });
 
-test('rejects past dates and a due date before the start date', () => {
-  const pastStart = service.createTask(validInput({ startDate: '2030-01-09' }), projects, members, now);
+test('autofills start date and rejects invalid due dates', () => {
+  const automaticStart = service.createTask(validInput({ startDate: '2040-12-31' }), projects, members, now);
+  store.saveTasks([]);
   const pastDue = service.createTask(validInput({ dueDate: '2030-01-09' }), projects, members, now);
   const reversed = service.createTask(validInput({ startDate: '2030-01-15', dueDate: '2030-01-14' }), projects, members, now);
 
-  assert.match(pastStart.errors.startDate, /before today/);
+  assert.equal(automaticStart.task.startDate, '2030-01-10');
   assert.match(pastDue.errors.dueDate, /before today/);
-  assert.match(reversed.errors.dueDate, /before the start date/);
+  assert.equal(reversed.isValid, true);
+  assert.equal(reversed.task.startDate, '2030-01-10');
+  assert.equal(reversed.task.dueDate, '2030-01-14');
+  store.saveTasks([]);
   assert.equal(store.getTasks().length, 0);
 });
 
@@ -133,7 +138,7 @@ test('normalizes legacy single-member tasks for editing and removes legacy field
   const editingInput = service.normalizeTaskForEditing(store.getTaskById(9), '2030-01-10');
 
   assert.deepEqual(editingInput.assignedMemberIds, ['2']);
-  assert.equal(editingInput.startDate, '2030-01-10');
+  assert.equal(editingInput.startDate, '2029-12-01');
 
   const result = service.editTask(9, editingInput, projects, members, now);
   const persisted = JSON.parse(storedValues.get(store.STORAGE_KEYS.TASKS))[0];

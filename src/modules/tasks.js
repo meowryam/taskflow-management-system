@@ -2,7 +2,6 @@ import {
   createTask,
   deleteTask,
   editTask,
-  getAssignedMemberIds,
   normalizeTaskForEditing
 } from './taskService.js';
 import { getTodayIso } from './taskValidation.js';
@@ -12,6 +11,8 @@ const taskSection = document.getElementById('task-creation-section');
 const availabilityMessage = document.getElementById('taskAvailabilityMessage');
 const formMessage = document.getElementById('taskFormMessage');
 const submitButton = document.getElementById('createTaskButton');
+const resetButton = document.getElementById('resetTaskButton');
+const cancelCreationButton = document.getElementById('cancelTaskCreationButton');
 const cancelEditButton = document.getElementById('cancelTaskEditButton');
 const editIndicator = document.getElementById('taskEditIndicator');
 const projectSelect = document.getElementById('taskProject');
@@ -19,7 +20,7 @@ const memberCountInput = document.getElementById('taskMemberCount');
 const memberSelections = document.getElementById('taskMemberSelections');
 const startDateInput = document.getElementById('taskStartDate');
 const dueDateInput = document.getElementById('taskDueDate');
-const testingList = document.getElementById('taskTestingList');
+const taskCardGrid = document.getElementById('taskCardGrid');
 const taskNavigation = document.getElementById('nav-tasks');
 
 let projects = [];
@@ -33,7 +34,11 @@ function normalizeReference(item, type) {
   const label = type === 'project'
     ? (item.name ?? item.projectName ?? item.title)
     : (item.name ?? item.fullName ?? item.memberName);
-  return rawId == null ? null : { id: rawId, label: label || `Unnamed ${type}` };
+  return rawId == null ? null : {
+    id: rawId,
+    label: label || `Unnamed ${type}`,
+    role: item.role ?? item.roleName ?? ''
+  };
 }
 
 function populateSelect(select, items, placeholder) {
@@ -45,13 +50,25 @@ function getCurrentMemberSelections() {
   return Array.from(memberSelections.querySelectorAll('select')).map((select) => select.value);
 }
 
+function updateMemberOptionAvailability() {
+  const selects = Array.from(memberSelections.querySelectorAll('select'));
+  const selectedIds = selects.map((select) => select.value).filter(Boolean);
+  selects.forEach((select) => {
+    Array.from(select.options).forEach((option) => {
+      option.disabled = Boolean(option.value)
+        && option.value !== select.value
+        && selectedIds.includes(option.value);
+    });
+  });
+}
+
 function renderMemberSelections(count, selectedIds = getCurrentMemberSelections()) {
   memberSelections.replaceChildren();
   if (members.length === 0) {
     memberCountInput.value = '';
     return;
   }
-  const safeCount = Math.min(Math.max(Number(count) || 1, 1), Math.max(members.length, 1));
+  const safeCount = Math.min(Math.max(Number(count) || 1, 1), members.length);
   memberCountInput.value = String(safeCount);
 
   for (let index = 0; index < safeCount; index += 1) {
@@ -68,27 +85,20 @@ function renderMemberSelections(count, selectedIds = getCurrentMemberSelections(
     wrapper.append(label, select);
     memberSelections.append(wrapper);
   }
+  updateMemberOptionAvailability();
 }
 
 function applyDateConstraints() {
   const today = getTodayIso();
-  startDateInput.min = today;
-  dueDateInput.min = startDateInput.value && startDateInput.value > today
-    ? startDateInput.value
-    : today;
+  startDateInput.value = editingTaskId === null ? today : startDateInput.value;
+  dueDateInput.min = startDateInput.value > today ? startDateInput.value : today;
 }
 
 function loadDependencies() {
   projects = globalThis.DataStore.getProjects().map((item) => normalizeReference(item, 'project')).filter(Boolean);
-  const allMembers = globalThis.DataStore.getMembers().map((item) => normalizeReference(item, 'member')).filter(Boolean);
-  const session = window.TaskFlowSession;
-
-  members = session?.role === 'Team Member'
-    ? allMembers.filter((member) => (
-      String(member.id) === String(session.memberId || session.email)
-      || member.label.toLowerCase() === String(session.email).toLowerCase()
-    ))
-    : allMembers;
+  members = globalThis.DataStore.getMembers()
+    .map((item) => normalizeReference(item, 'member'))
+    .filter(Boolean);
 
   const selectedProject = projectSelect.value;
   const selectedMembers = getCurrentMemberSelections();
@@ -100,13 +110,12 @@ function loadDependencies() {
 
   const missing = [];
   if (projects.length === 0) missing.push('projects');
-  if (members.length === 0) missing.push('members');
+  if (members.length === 0) missing.push('people');
   submitButton.disabled = missing.length > 0;
   availabilityMessage.textContent = missing.length
     ? `Task creation is unavailable until ${missing.join(' and ')} exist.`
     : '';
   applyDateConstraints();
-  renderTaskList();
 }
 
 function readForm() {
@@ -153,7 +162,9 @@ function setEditMode(taskId = null) {
   const editing = taskId !== null;
   document.getElementById('taskCreationTitle').textContent = editing ? 'Edit task' : 'Create a task';
   submitButton.textContent = editing ? 'Save Changes' : 'Create Task';
+  resetButton.hidden = editing;
   cancelEditButton.hidden = !editing;
+  cancelCreationButton.hidden = editing;
   editIndicator.hidden = !editing;
 }
 
@@ -164,6 +175,7 @@ function resetForm(options = {}) {
   clearErrors();
   memberCountInput.value = members.length ? '1' : '';
   renderMemberSelections(1, []);
+  startDateInput.value = getTodayIso();
   applyDateConstraints();
   showMessage(options.message || '', options.type || '');
 }
@@ -185,12 +197,7 @@ function handleSubmit(event) {
       showMessage(result.errors.form || 'Please correct the highlighted fields.', 'error');
       return;
     }
-
-    resetForm({
-      message: wasEditing ? 'Task updated successfully.' : 'Task created successfully.',
-      type: 'success'
-    });
-    renderTaskList();
+    resetForm({ message: wasEditing ? 'Task updated successfully.' : 'Task created successfully.', type: 'success' });
   } catch (error) {
     console.error('Task save failed.', error);
     showMessage('The task could not be saved. Check browser storage and try again.', 'error');
@@ -200,12 +207,26 @@ function handleSubmit(event) {
   }
 }
 
+function showTaskCreation(event) {
+  event?.preventDefault();
+  document.querySelectorAll('.main-content > section').forEach((section) => {
+    section.style.display = section === taskSection ? '' : 'none';
+  });
+  document.querySelector('.header__title').textContent = editingTaskId === null ? 'Create Task' : 'Edit Task';
+  document.querySelectorAll('.sidebar__item').forEach((item) => item.classList.remove('sidebar__item--active'));
+  taskNavigation?.classList.add('sidebar__item--active');
+  document.getElementById('sidebar')?.classList.remove('sidebar--open');
+  loadDependencies();
+}
+
+function showTasksView() {
+  taskNavigation?.querySelector('.sidebar__link')?.click();
+}
+
 function beginEditing(taskId) {
   const task = globalThis.DataStore.getTaskById(taskId);
-  if (!task) {
-    showMessage('Task not found.', 'error');
-    return;
-  }
+  if (!task) return;
+  showTaskCreation();
   const input = normalizeTaskForEditing(task);
   setEditMode(task.id);
   form.elements.title.value = input.title;
@@ -223,71 +244,78 @@ function beginEditing(taskId) {
   form.elements.title.focus();
 }
 
+function showDeleteDialog(task) {
+  const overlay = document.createElement('div');
+  const dialog = document.createElement('div');
+  const icon = document.createElement('span');
+  const title = document.createElement('h3');
+  const message = document.createElement('p');
+  const actions = document.createElement('div');
+  const cancelButton = document.createElement('button');
+  const deleteButton = document.createElement('button');
+  const previousFocus = document.activeElement;
+
+  overlay.className = 'task-delete-dialog';
+  dialog.className = 'task-delete-dialog__panel';
+  icon.className = 'task-delete-dialog__icon';
+  actions.className = 'task-delete-dialog__actions';
+  title.id = 'taskDeleteDialogTitle';
+  title.textContent = 'Delete this task?';
+  message.textContent = `"${task.title}" will be permanently removed. This action cannot be undone.`;
+  cancelButton.type = deleteButton.type = 'button';
+  cancelButton.className = 'task-form__button task-form__button--secondary';
+  deleteButton.className = 'task-form__button task-form__button--danger';
+  cancelButton.textContent = 'Keep Task';
+  deleteButton.textContent = 'Delete Task';
+  icon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', title.id);
+
+  function closeDialog() {
+    document.removeEventListener('keydown', handleKeydown);
+    overlay.remove();
+    previousFocus?.focus();
+  }
+
+  function handleKeydown(event) {
+    if (event.key === 'Escape') closeDialog();
+    if (event.key === 'Tab') {
+      const nextTarget = event.shiftKey ? cancelButton : deleteButton;
+      if (document.activeElement === nextTarget) {
+        event.preventDefault();
+        (event.shiftKey ? deleteButton : cancelButton).focus();
+      }
+    }
+  }
+
+  cancelButton.addEventListener('click', closeDialog);
+  deleteButton.addEventListener('click', () => {
+    deleteTask(task.id);
+    closeDialog();
+  });
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) closeDialog();
+  });
+  document.addEventListener('keydown', handleKeydown);
+  actions.append(cancelButton, deleteButton);
+  dialog.append(icon, title, message, actions);
+  overlay.append(dialog);
+  document.body.append(overlay);
+  cancelButton.focus();
+}
+
 function handleDelete(taskId) {
   const task = globalThis.DataStore.getTaskById(taskId);
-  if (!task || !window.confirm(`Delete task "${task.title}"? This cannot be undone.`)) return;
-  if (!deleteTask(taskId)) {
-    showMessage('Task could not be deleted.', 'error');
-    return;
-  }
-  if (String(editingTaskId) === String(taskId)) resetForm();
-  showMessage('Task deleted successfully.', 'success');
-  renderTaskList();
+  if (task) showDeleteDialog(task);
 }
 
-function createTaskListItem(task) {
-  const item = document.createElement('article');
-  item.className = 'task-testing-panel__item';
-  const content = document.createElement('div');
-  const title = document.createElement('h4');
-  const details = document.createElement('p');
-  const assignedNames = getAssignedMemberIds(task).map((id) => (
-    members.find((member) => String(member.id) === String(id))?.label || 'Unavailable member'
-  ));
-  title.textContent = task.title || 'Untitled task';
-  details.textContent = `${task.status} · ${task.startDate || 'No start date'} to ${task.dueDate || 'No due date'} · ${assignedNames.join(', ') || 'Unassigned'}`;
-  content.append(title, details);
-
-  const actions = document.createElement('div');
-  actions.className = 'task-testing-panel__actions';
-  const editButton = document.createElement('button');
-  const deleteButton = document.createElement('button');
-  editButton.type = deleteButton.type = 'button';
-  editButton.className = 'task-form__button task-form__button--secondary';
-  deleteButton.className = 'task-form__button task-form__button--danger';
-  editButton.textContent = 'Edit';
-  deleteButton.textContent = 'Delete';
-  editButton.addEventListener('click', () => beginEditing(task.id));
-  deleteButton.addEventListener('click', () => handleDelete(task.id));
-  actions.append(editButton, deleteButton);
-  item.append(content, actions);
-  return item;
-}
-
-function renderTaskList() {
-  if (!testingList) return;
-  testingList.replaceChildren();
-  const tasks = globalThis.DataStore.getTasks();
-  if (tasks.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'task-testing-panel__empty';
-    empty.textContent = 'No tasks have been created.';
-    testingList.append(empty);
-    return;
-  }
-  tasks.forEach((task) => testingList.append(createTaskListItem(task)));
-}
-
-function showTaskCreation(event) {
-  event?.preventDefault();
-  document.querySelectorAll('.main-content > section').forEach((section) => {
-    section.style.display = section === taskSection ? '' : 'none';
+function closeTaskMenus(exceptMenu = null) {
+  taskCardGrid?.querySelectorAll('.task-card__menu-popover:not([hidden])').forEach((menu) => {
+    if (menu === exceptMenu) return;
+    menu.hidden = true;
+    menu.previousElementSibling?.setAttribute('aria-expanded', 'false');
   });
-  document.querySelector('.header__title').textContent = editingTaskId === null ? 'Create Task' : 'Edit Task';
-  document.querySelectorAll('.sidebar__item').forEach((item) => item.classList.remove('sidebar__item--active'));
-  taskNavigation?.classList.add('sidebar__item--active');
-  document.getElementById('sidebar')?.classList.remove('sidebar--open');
-  loadDependencies();
 }
 
 if (form) {
@@ -308,13 +336,39 @@ if (form) {
   memberSelections.addEventListener('change', () => {
     document.getElementById('assignedMemberIdsError').textContent = '';
     memberSelections.querySelectorAll('select').forEach((select) => select.removeAttribute('aria-invalid'));
+    updateMemberOptionAvailability();
   });
-  startDateInput.addEventListener('change', applyDateConstraints);
-  cancelEditButton.addEventListener('click', () => resetForm({ message: 'Editing cancelled.' }));
+  cancelCreationButton.addEventListener('click', () => {
+    resetForm();
+    showTasksView();
+  });
+  cancelEditButton.addEventListener('click', () => {
+    resetForm();
+    showTasksView();
+  });
   window.showCreateTaskForm = showTaskCreation;
   window.addEventListener('taskflow:projects-changed', loadDependencies);
   window.addEventListener('taskflow:members-changed', loadDependencies);
-  window.addEventListener(globalThis.DataStore.TASKS_CHANGED_EVENT, renderTaskList);
+  taskCardGrid?.addEventListener('click', (event) => {
+    const menuTrigger = event.target.closest('.task-card__menu-trigger');
+    if (menuTrigger) {
+      const menu = menuTrigger.nextElementSibling;
+      const willOpen = menu.hidden;
+      closeTaskMenus(willOpen ? menu : null);
+      menu.hidden = !willOpen;
+      menuTrigger.setAttribute('aria-expanded', String(willOpen));
+      return;
+    }
+
+    const action = event.target.closest('[data-task-action]');
+    if (!action) return;
+    closeTaskMenus();
+    if (action.dataset.taskAction === 'edit') beginEditing(action.dataset.taskId);
+    if (action.dataset.taskAction === 'delete') handleDelete(action.dataset.taskId);
+  });
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.task-card__menu')) closeTaskMenus();
+  });
   loadDependencies();
   window.loadTaskCreationDeps = loadDependencies;
 }

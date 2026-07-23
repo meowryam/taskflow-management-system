@@ -16,8 +16,8 @@ src/
 
 ## 2. File responsibilities
 
-- `index.html` contains accessible task-form markup only.
-- `tasks.css` owns responsive task-form presentation.
+- `index.html` contains accessible task-form markup and the task-card container.
+- `tasks.css` owns responsive task-form and task-card presentation.
 - `tasks.js` populates controls, reads the form, renders validation, and coordinates submission.
 - `taskValidation.js` defines allowed statuses/priorities and validates normalized input.
 - `taskService.js` normalizes input, creates IDs/timestamps, builds the canonical task, and calls storage.
@@ -51,7 +51,7 @@ Only IDs connect a task to a project and member. Display names are resolved by c
 
 ## 5. Validation strategy
 
-Input is trimmed and normalized before validation. Title, project, member count, every generated member selection, start date, due date, priority, and status are required. References must exist, member selections must be unique, and the count cannot exceed available members. Dates must be real `YYYY-MM-DD` dates, cannot be before today, and due date cannot precede start date. The same structured validation runs for create and edit.
+Input is trimmed and normalized before validation. Title, project, member count, every generated member selection, creation date, due date, priority, and status are required. References must exist, member selections must be unique, and the count cannot exceed available members. Dates must be real `YYYY-MM-DD` dates; due dates cannot be before today or precede the creation date. The same structured validation runs for create and edit.
 
 ## 6. Storage strategy
 
@@ -59,11 +59,11 @@ The existing shared keys are `taskflow_tasks`, `taskflow_projects`, and `taskflo
 
 ## 7. HTML
 
-The form is in `index.html` under `#task-creation-section`. Labels, `aria-describedby`, live validation regions, status messages, Create Task, and Reset controls are included.
+The form is in `index.html` under `#task-creation-section`. Labels, `aria-describedby`, live validation regions, status messages, Create Task, Reset, and Cancel controls are included. Reset is hidden in edit mode.
 
 ## 8. CSS
 
-`src/styles/tasks.css` uses the existing design tokens, a two-column desktop layout, a single-column mobile layout, visible focus styles, invalid-field styling, and disabled-button feedback.
+`src/styles/tasks.css` uses the existing design tokens, responsive form and card grids, visible focus styles, invalid-field styling, and restrained status/priority treatments with inline SVG icons.
 
 ## 9. JavaScript (split by file/module)
 
@@ -325,47 +325,51 @@ When integrating scripts in the page, load `src/dataStore.js` before Task Creati
 
 ### Updated plan and responsibilities
 
-- `index.html` contains only the additional Task Creation controls: member count, generated-member host, paired dates, edit/cancel buttons, and the testing list.
+- `index.html` contains the Task Creation controls and the task-card grid used by the existing Tasks view.
 - `tasks.css` contains only Task Creation presentation changes.
 - `taskValidation.js` owns the reusable create/edit rules.
 - `taskService.js` owns normalization, legacy assignment handling, timestamps, create, edit, and delete operations.
-- `tasks.js` owns form state, dynamic dropdowns, field-error rendering, edit/cancel mode, confirmation, and testing-list refresh.
+- `tasks.js` owns form state, dynamic dropdowns, field-error rendering, edit/cancel mode, confirmation, and card-menu actions.
 - `dataStore.js` has one backward-compatible runtime alias extension so the unchanged Board can read the first new assignment. The alias is non-enumerable and is not stored.
 
 No Project, Member, Board, Report, Activity, Authentication, Dashboard, navigation, or global-style module is changed.
 
 ### Feature behavior
 
-- Start Date and Due Date are grouped under Task Schedule. Their HTML `min` values begin at today, and Due Date's minimum follows a later Start Date.
-- Member Count is limited to `1..availableMembers`. Changing it adds or removes member selects without keeping extra assignments.
-- Every selected member must exist and be unique.
+- Creation Date is automatically set to the local creation date, is read-only, and is visually secondary. Editing preserves the original date.
+- Member Count is limited to the total number of people available. All roles may be assigned. Changing the count adds or removes member selects without keeping extras.
+- Every selected member must exist and be unique. A selected member is disabled in every other assignment dropdown.
 - Create sets both timestamps. Edit preserves `createdAt` and replaces `updatedAt`.
 - Edit loads old `assignedMemberId` or `assignedUserId` values into the new array model. Saving removes the legacy persisted fields.
-- Delete requires confirmation, removes only the task, and refreshes the testing list.
+- Edit and Delete appear in each task card's three-dot menu. Delete requires confirmation and removes only the task.
+- Reset is available while creating but hidden while editing, preventing an existing task from being cleared accidentally.
+- View Tasks returns to the task-card list. Cancel Edit also returns directly to that list without saving.
+- Delete uses the TaskFlow-styled confirmation dialog instead of the browser confirmation prompt.
 - Create, update, and delete continue emitting `taskflow:tasks-changed`.
 
 ### Edge-case handling
 
-- No projects or members: creation is disabled with a message; member count also disables when no members exist.
+- No projects or people: creation is disabled with a message. Every person in the shared members collection increases assignment capacity, regardless of role.
 - Empty or missing storage: shared `DataStore` returns safe collections and the task list shows its empty state.
 - Old task structure: a single legacy assignment becomes a one-item `assignedMemberIds` array during editing.
 - Missing former member: the edit form requires a currently available replacement before saving.
-- Invalid/past/reversed dates: both HTML constraints and JavaScript validation block persistence.
+- Start Date is generated from the creation time; invalid, past, or reversed due dates are blocked.
 - Duplicate or incomplete member selections: structured field errors block persistence.
 - Member availability changes: the input maximum and rendered dropdown count are recalculated.
 - Deleting the final task: the persisted collection becomes `[]` and the empty state renders.
-- Cancelling edit: the form, errors, generated member fields, heading, and buttons return to create mode without saving.
+- View Tasks returns to the card list; cancelling edit also returns there and resets edit state without saving.
 - Refreshing: all successful changes are already in the existing LocalStorage collection.
 
 ### Manual testing
 
 1. Run `node --test --test-isolation=none tests/task-creation.test.mjs`.
-2. Open Task Creation and verify Start Date and Due Date have today's minimum.
-3. Try past dates and a due date earlier than start date; confirm field errors and no save.
-4. Change Member Count from 1 to the available maximum and back; confirm dropdowns add/remove cleanly.
-5. Select the same member twice and confirm creation is blocked.
+2. Open Task Creation and verify Creation Date is automatically populated, read-only, smaller, and gray.
+3. Try a past due date and confirm a field error and no save.
+4. Confirm Member Count includes every available person, including Admin and Manager, then change it from 1 to the available maximum and back.
+5. Select a member and confirm that member is disabled in every other assignment dropdown.
 6. Create a valid multi-member task and inspect `taskflow_tasks` for the new model and both timestamps.
 7. Edit it, change all supported values, and confirm `createdAt` is unchanged while `updatedAt` changes.
-8. Cancel another edit and confirm nothing persists.
-9. Delete a task, accept confirmation, reload, and confirm it stays deleted.
-10. Edit a legacy seeded task and confirm its single assignment loads safely into the new UI.
+8. Cancel task creation and confirm it returns to the Tasks table without saving.
+9. Use Edit and Delete from a card's three-dot menu; accept deletion, reload, and confirm it stays deleted.
+10. Open Edit and verify Reset is hidden, then cancel without saving.
+11. Edit a legacy seeded task and confirm its single assignment loads safely into the new UI.
