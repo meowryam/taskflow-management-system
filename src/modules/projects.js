@@ -17,7 +17,8 @@
 //   id: string,
 //   name: string,
 //   description: string,
-//   deadline: string,       // ISO date string, e.g. "2026-08-01"
+//   startDate: string,      // ISO date string, e.g. "2026-07-01"
+//   deadline: string,       // ISO date string, e.g. "2026-08-01" — shown in the UI as "End Date"
 //   status: "Active" | "Completed" | "On Hold",
 //   createdAt: string        // ISO datetime string
 // }
@@ -91,6 +92,7 @@ const Projects = (function () {
     const errors = {};
     const name = (input.name || "").trim();
     const description = (input.description || "").trim();
+    const startDate = (input.startDate || "").trim();
     const deadline = (input.deadline || "").trim();
     const status = input.status || "Active";
 
@@ -104,10 +106,19 @@ const Projects = (function () {
       errors.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
     }
 
+    const startDateTime = new Date(startDate).getTime();
+    if (!startDate) {
+      errors.startDate = "Start date is required.";
+    } else if (Number.isNaN(startDateTime)) {
+      errors.startDate = "Start date must be a valid date.";
+    }
+
     if (!deadline) {
       errors.deadline = "Deadline is required.";
     } else if (Number.isNaN(new Date(deadline).getTime())) {
       errors.deadline = "Deadline must be a valid date.";
+    } else if (startDate && !Number.isNaN(startDateTime) && new Date(deadline).getTime() < startDateTime) {
+      errors.deadline = "End date cannot be before the start date.";
     }
 
     if (!STATUS_OPTIONS.includes(status)) {
@@ -117,7 +128,7 @@ const Projects = (function () {
     return {
       valid: Object.keys(errors).length === 0,
       errors,
-      value: { name, description, deadline, status },
+      value: { name, description, startDate, deadline, status },
     };
   }
 
@@ -142,6 +153,7 @@ const Projects = (function () {
       id: generateId(),
       name: result.value.name,
       description: result.value.description,
+      startDate: result.value.startDate,
       deadline: result.value.deadline,
       status: result.value.status,
       createdAt: new Date().toISOString(),
@@ -170,6 +182,7 @@ const Projects = (function () {
       ...projects[index],
       name: result.value.name,
       description: result.value.description,
+      startDate: result.value.startDate,
       deadline: result.value.deadline,
       status: result.value.status,
     };
@@ -228,15 +241,130 @@ const Projects = (function () {
 
   // -- Rendering ---------------------------------------------------------------
   // Renders into whatever container element the caller hands in. This module
-  // does not create its own root, does not inject styles, and does not
-  // decide where it lives on the page — that's Day 2 integration work.
+  // does not create its own root and does not decide where it lives on the
+  // page — that's Day 2 integration work. It does inject one scoped
+  // <style> block (see injectStyles below) containing the project-card
+  // grid CSS, built entirely from Dashboard design tokens/patterns already
+  // defined in style.css (same approach members-ui.js uses for member
+  // tiles), so no shared stylesheet has to be touched.
+
+  const STYLE_ID = "pm-projects-module-styles";
+
+  // Same folder icon the Dashboard widget-empty state uses for projects,
+  // reused here so the icon language stays identical across the app.
+  const FOLDER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7C3 5.89543 3.89543 5 5 5H9L11 8H19C20.1046 8 21 8.89543 21 10V17C21 18.1046 20.1046 19 19 19H5C3.89543 19 3 18.1046 3 17V7Z"/></svg>';
+  const FOLDER_ICON_LARGE = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7C3 5.89543 3.89543 5 5 5H9L11 8H19C20.1046 8 21 8.89543 21 10V17C21 18.1046 20.1046 19 19 19H5C3.89543 19 3 18.1046 3 17V7Z"/></svg>';
+
+  function injectStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = `
+      .projects-view {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        animation: slideUpFade 0.5s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      .pm-date-row-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 14px;
+      }
+      .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 18px;
+      }
+      .project-card {
+        background: rgba(255,255,255,0.55);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.5);
+        border-radius: 18px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 12px rgba(154,170,99,0.04);
+        transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+      }
+      .project-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(154,170,99,0.1), 0 3px 8px rgba(0,0,0,0.04);
+        border-color: rgba(154,170,99,0.15);
+      }
+      .project-card__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .project-card__name {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--color-gray-800, #2c2820);
+        margin: 0;
+        overflow-wrap: break-word;
+      }
+      .project-card__description {
+        font-size: 0.82rem;
+        color: rgba(44,40,32,0.6);
+        margin: 0;
+        line-height: 1.5;
+        overflow-wrap: break-word;
+      }
+      .project-card__description--empty {
+        color: rgba(44,40,32,0.35);
+        font-style: italic;
+      }
+      .project-card__meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(154,170,99,0.12);
+      }
+      .project-card__meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .project-card__meta-label {
+        font-size: 0.66rem;
+        font-weight: 600;
+        color: rgba(44,40,32,0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .project-card__meta-value {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--color-gray-700, #423c2e);
+        overflow-wrap: break-word;
+      }
+      .project-card__actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 4px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   let container = null;
   let editingId = null;
 
   function render() {
     if (!container) return;
+    injectStyles();
     container.innerHTML = "";
+
+    const view = document.createElement("div");
+    view.className = "projects-view";
 
     const header = document.createElement("div");
     header.className = "pm-header";
@@ -255,15 +383,17 @@ const Projects = (function () {
     });
     header.appendChild(newBtn);
 
-    container.appendChild(header);
+    view.appendChild(header);
 
     const formHost = document.createElement("div");
     formHost.className = "pm-form-host";
-    container.appendChild(formHost);
+    view.appendChild(formHost);
 
     const listHost = document.createElement("div");
     listHost.className = "pm-list-host";
-    container.appendChild(listHost);
+    view.appendChild(listHost);
+
+    container.appendChild(view);
 
     renderList();
   }
@@ -272,22 +402,41 @@ const Projects = (function () {
     const formHost = container.querySelector(".pm-form-host");
     formHost.innerHTML = "";
 
+    const card = document.createElement("div");
+    card.className = "widget-card pm-form-card";
+
+    const cardHeader = document.createElement("div");
+    cardHeader.className = "widget-card__header";
+
+    const cardTitle = document.createElement("div");
+    cardTitle.className = "widget-card__title";
+    cardTitle.innerHTML = FOLDER_ICON;
+    cardTitle.appendChild(document.createTextNode(project ? "Edit Project" : "Create Project"));
+    cardHeader.appendChild(cardTitle);
+    card.appendChild(cardHeader);
+
+    const cardBody = document.createElement("div");
+    cardBody.className = "widget-card__body";
+
     const form = document.createElement("form");
     form.className = "pm-form";
     form.noValidate = true;
 
-    const heading = document.createElement("h3");
-    heading.textContent = project ? "Edit Project" : "Create Project";
-    form.appendChild(heading);
-
     const nameRow = buildFieldRow("pm-name", "Name", "input", { type: "text", value: project ? project.name : "" });
     const descRow = buildFieldRow("pm-description", "Description", "textarea", { value: project ? project.description : "" });
-    const deadlineRow = buildFieldRow("pm-deadline", "Deadline", "input", { type: "date", value: project ? project.deadline : "" });
+    const startDateRow = buildFieldRow("pm-start-date", "Start Date", "input", { type: "date", value: project ? project.startDate : "" });
+    const deadlineRow = buildFieldRow("pm-deadline", "End Date", "input", { type: "date", value: project ? project.deadline : "" });
     const statusRow = buildStatusRow(project ? project.status : "Active");
 
     form.appendChild(nameRow.row);
     form.appendChild(descRow.row);
-    form.appendChild(deadlineRow.row);
+
+    const dateGroup = document.createElement("div");
+    dateGroup.className = "pm-date-row-group";
+    dateGroup.appendChild(startDateRow.row);
+    dateGroup.appendChild(deadlineRow.row);
+    form.appendChild(dateGroup);
+
     form.appendChild(statusRow.row);
 
     const actions = document.createElement("div");
@@ -316,6 +465,7 @@ const Projects = (function () {
       const input = {
         name: nameRow.input.value,
         description: descRow.input.value,
+        startDate: startDateRow.input.value,
         deadline: deadlineRow.input.value,
         status: statusRow.select.value,
       };
@@ -334,7 +484,9 @@ const Projects = (function () {
       renderList();
     });
 
-    formHost.appendChild(form);
+    cardBody.appendChild(form);
+    card.appendChild(cardBody);
+    formHost.appendChild(card);
   }
 
   function buildFieldRow(id, labelText, tag, opts) {
@@ -383,7 +535,7 @@ const Projects = (function () {
   }
 
   function showFieldErrors(form, errors) {
-    const fieldToId = { name: "pm-name", description: "pm-description", deadline: "pm-deadline", status: "pm-status" };
+    const fieldToId = { name: "pm-name", description: "pm-description", startDate: "pm-start-date", deadline: "pm-deadline", status: "pm-status" };
     Object.keys(errors).forEach((field) => {
       const inputId = fieldToId[field];
       const input = inputId ? form.querySelector(`#${inputId}`) : null;
@@ -404,76 +556,127 @@ const Projects = (function () {
 
     const projects = getAllProjects();
 
+    const card = document.createElement("div");
+    card.className = "widget-card";
+
+    const cardHeader = document.createElement("div");
+    cardHeader.className = "widget-card__header";
+
+    const cardTitle = document.createElement("div");
+    cardTitle.className = "widget-card__title";
+    cardTitle.innerHTML = FOLDER_ICON;
+    cardTitle.appendChild(document.createTextNode("Projects"));
+    cardHeader.appendChild(cardTitle);
+
+    const badge = document.createElement("span");
+    badge.className = "widget-card__badge";
+    badge.textContent = projects.length + (projects.length === 1 ? " project" : " projects");
+    cardHeader.appendChild(badge);
+
+    card.appendChild(cardHeader);
+
+    const cardBody = document.createElement("div");
+    cardBody.className = "widget-card__body";
+
     if (projects.length === 0) {
-      const empty = document.createElement("p");
-      empty.className = "pm-empty";
-      empty.textContent = "No projects yet. Click \"New Project\" to add one.";
-      listHost.appendChild(empty);
-      return;
+      const empty = document.createElement("div");
+      empty.className = "widget-empty";
+      empty.innerHTML =
+        '<div class="widget-empty__icon">' + FOLDER_ICON_LARGE + "</div>" +
+        '<span class="widget-empty__text">No projects yet. Click "New Project" to add one.</span>';
+      cardBody.appendChild(empty);
+    } else {
+      const grid = document.createElement("div");
+      grid.className = "projects-grid";
+      projects.forEach((project) => grid.appendChild(buildProjectCard(project)));
+      cardBody.appendChild(grid);
     }
 
-    const table = document.createElement("table");
-    table.className = "pm-table";
+    card.appendChild(cardBody);
+    listHost.appendChild(card);
+  }
 
-    const thead = document.createElement("thead");
-    thead.innerHTML =
-      "<tr><th>Name</th><th>Description</th><th>Deadline</th><th>Status</th><th>Actions</th></tr>";
-    table.appendChild(thead);
+  function buildMetaItem(label, value) {
+    const item = document.createElement("div");
+    item.className = "project-card__meta-item";
 
-    const tbody = document.createElement("tbody");
+    const labelEl = document.createElement("span");
+    labelEl.className = "project-card__meta-label";
+    labelEl.textContent = label;
+    item.appendChild(labelEl);
 
-    projects.forEach((project) => {
-      const tr = document.createElement("tr");
+    const valueEl = document.createElement("span");
+    valueEl.className = "project-card__meta-value";
+    valueEl.textContent = value;
+    item.appendChild(valueEl);
 
-      const nameTd = document.createElement("td");
-      nameTd.textContent = project.name;
-      tr.appendChild(nameTd);
+    return item;
+  }
 
-      const descTd = document.createElement("td");
-      descTd.textContent = project.description;
-      tr.appendChild(descTd);
+  function buildProjectCard(project) {
+    const card = document.createElement("div");
+    card.className = "project-card";
 
-      const deadlineTd = document.createElement("td");
-      deadlineTd.textContent = formatDeadline(project.deadline);
-      if (isOverdue(project)) {
-        deadlineTd.classList.add("pm-overdue");
-        deadlineTd.textContent += " (Overdue)";
-      }
-      tr.appendChild(deadlineTd);
+    const header = document.createElement("div");
+    header.className = "project-card__header";
 
-      const statusTd = document.createElement("td");
-      const badge = document.createElement("span");
-      badge.className = statusBadgeClass(project.status);
-      badge.textContent = project.status;
-      statusTd.appendChild(badge);
-      tr.appendChild(statusTd);
+    const name = document.createElement("h3");
+    name.className = "project-card__name";
+    name.textContent = project.name;
+    header.appendChild(name);
 
-      const actionsTd = document.createElement("td");
-      actionsTd.className = "pm-actions";
+    const statusBadge = document.createElement("span");
+    statusBadge.className = statusBadgeClass(project.status);
+    statusBadge.textContent = project.status;
+    header.appendChild(statusBadge);
 
-      const editBtn = document.createElement("button");
-      editBtn.type = "button";
-      editBtn.className = "pm-btn pm-btn--secondary pm-btn--small";
-      editBtn.textContent = "Edit";
-      editBtn.addEventListener("click", () => {
-        editingId = project.id;
-        renderForm(project);
-      });
-      actionsTd.appendChild(editBtn);
+    card.appendChild(header);
 
-      const deleteBtn = document.createElement("button");
-      deleteBtn.type = "button";
-      deleteBtn.className = "pm-btn pm-btn--danger pm-btn--small";
-      deleteBtn.textContent = "Delete";
-      deleteBtn.addEventListener("click", () => handleDeleteClick(project));
-      actionsTd.appendChild(deleteBtn);
+    const desc = document.createElement("p");
+    desc.className = project.description
+      ? "project-card__description"
+      : "project-card__description project-card__description--empty";
+    desc.textContent = project.description || "No description provided.";
+    card.appendChild(desc);
 
-      tr.appendChild(actionsTd);
-      tbody.appendChild(tr);
+    const meta = document.createElement("div");
+    meta.className = "project-card__meta";
+
+    meta.appendChild(buildMetaItem("Start Date", project.startDate ? formatDeadline(project.startDate) : "Not set"));
+
+    const endDateItem = buildMetaItem("End Date", formatDeadline(project.deadline) + (isOverdue(project) ? " (Overdue)" : ""));
+    if (isOverdue(project)) {
+      endDateItem.querySelector(".project-card__meta-value").classList.add("pm-overdue");
+    }
+    meta.appendChild(endDateItem);
+
+    meta.appendChild(buildMetaItem("Created", formatDeadline(project.createdAt)));
+
+    card.appendChild(meta);
+
+    const actions = document.createElement("div");
+    actions.className = "project-card__actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "pm-btn pm-btn--secondary pm-btn--small";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", () => {
+      editingId = project.id;
+      renderForm(project);
     });
+    actions.appendChild(editBtn);
 
-    table.appendChild(tbody);
-    listHost.appendChild(table);
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "pm-btn pm-btn--danger pm-btn--small";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.addEventListener("click", () => handleDeleteClick(project));
+    actions.appendChild(deleteBtn);
+
+    card.appendChild(actions);
+
+    return card;
   }
 
   function handleDeleteClick(project) {
