@@ -1092,25 +1092,30 @@
     var html = '';
     team.forEach(function (m, i) {
       var delay = (i * 0.06) + 's';
-      var wlClass = 'reports__workload-badge--' + m.workloadLevel;
+      var wlClass = 'rpt-team-wl-badge--' + m.workloadLevel;
       var wlLabel = m.workloadLevel.charAt(0).toUpperCase() + m.workloadLevel.slice(1);
       var pctColor = m.efficiency >= 75 ? '#22c55e' : m.efficiency >= 40 ? '#f59e0b' : '#ef4444';
       var riskDot = m.overdue > 3 ? '#ef4444' : m.overdue > 0 ? '#f59e0b' : '#22c55e';
 
-      html += '<div class="reports__team-card" style="animation-delay:' + delay + '">' +
-        '<div class="reports__team-avatar" style="' + avColors[i % avColors.length] + '">' + safeHtml(m.initials) + '</div>' +
-        '<div class="reports__team-info">' +
-        '<div class="reports__team-name" title="' + safeHtml(m.name) + '">' + safeHtml(m.name) + '</div>' +
-        '<div class="reports__team-role">' + safeHtml(m.role) + '</div>' +
+      html += '<div class="rpt-team-card" style="animation-delay:' + delay + '">' +
+        '<div class="rpt-team-card__top">' +
+        '<div class="rpt-team-avatar" style="' + avColors[i % avColors.length] + '">' + safeHtml(m.initials) + '</div>' +
+        '<div class="rpt-team-info">' +
+        '<div class="rpt-team-name" title="' + safeHtml(m.name) + '">' + safeHtml(m.name) + '</div>' +
+        '<div class="rpt-team-role">' + safeHtml(m.role) + '</div>' +
         '</div>' +
-        '<div class="reports__team-stats">' +
-        '<div class="reports__team-stat"><span class="reports__team-stat-value">' + m.totalTasks + '</span><span class="reports__team-stat-label">Assigned</span></div>' +
-        '<div class="reports__team-stat"><span class="reports__team-stat-value" style="color:#22c55e">' + m.completed + '</span><span class="reports__team-stat-label">Done</span></div>' +
-        '<div class="reports__team-stat"><span class="reports__team-stat-value" style="color:#f59e0b">' + m.pendingTasks + '</span><span class="reports__team-stat-label">Pending</span></div>' +
-        '<div class="reports__team-stat"><span class="reports__team-stat-value" style="color:' + riskDot + '">' + m.overdue + '</span><span class="reports__team-stat-label">Overdue</span></div>' +
+        '<span class="rpt-team-wl-badge ' + wlClass + '">' + wlLabel + '</span>' +
         '</div>' +
-        '<div class="reports__team-pct" style="color:' + pctColor + '">' + m.efficiency + '%</div>' +
-        '<span class="reports__workload-badge ' + wlClass + '">' + wlLabel + '</span>' +
+        '<div class="rpt-team-card__stats">' +
+        '<div class="rpt-team-stat"><span class="rpt-team-stat__value">' + m.totalTasks + '</span><span class="rpt-team-stat__label">Assigned</span></div>' +
+        '<div class="rpt-team-stat"><span class="rpt-team-stat__value" style="color:#22c55e">' + m.completed + '</span><span class="rpt-team-stat__label">Done</span></div>' +
+        '<div class="rpt-team-stat"><span class="rpt-team-stat__value" style="color:#f59e0b">' + m.pendingTasks + '</span><span class="rpt-team-stat__label">Pending</span></div>' +
+        '<div class="rpt-team-stat"><span class="rpt-team-stat__value" style="color:' + riskDot + '">' + m.overdue + '</span><span class="rpt-team-stat__label">Overdue</span></div>' +
+        '</div>' +
+        '<div class="rpt-team-card__bar-wrap">' +
+        '<div class="rpt-team-card__bar"><div class="rpt-team-card__bar-fill" style="width:' + m.efficiency + '%;background:' + pctColor + '"></div></div>' +
+        '<span class="rpt-team-card__pct" style="color:' + pctColor + '">' + m.efficiency + '%</span>' +
+        '</div>' +
         '</div>';
     });
     wrap.innerHTML = html;
@@ -1164,7 +1169,7 @@
     if (badge) badge.textContent = overdue.length + ' overdue';
 
     if (overdue.length === 0) {
-      wrap.innerHTML = '<tr><td colspan="7" style="text-align:center;color:rgba(44,40,32,0.35);padding:40px 12px;">No overdue tasks. Everything is on track!</td></tr>';
+      wrap.innerHTML = '<tr><td colspan="7"><div style="display:flex;align-items:center;justify-content:center;padding:48px 12px;color:rgba(44,40,32,0.35);"><div style="text-align:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 10px;display:block;opacity:0.5;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>No overdue tasks. Everything is on track!</div></div></td></tr>';
       return;
     }
 
@@ -1213,26 +1218,32 @@
     var summaryText = generateExecutiveSummaryText(data, stats, snapshot);
     var summaryEl = document.getElementById('rptExecSummary');
     if (summaryEl) {
-      summaryEl.textContent = summaryText;
+      summaryEl.innerHTML = summaryText;
     }
   }
 
   function generateExecutiveSummaryText(data, stats, snapshot) {
-    var parts = [
-      snapshot.activeProjects + ' Active Projects',
-      snapshot.totalTasks + ' Total Tasks',
-      snapshot.completed + ' Completed',
-      snapshot.overdue + ' Overdue'
-    ];
-    var text = 'TaskFlow Summary: ' + parts.join(' · ');
+    var lines = [];
+    lines.push('<strong>' + snapshot.activeProjects + '</strong> active projects · <strong>' + snapshot.totalTasks + '</strong> total tasks · <strong>' + snapshot.completed + '</strong> completed · <strong>' + snapshot.overdue + '</strong> overdue');
 
     if (snapshot.highestWorkload && snapshot.highestWorkload.totalTasks > 0) {
-      text += '. ' + snapshot.highestWorkload.name + ' currently has the highest workload.';
+      lines.push('<strong>' + safeHtml(snapshot.highestWorkload.name) + '</strong> has the highest workload (' + snapshot.highestWorkload.totalTasks + ' tasks).');
     }
     if (snapshot.lowestProject && snapshot.lowestProject.totalTasks > 0) {
-      text += ' ' + snapshot.lowestProject.name + ' has the lowest completion rate.';
+      lines.push('<strong>' + safeHtml(snapshot.lowestProject.name) + '</strong> has the lowest completion rate (' + snapshot.lowestProject.completionRate + '%).');
     }
-    text += ' Overall project health: ' + snapshot.overallHealth.label + '.';
+    if (snapshot.projectsAtRisk > 0) {
+      lines.push('<strong>' + snapshot.projectsAtRisk + '</strong> project' + (snapshot.projectsAtRisk !== 1 ? 's' : '') + ' at risk, <strong>' + snapshot.healthyProjects + '</strong> healthy.');
+    }
+    if (snapshot.tasksDueThisWeek > 0) {
+      lines.push('<strong>' + snapshot.tasksDueThisWeek + '</strong> task' + (snapshot.tasksDueThisWeek !== 1 ? 's' : '') + ' due this week' + (snapshot.tasksDueToday > 0 ? ' (<strong>' + snapshot.tasksDueToday + '</strong> today).' : '.'));
+    }
+    lines.push('Overall project health: <strong style="color:' + (snapshot.overallHealth.level === 'good' ? '#16a34a' : snapshot.overallHealth.level === 'warning' ? '#d97706' : '#dc2626') + '">' + snapshot.overallHealth.label + '</strong>.');
+
+    var text = '';
+    lines.forEach(function (line, i) {
+      text += (i > 0 ? '<br>' : '') + line;
+    });
     return text;
   }
 
