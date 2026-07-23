@@ -2571,6 +2571,18 @@ svg {
   border-color: #423c2e !important;
 }
 
+[data-theme="dark"] .notif-item {
+  border-color: #423c2e !important;
+}
+
+[data-theme="dark"] .notif-item:hover {
+  background: #423c2e !important;
+}
+
+[data-theme="dark"] .notif-item div {
+  color: #f3ecdb !important;
+}
+
 [data-theme="dark"] .header__search-placeholder input {
   color: #f3ecdb !important;
 }
