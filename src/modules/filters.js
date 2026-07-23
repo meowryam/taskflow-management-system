@@ -1,5 +1,13 @@
 const Filters = (function () {
 
+  function getAssignedMemberIds(task) {
+    if (Array.isArray(task && task.assignedMemberIds)) {
+      return task.assignedMemberIds.filter(function (id) { return id != null; });
+    }
+    var legacyId = task && (task.assignedMemberId !== undefined ? task.assignedMemberId : task.assignedUserId);
+    return legacyId == null ? [] : [legacyId];
+  }
+
   function searchTasks(tasks, query) {
     if (!query || typeof query !== 'string' || query.trim() === '') {
       return tasks;
@@ -14,10 +22,8 @@ const Filters = (function () {
     if (projectId === null || projectId === undefined || projectId === '') {
       return tasks;
     }
-    var id = Number(projectId);
-    if (isNaN(id)) return tasks;
     return tasks.filter(function (task) {
-      return task.projectId === id;
+      return String(task.projectId) === String(projectId);
     });
   }
 
@@ -45,10 +51,10 @@ const Filters = (function () {
     if (memberId === null || memberId === undefined || memberId === '') {
       return tasks;
     }
-    var id = Number(memberId);
-    if (isNaN(id)) return tasks;
     return tasks.filter(function (task) {
-      return task.assignedUserId === id;
+      return getAssignedMemberIds(task).some(function (id) {
+        return String(id) === String(memberId);
+      });
     });
   }
 

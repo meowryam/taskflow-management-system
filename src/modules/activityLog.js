@@ -352,13 +352,8 @@ const ActivityLog = (function () {
     return { success: true };
   }
 
-  if (typeof DataStore !== 'undefined') {
-    seed();
-  } else if (typeof document !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', function () {
-      if (typeof DataStore !== 'undefined') seed();
-    });
-  }
+  // Demo seed is available via ActivityLog.seed() but does not auto-run.
+  // The activity log starts empty until real user actions are recorded.
 
   return {
     STORAGE_KEY,

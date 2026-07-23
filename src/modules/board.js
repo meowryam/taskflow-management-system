@@ -86,7 +86,6 @@
     this.bindElements();
     this.setupEventListeners();
     this.loadData();
-    this.setupNavigation();
     this.setupAutoSync();
   };
 
@@ -228,48 +227,6 @@
         self.loadData();
       });
     }
-  };
-
-  /**
-   * Seamless sidebar navigation hook
-   */
-  KanbanBoard.prototype.setupNavigation = function () {
-    var self = this;
-
-    function activateBoardView() {
-      var sections = document.querySelectorAll('.main-content > section, main > section');
-      sections.forEach(function (sec) {
-        sec.style.display = (sec.id === 'board-section') ? '' : 'none';
-      });
-
-      var headerTitle = document.querySelector('.header__title');
-      if (headerTitle) {
-        headerTitle.textContent = 'Task Board';
-      }
-
-      var navItems = document.querySelectorAll('.sidebar__item');
-      navItems.forEach(function (item) {
-        var label = item.querySelector('.sidebar__label');
-        if (label && label.textContent.trim().toLowerCase() === 'board') {
-          item.classList.add('sidebar__item--active');
-        } else {
-          item.classList.remove('sidebar__item--active');
-        }
-      });
-
-      self.loadData();
-    }
-
-    var navItems = document.querySelectorAll('.sidebar__item');
-    navItems.forEach(function (item) {
-      var label = item.querySelector('.sidebar__label');
-      if (label && label.textContent.trim().toLowerCase() === 'board') {
-        item.addEventListener('click', function (e) {
-          e.preventDefault();
-          activateBoardView();
-        });
-      }
-    });
   };
 
   KanbanBoard.prototype.getFilteredTasks = function () {
