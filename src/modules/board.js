@@ -1000,7 +1000,68 @@
       }
     }
 
+    var toastMsg = 'Task "' + (task.title || 'Untitled Task') + '" moved from ' + oldStatus + ' to ' + newStatus + ' successfully.';
+    this.showToast(toastMsg);
+
     this.renderBoard();
+  };
+
+  /**
+   * Displays a toast notification in bottom right corner upon successful status update
+   */
+  KanbanBoard.prototype.showToast = function (message) {
+    if (!message) return;
+
+    var container = document.getElementById('kanban-toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'kanban-toast-container';
+      container.className = 'kanban-toast-container';
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(container);
+    }
+
+    var toastEl = document.createElement('div');
+    toastEl.className = 'kanban-toast';
+    toastEl.setAttribute('role', 'status');
+
+    var iconSpan = document.createElement('span');
+    iconSpan.className = 'kanban-toast__icon';
+    iconSpan.textContent = '✓';
+
+    var contentDiv = document.createElement('div');
+    contentDiv.className = 'kanban-toast__content';
+    contentDiv.textContent = message;
+
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'kanban-toast__close-btn';
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Dismiss notification');
+    closeBtn.innerHTML = '&times;';
+
+    toastEl.appendChild(iconSpan);
+    toastEl.appendChild(contentDiv);
+    toastEl.appendChild(closeBtn);
+
+    container.appendChild(toastEl);
+
+    var isDismissed = false;
+
+    function dismissToast() {
+      if (isDismissed) return;
+      isDismissed = true;
+      toastEl.classList.add('kanban-toast--exiting');
+      setTimeout(function () {
+        if (toastEl.parentNode) {
+          toastEl.parentNode.removeChild(toastEl);
+        }
+      }, 260);
+    }
+
+    closeBtn.addEventListener('click', dismissToast);
+
+    setTimeout(dismissToast, 3500);
   };
 
   /**

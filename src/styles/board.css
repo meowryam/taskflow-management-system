@@ -808,3 +808,113 @@
     width: 100%;
   }
 }
+
+/* ----- 8. Toast Notification System ------------------------- */
+.kanban-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1300;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+}
+
+.kanban-toast {
+  pointer-events: auto;
+  width: 380px;
+  max-width: 100%;
+  background-color: var(--card-bg, #fffdf8);
+  border: 1px solid var(--color-gray-200, #e6dcc0);
+  border-left: 4px solid var(--color-success, #6b8e4e);
+  border-radius: var(--card-radius, 12px);
+  box-shadow: 0 8px 24px rgba(26, 23, 18, 0.12), 0 2px 6px rgba(26, 23, 18, 0.04);
+  padding: 0.875rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-family: var(--font-family);
+  color: var(--color-gray-900, #1a1712);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.kanban-toast--exiting {
+  animation: toastFadeOut 0.25s ease-in forwards;
+}
+
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+}
+
+.kanban-toast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #dcfce7;
+  color: var(--color-success, #6b8e4e);
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.kanban-toast__content {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--color-gray-800, #2c2820);
+  word-break: break-word;
+}
+
+.kanban-toast__close-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-gray-400, #a89b78);
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 1.125rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color var(--transition-fast, 0.15s ease);
+}
+
+.kanban-toast__close-btn:hover {
+  color: var(--color-gray-800, #2c2820);
+}
+
+@media (max-width: 540px) {
+  .kanban-toast-container {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+  }
+  .kanban-toast {
+    width: 100%;
+  }
+}

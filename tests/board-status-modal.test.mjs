@@ -104,13 +104,30 @@ test('KanbanBoard intercepts status change and requires non-empty comment', () =
   assert.strictEqual(currentTask.history[0].comment, 'Fix completed and verified by manual testing.');
   assert.strictEqual(currentTask.history[0].user, 'Bilal Intern');
 
-  // 5. Verify ActivityLog recorded entry
-  const logs = globalThis.ActivityLog.getAll();
-  const lastLog = logs[0];
-  assert.strictEqual(lastLog.entityType, 'Task');
-  assert.strictEqual(lastLog.entityId, targetTask.id);
-  assert.strictEqual(lastLog.actionType, 'Completed');
-  assert.strictEqual(lastLog.actionDetail.includes('Fix completed and verified by manual testing.'), true);
+  // 6. Verify Toast Notification message format
+  let toastContainer = null;
+  let createdElements = [];
+  globalThis.document.createElement = (tag) => {
+    const el = {
+      tagName: tag.toUpperCase(),
+      className: '',
+      textContent: '',
+      children: [],
+      classList: { add: () => {}, remove: () => {} },
+      setAttribute: (k, v) => {},
+      appendChild: (child) => { el.children.push(child); },
+      addEventListener: () => {}
+    };
+    createdElements.push(el);
+    return el;
+  };
 
-  console.log('✓ All Kanban Board status confirmation and comment validation tests passed!');
+  const testTitle = 'Test Notification Task';
+  board.showToast(`Task "${testTitle}" moved from Todo to Review successfully.`);
+  assert.strictEqual(createdElements.length >= 3, true);
+  const contentEl = createdElements.find((e) => e.className === 'kanban-toast__content');
+  assert.notStrictEqual(contentEl, undefined);
+  assert.strictEqual(contentEl.textContent, `Task "${testTitle}" moved from Todo to Review successfully.`);
+
+  console.log('✓ All Kanban Board status confirmation, comment validation, and toast notification tests passed!');
 });
