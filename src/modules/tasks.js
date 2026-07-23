@@ -20,8 +20,13 @@ const memberCountInput = document.getElementById('taskMemberCount');
 const memberSelections = document.getElementById('taskMemberSelections');
 const creationDateInput = document.getElementById('taskCreationDate');
 const startDateInput = document.getElementById('taskStartDate');
-const startDateHint = document.getElementById('startDateHint');
+const startDateRule = document.getElementById('startDateRule');
+const startDateReason = document.getElementById('startDateReason');
+const startDateError = document.getElementById('startDateError');
 const dueDateInput = document.getElementById('taskDueDate');
+const dueDateRule = document.getElementById('dueDateRule');
+const dueDateReason = document.getElementById('dueDateReason');
+const dueDateError = document.getElementById('dueDateError');
 const taskCardGrid = document.getElementById('taskCardGrid');
 const taskNavigation = document.getElementById('nav-tasks');
 
@@ -91,18 +96,56 @@ function renderMemberSelections(count, selectedIds = getCurrentMemberSelections(
   updateMemberOptionAvailability();
 }
 
+function formatDateLabel(dateValue) {
+  if (!dateValue) return 'not set';
+  const [year, month, day] = dateValue.split('-').map(Number);
+  return new Intl.DateTimeFormat(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  }).format(new Date(year, month - 1, day));
+}
+
+function showDateConstraintError(input, errorElement, minimumDate, fieldLabel) {
+  const isBeforeMinimum = input.value && input.value < minimumDate;
+  if (isBeforeMinimum) {
+    errorElement.textContent = `${fieldLabel} must be ${formatDateLabel(minimumDate)} or later.`;
+    errorElement.dataset.constraintError = 'true';
+    input.setAttribute('aria-invalid', 'true');
+  } else if (input.value || errorElement.dataset.constraintError === 'true') {
+    errorElement.textContent = '';
+    delete errorElement.dataset.constraintError;
+    input.removeAttribute('aria-invalid');
+  }
+}
+
 function applyDateConstraints() {
   const today = getTodayIso();
   const selectedProject = projects.find((project) => String(project.id) === projectSelect.value);
   const projectStartDate = selectedProject?.startDate || '';
 
   if (editingTaskId === null) creationDateInput.value = today;
-  if (projectStartDate) startDateInput.min = projectStartDate;
-  else startDateInput.removeAttribute('min');
-  startDateHint.textContent = projectStartDate
-    ? `Must be on or after the project start date: ${projectStartDate}.`
-    : 'Select a project to see its earliest start date.';
-  dueDateInput.min = startDateInput.value > today ? startDateInput.value : today;
+  const creationDate = creationDateInput.value || today;
+  const earliestStartDate = projectStartDate > creationDate ? projectStartDate : creationDate;
+  const earliestDueDate = startDateInput.value > earliestStartDate
+    ? startDateInput.value
+    : earliestStartDate;
+
+  startDateInput.min = earliestStartDate;
+  startDateRule.textContent = `Choose ${formatDateLabel(earliestStartDate)} or any later date.`;
+  startDateReason.textContent = projectStartDate
+    ? `Task created ${formatDateLabel(creationDate)}. ${selectedProject.label} starts ${formatDateLabel(projectStartDate)}.`
+    : `Task created ${formatDateLabel(creationDate)}. Select a project to confirm its schedule.`;
+  dueDateInput.min = earliestDueDate;
+  dueDateRule.textContent = `Choose ${formatDateLabel(earliestDueDate)} or any later date.`;
+  dueDateReason.textContent = startDateInput.value
+    ? `This follows the selected task start date: ${formatDateLabel(startDateInput.value)}.`
+    : projectStartDate
+      ? 'Choose a task start date first; the due-date limit will update automatically.'
+      : 'Select a project and task start date first; this limit will update automatically.';
+
+  showDateConstraintError(startDateInput, startDateError, earliestStartDate, 'Start date');
+  showDateConstraintError(dueDateInput, dueDateError, earliestDueDate, 'Due date');
 }
 
 function loadDependencies() {
@@ -352,7 +395,8 @@ if (form) {
     updateMemberOptionAvailability();
   });
   projectSelect.addEventListener('change', applyDateConstraints);
-  startDateInput.addEventListener('change', applyDateConstraints);
+  startDateInput.addEventListener('input', applyDateConstraints);
+  dueDateInput.addEventListener('input', applyDateConstraints);
   cancelCreationButton.addEventListener('click', () => {
     resetForm();
     showTasksView();
