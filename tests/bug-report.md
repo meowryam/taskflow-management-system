@@ -1,254 +1,312 @@
-# Bug Report
+# TaskFlow Management System — Bug Report
 
-## Bug 1
+## 1. Test Information
 
-### Title
-Projects page does not open
+| Field | Details |
+|---|---|
+| Project | TaskFlow Management System |
+| Tester | Intern 11 — QA & Manual Testing |
+| Group | Beta |
+| Roles Tested | Team Member, Admin, and Manager |
+| Testing Type | Manual Functional and Regression Testing |
+| Environment | Windows, Google Chrome |
+| Application URL | `http://localhost:8000` |
+| Test Date | July 23, 2026 |
 
-### Module
-Projects
+---
 
-### Severity
-High
+# 2. Open Bugs
 
-### Priority
-High
+## BUG-001 — Google Login Is Not Implemented
+
+| Field | Details |
+|---|---|
+| Module | Authentication |
+| Roles | All Roles |
+| Severity | Low |
+| Priority | Low |
+| Status | Open |
+
+### Preconditions
+
+- The Login page is open.
 
 ### Steps to Reproduce
-1. Open TaskFlow.
-2. Click **Projects** from the left navigation menu.
+
+1. Open the TaskFlow Login page.
+2. Click the Google Login button.
 
 ### Expected Result
-The Projects page should open and display project management options.
+
+Google authentication should start and allow the user to sign in using a
+Google account.
 
 ### Actual Result
-Nothing happens when the Projects menu is clicked.
 
-### Status
-Open
+Google authentication is not implemented.
 
 ---
 
-## Bug 2
+## BUG-002 — Incorrect Role Displayed for Team Member
 
-### Title
-Tasks page does not open
+| Field | Details |
+|---|---|
+| Module | Dashboard |
+| Role | Team Member |
+| Severity | Medium |
+| Priority | Medium |
+| Status | Open |
 
-### Module
-Tasks
+### Preconditions
 
-### Severity
-High
-
-### Priority
-High
+- A Team Member account is available.
 
 ### Steps to Reproduce
-1. Open TaskFlow.
-2. Click **Tasks**.
+
+1. Log in as a Team Member.
+2. Open the Dashboard.
+3. Review the account name and role displayed in the sidebar or header.
 
 ### Expected Result
-The Tasks page should load.
+
+The interface should display the logged-in Team Member's name and role.
 
 ### Actual Result
-Nothing happens.
 
-### Status
-Open
+The interface displays **Admin User** or **Administrator**.
 
 ---
 
-## Bug 3
+## BUG-003 — Team Member Profile Icon Does Not Open a Menu
 
-### Title
-Board page does not open
-
-### Module
-Board
-
-### Severity
-High
-
-### Priority
-High
+| Field | Details |
+|---|---|
+| Module | Dashboard |
+| Role | Team Member |
+| Severity | Low |
+| Priority | Low |
+| Status | Open |
 
 ### Steps to Reproduce
-1. Open TaskFlow.
-2. Click **Board**.
+
+1. Log in as a Team Member.
+2. Open the Dashboard.
+3. Click the Profile icon.
 
 ### Expected Result
-The Kanban board should load.
+
+A profile or account menu should open.
 
 ### Actual Result
-Nothing happens.
 
-### Status
-Open
+Nothing happens when the icon is clicked.
 
 ---
 
-## Bug 4
+## BUG-004 — Team Member Board Changes Do Not Persist
 
-### Title
-Members page does not open
+| Field | Details |
+|---|---|
+| Module | Board |
+| Role | Team Member |
+| Severity | Medium |
+| Priority | Medium |
+| Status | Open |
 
-### Module
-Members
+### Preconditions
 
-### Severity
-High
-
-### Priority
-High
+- At least one task is displayed on the Board.
 
 ### Steps to Reproduce
-1. Open TaskFlow.
-2. Click **Members**.
+
+1. Log in as a Team Member.
+2. Open the Board.
+3. Drag a task into a different status column.
+4. Verify that the task moves.
+5. Refresh the browser.
+6. Return to the Board if redirected.
 
 ### Expected Result
-Members page should load.
+
+The updated task status and position should remain saved after refresh.
 
 ### Actual Result
-Nothing happens.
 
-### Status
-Open
+The Board returns to its previous or default state, and the task movement is
+not retained.
 
 ---
 
-## Bug 5
+## BUG-005 — Team Member Project Dropdown Is Empty
 
-### Title
-Reports page does not open
+| Field | Details |
+|---|---|
+| Module | Prompt Builder |
+| Role | Team Member |
+| Severity | High |
+| Priority | High |
+| Status | Open |
 
-### Module
-Reports
+### Preconditions
 
-### Severity
-High
-
-### Priority
-High
+- The user is logged in as a Team Member.
+- Projects exist in the system.
 
 ### Steps to Reproduce
-1. Open TaskFlow.
-2. Click **Reports**.
+
+1. Open the Prompt Builder.
+2. Click the Project dropdown.
 
 ### Expected Result
-Reports page should load.
+
+Projects available to the Team Member should appear in the dropdown.
 
 ### Actual Result
-Nothing happens.
 
-### Status
-Open
+The Project dropdown is empty.
 
 ---
 
-## Bug 6
+## BUG-006 — Team Member Cannot Generate a Prompt
 
-### Title
-Activity Log page does not open
+| Field | Details |
+|---|---|
+| Module | Prompt Builder |
+| Role | Team Member |
+| Severity | High |
+| Priority | High |
+| Status | Open |
 
-### Module
-Activity Log
+### Preconditions
 
-### Severity
-High
-
-### Priority
-High
+- The user is logged in as a Team Member.
+- The Prompt Builder is open.
 
 ### Steps to Reproduce
-1. Open TaskFlow.
-2. Click **Activity Log**.
+
+1. Select a Prompt Type.
+2. Enter the required information.
+3. Attempt to select a Project.
+4. Click Generate Prompt.
 
 ### Expected Result
-Activity Log page should load.
+
+The Team Member should be able to select a Project and generate a prompt.
 
 ### Actual Result
-Nothing happens.
 
-### Status
-Open
+Prompt generation cannot continue because the required Project dropdown does
+not contain any projects.
+
+### Related Bug
+
+- BUG-005 — Team Member Project Dropdown Is Empty.
 
 ---
 
-## Bug 7
+## BUG-007 — Admin Profile Icon Does Not Open a Menu
 
-### Title
-Prompt Builder only partially saves data after page refresh
-
-### Module
-Prompt Builder
-
-### Severity
-Medium
-
-### Priority
-Medium
+| Field | Details |
+|---|---|
+| Module | Dashboard |
+| Role | Admin |
+| Severity | Low |
+| Priority | Low |
+| Status | Open |
 
 ### Steps to Reproduce
-1. Open Prompt Builder.
-2. Select **Documentation** as Prompt Type.
-3. Enter a Project Name.
-4. Enter a Main Task.
-5. Generate a prompt.
-6. Refresh the page.
-7. Return to Prompt Builder.
+
+1. Log in as Admin.
+2. Open the Dashboard.
+3. Click the Profile icon.
 
 ### Expected Result
-All entered information and generated prompt should remain after refresh.
+
+A profile or account menu should open.
 
 ### Actual Result
-Only the selected Prompt Type remained. Project Name, Main Task and generated prompt were cleared.
 
-### Status
-Open
+Nothing happens when the Profile icon is clicked.
 
 ---
 
-## Observation (Not a Bug)
+## BUG-008 — Manager Profile Icon Does Not Open a Menu
 
-### Title
-Required field validation works correctly
+| Field | Details |
+|---|---|
+| Module | Dashboard |
+| Role | Manager |
+| Severity | Low |
+| Priority | Low |
+| Status | Open |
 
-### Observation
-When Prompt Type, Project / Module Name and Main Task are left empty, the application correctly displays validation messages and prevents prompt generation.
+### Steps to Reproduce
 
-### Result
-Pass
+1. Log in as Manager.
+2. Open the Dashboard.
+3. Click the Profile icon.
+
+### Expected Result
+
+A profile or account menu should open.
+
+### Actual Result
+
+Nothing happens when the Profile icon is clicked.
 
 ---
 
-## Observation (Expected Behaviour)
+# 3. Open Bug Summary
 
-### Title
-Optional fields accept free-form text
+| Bug ID | Module | Role | Severity | Status |
+|---|---|---|---|---|
+| BUG-001 | Authentication | All Roles | Low | Open |
+| BUG-002 | Dashboard | Team Member | Medium | Open |
+| BUG-003 | Dashboard | Team Member | Low | Open |
+| BUG-004 | Board | Team Member | Medium | Open |
+| BUG-005 | Prompt Builder | Team Member | High | Open |
+| BUG-006 | Prompt Builder | Team Member | High | Open |
+| BUG-007 | Dashboard | Admin | Low | Open |
+| BUG-008 | Dashboard | Manager | Low | Open |
 
-### Observation
-Technology Stack, Context, Constraints and Edge Cases fields accept letters, numbers and special characters.
+## Severity Summary
 
-### Result
-Expected behaviour because these fields are optional.
+| Severity | Count |
+|---|---:|
+| Critical | 0 |
+| High | 2 |
+| Medium | 2 |
+| Low | 4 |
+| **Total** | **8** |
 
 ---
 
-## Suggested Enhancement
+# 4. Resolved Issues
 
-### Title
-Improve validation for optional fields
+## RESOLVED-001 — Dashboard Search Was Non-Functional
 
-### Suggestion
-Although optional fields do not require validation, the application could improve usability by:
+**Status:** Verified Fixed
 
-- Adding maximum character limits.
-- Trimming unnecessary whitespace.
-- Displaying example placeholder text.
-- Warning users when meaningless input (for example random characters) is entered.
+Dashboard Search now accepts input and works correctly.
 
-### Priority
-Low
+---
 
-### Type
-Enhancement
+## RESOLVED-002 — Notification Bell Was Non-Functional
+
+**Status:** Verified Fixed
+
+The Notification Bell now responds correctly.
+
+---
+
+## RESOLVED-003 — Create Task Button Was Non-Functional
+
+**Status:** Verified Fixed
+
+The Create Task form opens correctly when the application is served through a
+local HTTP server.
+
+### Correct Run Method
+
+```bash
+python -m http.server 8000
