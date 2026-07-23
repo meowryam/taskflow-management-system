@@ -53,6 +53,12 @@ const Members = (function () {
    * Returns { success: true, member } or { success: false, error }
    */
   function addMember(name, role, email) {
+    if (window.Permissions && window.TaskFlowSession) {
+      if (!window.Permissions.check(window.TaskFlowSession.role, "manage_team")) {
+        return { success: false, error: "You don't have permission to add members." };
+      }
+    }
+
     const members = DataStore.getMembers();
 
     if (!name || !name.trim()) {
@@ -89,6 +95,12 @@ const Members = (function () {
    * Returns { success: true, member } or { success: false, error }
    */
   function editMember(id, name, role, email) {
+    if (window.Permissions && window.TaskFlowSession) {
+      if (!window.Permissions.check(window.TaskFlowSession.role, "manage_team")) {
+        return { success: false, error: "You don't have permission to edit members." };
+      }
+    }
+
     const members = DataStore.getMembers();
     const member = members.find((m) => m.id === id);
 

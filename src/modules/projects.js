@@ -83,7 +83,18 @@ const Projects = (function () {
   function getRelatedTaskCount(projectId) {
     const tasks = storage.readCollection(TASKS_KEY);
     if (!Array.isArray(tasks)) return 0;
-    return tasks.filter((t) => t && t.projectId === projectId).length;
+    return tasks.filter(
+      (t) => t && String(t.projectId) === String(projectId)
+    ).length;
+  }
+
+  function hasPermission(permission) {
+    if (!window.Permissions || !window.TaskFlowSession) return true;
+    return window.Permissions.check(window.TaskFlowSession.role, permission);
+  }
+
+  function permissionError(message) {
+    return { valid: false, errors: { _: message } };
   }
 
   // -- Validation ----------------------------------------------------------
@@ -145,6 +156,10 @@ const Projects = (function () {
   }
 
   function createProject(input) {
+    if (!hasPermission("create_project")) {
+      return permissionError("You don't have permission to create projects.");
+    }
+
     const result = validateProject(input);
     if (!result.valid) return result;
 
@@ -169,6 +184,10 @@ const Projects = (function () {
   }
 
   function updateProject(id, input) {
+    if (!hasPermission("edit_project")) {
+      return permissionError("You don't have permission to edit projects.");
+    }
+
     const result = validateProject(input);
     if (!result.valid) return result;
 
@@ -197,12 +216,26 @@ const Projects = (function () {
   }
 
   function deleteProjectById(id) {
+    if (!hasPermission("delete_project")) {
+      return { success: false, error: "You don't have permission to delete projects." };
+    }
+
+    const relatedCount = getRelatedTaskCount(id);
+    if (relatedCount > 0) {
+      return {
+        success: false,
+        error: `Cannot delete this project: ${relatedCount} task(s) still reference it. Reassign or delete those tasks first.`,
+        taskCount: relatedCount,
+      };
+    }
+
     const project = loadProjects().find((p) => p.id === id) || null;
     const projects = loadProjects().filter((p) => p.id !== id);
     saveProjects(projects);
     if (project && typeof ActivityLog !== 'undefined') {
       ActivityLog.logProjectDeleted(project);
     }
+    return { success: true };
   }
 
   // -- Deadline / status helpers ---------------------------------------------
@@ -381,7 +414,9 @@ const Projects = (function () {
       editingId = null;
       renderForm(null);
     });
-    header.appendChild(newBtn);
+    if (hasPermission("create_project")) {
+      header.appendChild(newBtn);
+    }
 
     view.appendChild(header);
 
@@ -657,43 +692,53 @@ const Projects = (function () {
     const actions = document.createElement("div");
     actions.className = "project-card__actions";
 
-    const editBtn = document.createElement("button");
-    editBtn.type = "button";
-    editBtn.className = "pm-btn pm-btn--secondary pm-btn--small";
-    editBtn.textContent = "Edit";
-    editBtn.addEventListener("click", () => {
-      editingId = project.id;
-      renderForm(project);
-    });
-    actions.appendChild(editBtn);
+    if (hasPermission("edit_project")) {
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "pm-btn pm-btn--secondary pm-btn--small";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => {
+        editingId = project.id;
+        renderForm(project);
+      });
+      actions.appendChild(editBtn);
+    }
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.type = "button";
-    deleteBtn.className = "pm-btn pm-btn--danger pm-btn--small";
-    deleteBtn.textContent = "Delete";
-    deleteBtn.addEventListener("click", () => handleDeleteClick(project));
-    actions.appendChild(deleteBtn);
+    if (hasPermission("delete_project")) {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "pm-btn pm-btn--danger pm-btn--small";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.addEventListener("click", () => handleDeleteClick(project));
+      actions.appendChild(deleteBtn);
+    }
 
-    card.appendChild(actions);
+    if (actions.childElementCount > 0) {
+      card.appendChild(actions);
+    }
 
     return card;
   }
 
   function handleDeleteClick(project) {
     const relatedCount = getRelatedTaskCount(project.id);
-    let confirmed;
     if (relatedCount > 0) {
-      confirmed = window.confirm(
+      window.alert(
         `"${project.name}" has ${relatedCount} related task${relatedCount === 1 ? "" : "s"}. ` +
-          "Deleting this project will not delete those tasks automatically, but they will be left pointing at a missing project. Continue?"
+          "Delete or reassign those tasks before removing this project."
       );
-    } else {
-      confirmed = window.confirm(`Delete project "${project.name}"? This cannot be undone.`);
+      return;
     }
 
+    const confirmed = window.confirm(`Delete project "${project.name}"? This cannot be undone.`);
     if (!confirmed) return;
 
-    deleteProjectById(project.id);
+    const result = deleteProjectById(project.id);
+    if (result && result.success === false && result.error) {
+      window.alert(result.error);
+      return;
+    }
+
     renderList();
   }
 
