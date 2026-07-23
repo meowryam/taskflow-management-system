@@ -13,11 +13,15 @@
   var COLUMNS = ['Todo', 'In Progress', 'Review', 'Done'];
 
   var STATUS_ICONS = {
-    'Todo': '📝',
-    'In Progress': '⚡',
-    'Review': '🔍',
-    'Done': '✅'
+    'Todo': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    'In Progress': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    'Review': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    'Done': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
   };
+
+  function statusIconHtml(status) {
+    return STATUS_ICONS[status] || STATUS_ICONS.Todo;
+  }
 
   /**
    * Formats ISO or YYYY-MM-DD date into "DD MMM YYYY" (e.g. 24 Jul 2026)
@@ -279,7 +283,7 @@
 
     var iconSpan = document.createElement('span');
     iconSpan.className = 'kanban-column__icon';
-    iconSpan.textContent = STATUS_ICONS[status] || '📋';
+    iconSpan.innerHTML = statusIconHtml(status);
     titleGroup.appendChild(iconSpan);
 
     var title = document.createElement('h3');
@@ -327,7 +331,7 @@
       var emptyEl = document.createElement('div');
       emptyEl.className = 'kanban-empty';
       emptyEl.innerHTML = 
-        '<div class="kanban-empty__icon">' + (STATUS_ICONS[status] || '📋') + '</div>' +
+        '<div class="kanban-empty__icon">' + statusIconHtml(status) + '</div>' +
         '<div class="kanban-empty__text">No tasks in ' + status + '</div>';
       list.appendChild(emptyEl);
     } else {
@@ -671,12 +675,6 @@
         DataStore.updateTask(taskId, { status: newStatus });
       } else if (typeof DataStore.saveTasks === 'function') {
         DataStore.saveTasks(this.tasks);
-      }
-
-      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-        window.dispatchEvent(new CustomEvent('taskflow:tasks-changed', {
-          detail: { action: 'board_move', taskId: taskId }
-        }));
       }
     }
 

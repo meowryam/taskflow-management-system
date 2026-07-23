@@ -1523,7 +1523,7 @@
 
   function showEmptyState() {
     var sections = [
-      'rptStatsSection', 'rptChartsSection', 'rptExecSection',
+      'rptHeaderSection', 'rptStatsSection', 'rptChartsSection', 'rptExecSection',
       'rptInsightsSection', 'rptProjectTableSection',
       'rptTeamSection', 'rptDeadlinesSection', 'rptOverdueSection',
       'rptDeliverySection', 'rptRiskSection'
@@ -1540,7 +1540,7 @@
 
   function hideEmptyState() {
     var sections = [
-      'rptStatsSection', 'rptChartsSection', 'rptExecSection',
+      'rptHeaderSection', 'rptStatsSection', 'rptChartsSection', 'rptExecSection',
       'rptInsightsSection', 'rptProjectTableSection',
       'rptTeamSection', 'rptDeadlinesSection', 'rptOverdueSection'
     ];

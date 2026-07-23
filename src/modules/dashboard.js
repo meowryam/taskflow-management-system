@@ -63,9 +63,11 @@
   function renderGreeting() {
     var el = document.getElementById('dashboardGreeting');
     if (!el) return;
+    var session = getSession();
+    var name = session && session.name ? session.name : '';
     var h = new Date().getHours();
     var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-    el.textContent = g + '!';
+    el.textContent = name ? g + ', ' + name + '!' : g + '!';
   }
 
   /* ── Mini Calendar ─────────────────────────────────────── */
@@ -269,7 +271,6 @@
       'background:linear-gradient(135deg,#c4b5fd,#ddd6fe)',
       'background:linear-gradient(135deg,#fdba74,#fed7aa)'
     ];
-    var statuses = ['online', 'online', 'online', 'busy'];
 
     var html = '';
     members.forEach(function (m, i) {
@@ -277,9 +278,8 @@
       var name = m.name || 'Unknown';
       var role = m.role || 'Member';
       var bg = avColors[i % avColors.length];
-      var st = statuses[i % statuses.length];
       html += '<div class="team-member-row">' +
-        '<div class="team-member-row__avatar team-member-row__avatar--' + st + '" style="' + bg + '">' + safeHtml(ini) + '</div>' +
+        '<div class="team-member-row__avatar" style="' + bg + '">' + safeHtml(ini) + '</div>' +
         '<div class="team-member-row__info">' +
         '<div class="team-member-row__name">' + safeHtml(name) + '</div>' +
         '<div class="team-member-row__role">' + safeHtml(role) + '</div>' +
@@ -339,40 +339,18 @@
     deadlineList.innerHTML = html;
   }
 
-  /* ── Activity Timeline ─────────────────────────────────── */
-  function renderActivityTimeline() {
-    var timeline = document.getElementById('activityTimeline');
-    var countEl = document.getElementById('activityCount');
-    if (!timeline) return;
-
-    var activities = (window.ActivityLog && window.ActivityLog.getActivities) ? window.ActivityLog.getActivities() : [];
-    if (countEl) countEl.textContent = activities.length + ' update' + (activities.length !== 1 ? 's' : '');
-
-    if (activities.length === 0) {
-      timeline.innerHTML = '<div class="activity-empty">' +
-        '<div class="activity-empty__icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>' +
-        '<p class="activity-empty__text">No recent activity yet</p>' +
-        '<p class="activity-empty__hint">Activity will appear here as your team works</p></div>';
-      return;
+  /* ── Core Refresh ──────────────────────────────────────── */
+  function updateNavBadges(activeTasks, totalProjects) {
+    var dashBadge = document.getElementById('navDashboardBadge');
+    if (dashBadge) {
+      dashBadge.textContent = String(totalProjects);
     }
-
-    var getRelativeTime = window.ActivityLog ? window.ActivityLog.getRelativeTime : function (t) { return t; };
-    var html = '';
-    activities.slice(0, 20).forEach(function (a, i) {
-      var delay = (i * 0.05) + 's';
-      html += '<div class="activity-item" style="animation-delay:' + delay + '">' +
-        '<div class="activity-item__avatar" style="' + (a.avatarColor || 'background:linear-gradient(135deg,#9AAA63,#b8c88a)') + '">' + safeHtml(a.userInitials || '?') + '</div>' +
-        '<div class="activity-item__content">' +
-        '<div class="activity-item__text"><strong>' + safeHtml(a.userName || 'Someone') + '</strong> ' + safeHtml(a.description || 'made a change') + ' <strong>' + safeHtml(a.entityName || '') + '</strong>' + (a.extra ? ' ' + safeHtml(a.extra) : '') + '</div>' +
-        '<div class="activity-item__meta">' +
-        '<span class="activity-item__time">' + getRelativeTime(a.timestamp) + '</span>' +
-        '<span class="activity-item__badge activity-item__badge--' + (a.badgeType || 'created') + '">' + (a.badgeType || 'created') + '</span>' +
-        '</div></div></div>';
-    });
-    timeline.innerHTML = html;
+    var tasksBadge = document.getElementById('navTasksBadge');
+    if (tasksBadge) {
+      tasksBadge.textContent = String(activeTasks);
+    }
   }
 
-  /* ── Core Refresh ──────────────────────────────────────── */
   function refresh() {
     var store = globalThis.DataStore;
     if (!store) return;
@@ -414,6 +392,7 @@
     setText('statActiveTasks', String(activeTasks));
     setText('statTeamMembers', String(teamMembers));
     setText('statCompletedWeek', String(completedThisWeek));
+    updateNavBadges(activeTasks, totalProjects);
 
     updateWeeklyChart(visibleTasks);
     updateTaskDistribution(visibleTasks);

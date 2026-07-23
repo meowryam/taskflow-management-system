@@ -260,16 +260,32 @@ const ActivityLog = (function () {
       });
     }
 
-    const oldIds = getAssignedIds(existingTask).map(String).sort().join(',');
-    const newIds = getAssignedIds(updatedTask).map(String).sort().join(',');
-    if (oldIds !== newIds) {
-      getAssignedIds(updatedTask).forEach(function (memberId) {
-        record({
-          entityType: 'Task',
-          entityId: updatedTask.id,
-          actionType: 'Assigned',
-          actionDetail: 'Task "' + title + '" was assigned to ' + getMemberName(memberId) + '.'
-        });
+    const oldAssigneeIds = getAssignedIds(existingTask).map(String);
+    const newAssigneeIds = getAssignedIds(updatedTask).map(String);
+    const oldIdSet = new Set(oldAssigneeIds);
+    const newIdSet = new Set(newAssigneeIds);
+    const assigneesChanged = oldAssigneeIds.sort().join(',') !== newAssigneeIds.sort().join(',');
+
+    if (assigneesChanged) {
+      newAssigneeIds.forEach(function (memberId) {
+        if (!oldIdSet.has(String(memberId))) {
+          record({
+            entityType: 'Task',
+            entityId: updatedTask.id,
+            actionType: 'Assigned',
+            actionDetail: 'Task "' + title + '" was assigned to ' + getMemberName(memberId) + '.'
+          });
+        }
+      });
+      oldAssigneeIds.forEach(function (memberId) {
+        if (!newIdSet.has(String(memberId))) {
+          record({
+            entityType: 'Task',
+            entityId: updatedTask.id,
+            actionType: 'Updated',
+            actionDetail: 'Task "' + title + '" was unassigned from ' + getMemberName(memberId) + '.'
+          });
+        }
       });
     }
 
@@ -282,7 +298,7 @@ const ActivityLog = (function () {
       otherChanged
       && existingTask.status === updatedTask.status
       && existingTask.priority === updatedTask.priority
-      && oldIds === newIds
+      && !assigneesChanged
     ) {
       record({
         entityType: 'Task',
@@ -331,6 +347,15 @@ const ActivityLog = (function () {
     });
   }
 
+  function logMemberUpdated(member) {
+    record({
+      entityType: 'Member',
+      entityId: member.id,
+      actionType: 'Updated',
+      actionDetail: 'Member "' + member.name + '" was updated.'
+    });
+  }
+
   function logMemberDeleted(member) {
     record({
       entityType: 'Member',
@@ -373,6 +398,7 @@ const ActivityLog = (function () {
     logTaskDeleted,
     logStatusChanged,
     logMemberAdded,
+    logMemberUpdated,
     logMemberDeleted
   };
 })();
