@@ -304,6 +304,121 @@
     return calcMemberWorkload(tasks, members);
   }
 
+  function calcProjectHealth(projects, tasks) {
+    return projects.map(function (p) {
+      var projTasks = tasks.filter(function (t) { return String(t.projectId) === String(p.id); });
+      var done = projTasks.filter(function (t) { return (t.status || '').toLowerCase() === 'done'; }).length;
+      var pending = projTasks.filter(function (t) { return (t.status || '').toLowerCase() === 'todo'; }).length;
+      var inProgress = projTasks.filter(function (t) {
+        var s = (t.status || '').toLowerCase();
+        return s === 'in progress' || s === 'in-progress';
+      }).length;
+      var review = projTasks.filter(function (t) { return (t.status || '').toLowerCase() === 'review'; }).length;
+      var overdue = projTasks.filter(function (t) {
+        if ((t.status || '').toLowerCase() === 'done') return false;
+        if (!t.dueDate) return false;
+        return new Date(t.dueDate) < getToday();
+      }).length;
+      var highPri = projTasks.filter(function (t) { return (t.priority || '').toLowerCase() === 'high'; }).length;
+      var total = projTasks.length;
+      var completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+      // Health score: 100-based
+      var healthScore = 100;
+      if (overdue > 3) healthScore -= 30;
+      else if (overdue > 1) healthScore -= 15;
+      else if (overdue > 0) healthScore -= 5;
+      if (total > 0 && completionRate < 25) healthScore -= 25;
+      else if (total > 0 && completionRate < 50) healthScore -= 10;
+      if (highPri > 0 && total > 0 && completionRate < 50) healthScore -= 10;
+      healthScore = Math.max(0, Math.min(100, healthScore));
+
+      // Risk level
+      var riskLevel;
+      if (overdue >= 5 || (total > 0 && completionRate < 20)) riskLevel = 'critical';
+      else if (overdue >= 3 || (total > 0 && completionRate < 40)) riskLevel = 'high';
+      else if (overdue >= 1 || (total > 0 && completionRate < 60)) riskLevel = 'medium';
+      else riskLevel = 'low';
+
+      // Health ring color
+      var healthColor;
+      if (healthScore >= 80) healthColor = 'green';
+      else if (healthScore >= 50) healthColor = 'amber';
+      else healthColor = 'red';
+
+      return {
+        id: p.id,
+        name: p.name || 'Untitled',
+        status: p.status || 'Active',
+        deadline: p.deadline || null,
+        total: total,
+        done: done,
+        pending: pending,
+        inProgress: inProgress,
+        review: review,
+        overdue: overdue,
+        highPriority: highPri,
+        completionRate: completionRate,
+        healthScore: healthScore,
+        riskLevel: riskLevel,
+        healthColor: healthColor,
+        priorityDist: {
+          high: highPri,
+          medium: projTasks.filter(function (t) { return (t.priority || '').toLowerCase() === 'medium'; }).length,
+          low: projTasks.filter(function (t) { return (t.priority || '').toLowerCase() === 'low'; }).length
+        }
+      };
+    }).sort(function (a, b) { return a.riskLevel === 'critical' || a.riskLevel === 'high' ? -1 : b.completionRate - a.completionRate; });
+  }
+
+  function calcDeliveryAnalytics(tasks) {
+    var today = getToday();
+    var weekStart = getWeekStart();
+    var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    var completedToday = tasks.filter(function (t) {
+      if ((t.status || '').toLowerCase() !== 'done') return false;
+      if (!t.createdAt) return false;
+      var d = new Date(t.createdAt);
+      return d >= today;
+    }).length;
+
+    var completedThisWeek = tasks.filter(function (t) {
+      if ((t.status || '').toLowerCase() !== 'done') return false;
+      if (!t.createdAt) return false;
+      var d = new Date(t.createdAt);
+      return d >= weekStart;
+    }).length;
+
+    var completedThisMonth = tasks.filter(function (t) {
+      if ((t.status || '').toLowerCase() !== 'done') return false;
+      if (!t.createdAt) return false;
+      var d = new Date(t.createdAt);
+      return d >= monthStart;
+    }).length;
+
+    var overdueCount = calcOverdueCount(tasks);
+    var upcomingCount = tasks.filter(function (t) {
+      if ((t.status || '').toLowerCase() === 'done') return false;
+      if (!t.dueDate) return false;
+      var d = daysBetween(today, t.dueDate);
+      return d >= 0 && d <= 7;
+    }).length;
+
+    var totalCompleted = tasks.filter(function (t) { return (t.status || '').toLowerCase() === 'done'; }).length;
+    var deliveryRate = tasks.length > 0 ? Math.round((totalCompleted / tasks.length) * 100) : 0;
+
+    return {
+      completedToday: completedToday,
+      completedThisWeek: completedThisWeek,
+      completedThisMonth: completedThisMonth,
+      overdueCount: overdueCount,
+      upcomingCount: upcomingCount,
+      totalCompleted: totalCompleted,
+      deliveryRate: deliveryRate
+    };
+  }
+
   function generateExecutiveSnapshot(data, stats) {
     var tasks = data.tasks;
     var projects = data.projects;
@@ -791,6 +906,21 @@
         '</div>';
     });
     html += '</div>';
+
+    var overCount = workload.filter(function (w) { return w.workloadLevel === 'overloaded'; }).length;
+    var busyCount = workload.filter(function (w) { return w.workloadLevel === 'busy'; }).length;
+    var balancedCount = workload.filter(function (w) { return w.workloadLevel === 'balanced'; }).length;
+    var lightCount = workload.filter(function (w) { return w.workloadLevel === 'light'; }).length;
+    var avg = workload.length > 0 ? Math.round(workload.reduce(function (s, w) { return s + w.totalTasks; }, 0) / workload.length * 10) / 10 : 0;
+
+    html += '<div class="rpt-workload-summary">';
+    if (overCount > 0) html += '<span class="rpt-workload-tag rpt-workload-tag--over"><span class="rpt-workload-tag-count">' + overCount + '</span> Overloaded</span>';
+    if (busyCount > 0) html += '<span class="rpt-workload-tag rpt-workload-tag--busy"><span class="rpt-workload-tag-count">' + busyCount + '</span> Busy</span>';
+    if (balancedCount > 0) html += '<span class="rpt-workload-tag rpt-workload-tag--balanced"><span class="rpt-workload-tag-count">' + balancedCount + '</span> Balanced</span>';
+    if (lightCount > 0) html += '<span class="rpt-workload-tag rpt-workload-tag--under"><span class="rpt-workload-tag-count">' + lightCount + '</span> Light</span>';
+    html += '<span class="rpt-workload-tag" style="background:rgba(154,170,99,0.06);color:#7a8a4a;">Avg <span class="rpt-workload-tag-count">' + avg + '</span> tasks/member</span>';
+    html += '</div>';
+
     wrap.innerHTML = html;
   }
 
@@ -846,7 +976,7 @@
     var badge = document.getElementById('rptProjectTableBadge');
     if (!wrap) return;
 
-    var progress = calcProjectProgress(data.projects, data.tasks);
+    var progress = calcProjectHealth(data.projects, data.tasks);
 
     if (badge) badge.textContent = progress.length + ' project' + (progress.length !== 1 ? 's' : '');
 
@@ -863,18 +993,24 @@
       var highH = Math.round((p.priorityDist.high / maxPri) * 100);
       var medH = Math.round((p.priorityDist.medium / maxPri) * 100);
       var lowH = Math.round((p.priorityDist.low / maxPri) * 100);
+      var riskClass = (p.riskLevel === 'critical' || p.riskLevel === 'high') ? ' rpt-row--at-risk' : '';
+      var healthRingClass = p.healthColor === 'green' ? 'rpt-health-score-ring--green' : p.healthColor === 'amber' ? 'rpt-health-score-ring--amber' : 'rpt-health-score-ring--red';
 
-      html += '<tr style="animation:slideLeftFade 0.4s cubic-bezier(0.16,1,0.3,1) ' + delay + ' both">' +
+      html += '<tr class="' + riskClass + '" style="animation:slideLeftFade 0.4s cubic-bezier(0.16,1,0.3,1) ' + delay + ' both">' +
         '<td><span class="reports__table-name">' + safeHtml(p.name) + '</span></td>' +
         '<td><span class="pm-badge ' + getProjectStatusClass(p.status) + '">' + safeHtml(p.status) + '</span></td>' +
+        '<td><span class="rpt-risk-badge rpt-risk-badge--' + p.riskLevel + '">' + p.riskLevel + '</span></td>' +
+        '<td>' +
+        '<div class="rpt-health-score"><span class="rpt-health-score-ring ' + healthRingClass + '">' + p.healthScore + '</span></div>' +
+        '</td>' +
         '<td>' +
         '<div class="reports__mini-progress">' +
         '<div class="reports__mini-progress-bar"><div class="reports__mini-progress-fill" style="width:' + p.completionRate + '%;background:' + pctColor + ';transition-delay:' + delay + '"></div></div>' +
         '<span class="reports__mini-progress-pct" style="color:' + pctColor + '">' + p.completionRate + '%</span>' +
         '</div>' +
         '</td>' +
-        '<td>' + p.totalTasks + '</td>' +
-        '<td style="color:#22c55e;font-weight:600;">' + p.completed + '</td>' +
+        '<td>' + p.total + '</td>' +
+        '<td style="color:#22c55e;font-weight:600;">' + p.done + '</td>' +
         '<td style="color:#f59e0b;font-weight:600;">' + p.pending + '</td>' +
         '<td style="color:#ef4444;font-weight:600;">' + p.overdue + '</td>' +
         '<td>' +
@@ -895,7 +1031,20 @@
     var badge = document.getElementById('rptTeamBadge');
     if (!wrap) return;
 
-    var team = calcTeamPerformance(data.tasks, data.projects, data.members);
+    var team = calcMemberWorkload(data.tasks, data.members);
+
+    // Calculate overdue per member
+    var today = getToday();
+    team.forEach(function (m) {
+      m.overdue = data.tasks.filter(function (t) {
+        if (String(t.assignedUserId) !== String(m.id)) return false;
+        if ((t.status || '').toLowerCase() === 'done') return false;
+        if (!t.dueDate) return false;
+        return new Date(t.dueDate) < today;
+      }).length;
+      // Efficiency: completion rate weighted by task count
+      m.efficiency = m.totalTasks > 0 ? Math.round((m.completed / m.totalTasks) * 100) : 0;
+    });
 
     if (badge) badge.textContent = team.length + ' member' + (team.length !== 1 ? 's' : '');
 
@@ -918,7 +1067,8 @@
       var delay = (i * 0.06) + 's';
       var wlClass = 'reports__workload-badge--' + m.workloadLevel;
       var wlLabel = m.workloadLevel.charAt(0).toUpperCase() + m.workloadLevel.slice(1);
-      var pctColor = m.completionRate >= 75 ? '#22c55e' : m.completionRate >= 40 ? '#f59e0b' : '#ef4444';
+      var pctColor = m.efficiency >= 75 ? '#22c55e' : m.efficiency >= 40 ? '#f59e0b' : '#ef4444';
+      var riskDot = m.overdue > 3 ? '#ef4444' : m.overdue > 0 ? '#f59e0b' : '#22c55e';
 
       html += '<div class="reports__team-card" style="animation-delay:' + delay + '">' +
         '<div class="reports__team-avatar" style="' + avColors[i % avColors.length] + '">' + safeHtml(m.initials) + '</div>' +
@@ -930,8 +1080,9 @@
         '<div class="reports__team-stat"><span class="reports__team-stat-value">' + m.totalTasks + '</span><span class="reports__team-stat-label">Assigned</span></div>' +
         '<div class="reports__team-stat"><span class="reports__team-stat-value" style="color:#22c55e">' + m.completed + '</span><span class="reports__team-stat-label">Done</span></div>' +
         '<div class="reports__team-stat"><span class="reports__team-stat-value" style="color:#f59e0b">' + m.pendingTasks + '</span><span class="reports__team-stat-label">Pending</span></div>' +
+        '<div class="reports__team-stat"><span class="reports__team-stat-value" style="color:' + riskDot + '">' + m.overdue + '</span><span class="reports__team-stat-label">Overdue</span></div>' +
         '</div>' +
-        '<div class="reports__team-pct" style="color:' + pctColor + '">' + m.completionRate + '%</div>' +
+        '<div class="reports__team-pct" style="color:' + pctColor + '">' + m.efficiency + '%</div>' +
         '<span class="reports__workload-badge ' + wlClass + '">' + wlLabel + '</span>' +
         '</div>';
     });
@@ -1093,6 +1244,113 @@
     wrap.innerHTML = html;
   }
 
+  function renderDeliveryAnalytics(data) {
+    var wrap = document.getElementById('rptDeliveryRow');
+    if (!wrap) return;
+    var dl = calcDeliveryAnalytics(data.tasks);
+
+    var cards = [
+      { id: 'rptDeliveryToday', icon: 'today', value: dl.completedToday, label: 'Completed Today' },
+      { id: 'rptDeliveryWeek', icon: 'week', value: dl.completedThisWeek, label: 'Completed This Week' },
+      { id: 'rptDeliveryMonth', icon: 'month', value: dl.completedThisMonth, label: 'Completed This Month' },
+      { id: 'rptDeliveryOverdue', icon: 'overdue', value: dl.overdueCount, label: 'Tasks Overdue' }
+    ];
+
+    var icons = {
+      today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      week: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>',
+      month: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+      overdue: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>'
+    };
+
+    var html = '';
+    cards.forEach(function (c, i) {
+      html += '<div class="rpt-delivery-card" style="animation-delay:' + (i * 0.08) + 's">' +
+        '<div class="rpt-delivery-icon rpt-delivery-icon--' + c.icon + '">' + (icons[c.icon] || '') + '</div>' +
+        '<div class="rpt-delivery-info">' +
+        '<div class="rpt-delivery-value" id="' + c.id + '">' + c.value + '</div>' +
+        '<div class="rpt-delivery-label">' + c.label + '</div>' +
+        '</div></div>';
+    });
+    if (wrap.innerHTML !== html) wrap.innerHTML = html;
+  }
+
+  function renderRiskAnalysis(data) {
+    var wrap = document.getElementById('rptRiskGrid');
+    if (!wrap) return;
+
+    var health = calcProjectHealth(data.projects, data.tasks);
+    var workload = calcMemberWorkload(data.tasks, data.members);
+
+    var atRiskProjects = health.filter(function (h) { return h.riskLevel === 'critical' || h.riskLevel === 'high'; });
+    var overloadedMembers = workload.filter(function (w) { return w.workloadLevel === 'overloaded'; });
+    var noActivityProjects = health.filter(function (h) { return h.total === 0; });
+
+    var cards = [
+      {
+        title: 'Projects at Risk',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>',
+        iconColor: '#ef4444',
+        iconBg: 'rgba(239,68,68,0.06)',
+        count: atRiskProjects.length,
+        desc: 'Critical or high-risk projects',
+        items: atRiskProjects.slice(0, 5),
+        itemDot: '#ef4444',
+        itemBadgeClass: 'rpt-risk-badge--critical'
+      },
+      {
+        title: 'Overloaded Members',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+        iconColor: '#f59e0b',
+        iconBg: 'rgba(245,158,11,0.06)',
+        count: overloadedMembers.length,
+        desc: 'Members with 8+ assigned tasks',
+        items: overloadedMembers.slice(0, 5),
+        itemDot: '#f59e0b',
+        itemBadgeClass: 'rpt-risk-badge--high'
+      },
+      {
+        title: 'No Activity',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>',
+        iconColor: '#9ca3af',
+        iconBg: 'rgba(156,163,175,0.06)',
+        count: noActivityProjects.length,
+        desc: 'Projects without tasks',
+        items: noActivityProjects.slice(0, 5),
+        itemDot: '#9ca3af',
+        itemBadgeClass: 'rpt-risk-badge--low'
+      }
+    ];
+
+    var html = '';
+    cards.forEach(function (c, i) {
+      var delay = (i * 0.08) + 's';
+      html += '<div class="rpt-risk-card" style="animation-delay:' + delay + '">' +
+        '<div class="rpt-risk-card-header">' +
+        '<span class="rpt-risk-card-title" style="color:' + c.iconColor + '">' + c.icon + safeHtml(c.title) + '</span>' +
+        '</div>' +
+        '<div class="rpt-risk-card-count" style="color:' + c.iconColor + '">' + c.count + '</div>' +
+        '<div class="rpt-risk-card-desc">' + c.desc + '</div>';
+
+      if (c.items.length > 0) {
+        html += '<div class="rpt-risk-card-list">';
+        c.items.forEach(function (item) {
+          var name = item.name || 'Unknown';
+          var badgeText = item.riskLevel ? item.riskLevel.toUpperCase() : (item.totalTasks + ' tasks');
+          html += '<div class="rpt-risk-item">' +
+            '<span class="rpt-risk-item-dot" style="background:' + c.itemDot + '"></span>' +
+            '<span class="rpt-risk-item-name" title="' + safeHtml(name) + '">' + safeHtml(name) + '</span>' +
+            '<span class="rpt-risk-item-badge ' + c.itemBadgeClass + '">' + badgeText + '</span>' +
+            '</div>';
+        });
+        html += '</div>';
+      }
+
+      html += '</div>';
+    });
+    wrap.innerHTML = html;
+  }
+
   /* ═══════════════════════════════════════════════════════════
      EXPORT FEATURES
      ═══════════════════════════════════════════════════════════ */
@@ -1240,7 +1498,8 @@
     var sections = [
       'rptStatsSection', 'rptChartsSection', 'rptExecSection',
       'rptInsightsSection', 'rptProjectTableSection',
-      'rptTeamSection', 'rptDeadlinesSection', 'rptOverdueSection'
+      'rptTeamSection', 'rptDeadlinesSection', 'rptOverdueSection',
+      'rptDeliverySection', 'rptRiskSection'
     ];
     sections.forEach(function (id) {
       var el = document.getElementById(id);
@@ -1313,6 +1572,8 @@
     renderExecutiveSnapshot(data, stats, snapshot);
     renderSmartInsights(data, stats, snapshot);
     renderProjectProgressChart(data);
+    renderDeliveryAnalytics(data);
+    renderRiskAnalysis(data);
   }
 
   /* ═══════════════════════════════════════════════════════════

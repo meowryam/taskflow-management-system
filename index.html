@@ -1370,6 +1370,18 @@
             <div id="rptExecSummary" style="text-align:center;color:rgba(44,40,32,0.4);font-size:0.8rem;margin-top:10px;"></div>
           </div>
 
+          <!-- Delivery Analytics -->
+          <div id="rptDeliverySection">
+            <div class="rpt-section-header">
+              <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                Delivery Analytics
+              </h3>
+              <p>High-level metrics for deliverables completed today, this week, this month, and tasks overdue.</p>
+            </div>
+            <div class="rpt-delivery-row" id="rptDeliveryRow"></div>
+          </div>
+
           <!-- Filters -->
           <div class="reports__filters" id="rptFilters">
             <div class="reports__filter-group reports__filter-group--wide">
@@ -1530,11 +1542,13 @@
               <span class="reports__table-badge" id="rptProjectTableBadge">0 projects</span>
             </div>
             <div class="reports__table-scroll">
-              <table class="reports__table">
+              <table class="reports__table rpt-table--enterprise">
                 <thead>
                   <tr>
                     <th>Project</th>
                     <th>Status</th>
+                    <th>Risk Level</th>
+                    <th>Health</th>
                     <th>Completion</th>
                     <th>Total Tasks</th>
                     <th>Completed</th>
@@ -1545,7 +1559,7 @@
                   </tr>
                 </thead>
                 <tbody id="rptProjectTableBody">
-                  <tr><td colspan="9" style="text-align:center;color:rgba(44,40,32,0.35);padding:40px 12px;">No projects found</td></tr>
+                  <tr><td colspan="11" style="text-align:center;color:rgba(44,40,32,0.35);padding:40px 12px;">No projects found</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1607,6 +1621,23 @@
               </div>
               <div class="reports__chart-body">
                 <div class="reports__team-grid" id="rptTeamPerformance"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Risk Analysis -->
+          <div id="rptRiskSection">
+            <div class="rpt-section-header">
+              <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+                Risk Analysis
+              </h3>
+              <p>Automatic detection of projects at risk, overloaded team members, and inactive projects.</p>
+            </div>
+            <div class="rpt-risk-grid" id="rptRiskGrid">
+              <div class="widget-empty" style="grid-column:1/-1;">
+                <div class="widget-empty__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div>
+                <span class="widget-empty__text">No risks detected</span>
               </div>
             </div>
           </div>
