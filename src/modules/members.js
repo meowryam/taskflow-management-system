@@ -5,10 +5,24 @@
  *
  * Uses the existing global DataStore (see src/dataStore.js) for persistence.
  * Member shape matches DataStore's seed data: { id, name, email, role, initials }
- * Tasks link to members via task.assignedUserId (confirmed from dataStore.js seed).
+ * Tasks link to members via assignedMemberIds[] (canonical) or legacy assignedUserId.
  */
 
 const Members = (function () {
+  function getAssignedMemberIds(task) {
+    if (Array.isArray(task?.assignedMemberIds)) {
+      return task.assignedMemberIds.filter((id) => id != null);
+    }
+    const legacyId = task?.assignedMemberId ?? task?.assignedUserId;
+    return legacyId == null ? [] : [legacyId];
+  }
+
+  function taskIncludesMember(task, memberId) {
+    return getAssignedMemberIds(task).some(
+      (id) => String(id) === String(memberId)
+    );
+  }
+
   // ---------- Validation ----------
 
   function isValidEmail(email) {
@@ -108,7 +122,7 @@ const Members = (function () {
    */
   function getAssignedTaskCount(memberId) {
     const tasks = DataStore.getTasks();
-    return tasks.filter((task) => task.assignedUserId === memberId).length;
+    return tasks.filter((task) => taskIncludesMember(task, memberId)).length;
   }
 
   /**
@@ -118,7 +132,7 @@ const Members = (function () {
   function getActiveTasksForMember(memberId) {
     const tasks = DataStore.getTasks();
     return tasks.filter(
-      (task) => task.assignedUserId === memberId && task.status !== "Done"
+      (task) => taskIncludesMember(task, memberId) && task.status !== "Done"
     );
   }
 

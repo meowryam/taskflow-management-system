@@ -25,16 +25,28 @@
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  function getAssignedMemberIds(task) {
+    if (Array.isArray(task && task.assignedMemberIds)) {
+      return task.assignedMemberIds.filter(function (id) { return id != null; });
+    }
+    var legacyId = task && (task.assignedMemberId !== undefined ? task.assignedMemberId : task.assignedUserId);
+    return legacyId == null ? [] : [legacyId];
+  }
+
+  function taskIncludesMember(task, memberId) {
+    return getAssignedMemberIds(task).some(function (id) {
+      return String(id) === String(memberId);
+    });
+  }
+
   /* ── Role-based filtering ──────────────────────────────── */
   function filterTasksByRole(tasks) {
     var session = getSession();
     if (!session) return tasks;
     if (session.role !== 'Team Member') return tasks;
-    if (!session.memberId) return tasks.filter(function (t) {
-      return String(t.assignedUserId) === String(session.email);
-    });
+    var memberKey = session.memberId || session.email;
     return tasks.filter(function (t) {
-      return String(t.assignedUserId) === String(session.memberId);
+      return taskIncludesMember(t, memberKey);
     });
   }
 
@@ -57,7 +69,7 @@
   }
 
   /* ── Mini Calendar ─────────────────────────────────────── */
-  function renderCalendar() {
+  function renderCalendar(tasks) {
     var now = new Date();
     var year = now.getFullYear();
     var month = now.getMonth();
@@ -78,17 +90,17 @@
     for (var i = 0; i < firstDay; i++) {
       html += '<span class="calendar-mini__day calendar-mini__day--empty">0</span>';
     }
-    // Mark days that have task deadlines as having events
-    var store = globalThis.DataStore;
     var deadlineDays = {};
-    if (store) {
-      var tasks = store.getTasks();
-      tasks.forEach(function (t) {
-        if (t.dueDate && month === new Date(t.dueDate).getMonth() && year === new Date(t.dueDate).getFullYear()) {
-          deadlineDays[new Date(t.dueDate).getDate()] = true;
-        }
-      });
+    var calendarTasks = tasks;
+    if (!calendarTasks) {
+      var store = globalThis.DataStore;
+      calendarTasks = store ? filterTasksByRole(store.getTasks()) : [];
     }
+    calendarTasks.forEach(function (t) {
+      if (t.dueDate && month === new Date(t.dueDate).getMonth() && year === new Date(t.dueDate).getFullYear()) {
+        deadlineDays[new Date(t.dueDate).getDate()] = true;
+      }
+    });
     for (var d = 1; d <= daysInMonth; d++) {
       var cls = 'calendar-mini__day';
       if (d === today) { cls += ' calendar-mini__day--today'; }
@@ -370,17 +382,21 @@
     var allProjects = store.getProjects();
     var allMembers = store.getMembers();
 
-    var visibleProjects, visibleTasks, teamMembers;
+    var visibleProjects, visibleTasks, teamMembers, visibleMembersList;
 
     if (session && session.role === 'Team Member') {
       visibleTasks = filterTasksByRole(allTasks);
       visibleProjects = filterProjectsByRole(allProjects, visibleTasks);
-      teamMembers = session.memberId
-        ? allMembers.filter(function (m) { return String(m.id) === String(session.memberId); }).length
-        : 1;
+      visibleMembersList = session.memberId
+        ? allMembers.filter(function (m) { return String(m.id) === String(session.memberId); })
+        : allMembers.filter(function (m) {
+          return session.email && m.email && m.email.toLowerCase() === session.email.toLowerCase();
+        });
+      teamMembers = visibleMembersList.length || 1;
     } else {
       visibleTasks = allTasks;
       visibleProjects = allProjects;
+      visibleMembersList = allMembers;
       teamMembers = allMembers.length;
     }
 
@@ -399,6 +415,14 @@
     setText('statTeamMembers', String(teamMembers));
     setText('statCompletedWeek', String(completedThisWeek));
 
+    updateWeeklyChart(visibleTasks);
+    updateTaskDistribution(visibleTasks);
+    updateProgress(visibleTasks);
+    updateProjectProgress(visibleProjects, visibleTasks);
+    updateTeamMembers(visibleMembersList);
+    updateDeadlines(visibleTasks);
+    renderCalendar(visibleTasks);
+
     if (globalThis.ActivityLogUI && typeof globalThis.ActivityLogUI.renderDashboardFeed === 'function') {
       globalThis.ActivityLogUI.renderDashboardFeed();
     }
@@ -408,7 +432,6 @@
   function init() {
     renderGreeting();
     refresh();
-    renderCalendar();
   }
 
   if (document.readyState === 'loading') {
@@ -417,8 +440,8 @@
     init();
   }
 
-  document.addEventListener('taskflow:tasks-changed', refresh);
-  document.addEventListener('taskflow:members-changed', refresh);
-  document.addEventListener('taskflow:projects-changed', refresh);
-  document.addEventListener('taskflow:activity-changed', refresh);
+  window.addEventListener('taskflow:tasks-changed', refresh);
+  window.addEventListener('taskflow:members-changed', refresh);
+  window.addEventListener('taskflow:projects-changed', refresh);
+  window.addEventListener('taskflow:activity-changed', refresh);
 })();
