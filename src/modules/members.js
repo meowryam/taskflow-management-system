@@ -15,9 +15,11 @@ const Members = (function () {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  function isDuplicateEmail(email, members) {
+  function isDuplicateEmail(email, members, excludeId) {
     return members.some(
-      (m) => m.email.toLowerCase() === email.toLowerCase()
+      (m) =>
+        m.id !== excludeId &&
+        m.email.toLowerCase() === email.toLowerCase()
     );
   }
 
@@ -63,6 +65,42 @@ const Members = (function () {
       ActivityLog.logMemberAdded(newMember);
     }
     return { success: true, member: newMember };
+  }
+
+  /**
+   * Updates an existing member's name, role and email.
+   * Re-runs the same validation as addMember, but excludes the member
+   * being edited from the duplicate-email check so keeping their own
+   * email is allowed. Initials are recomputed from the new name.
+   * Returns { success: true, member } or { success: false, error }
+   */
+  function editMember(id, name, role, email) {
+    const members = DataStore.getMembers();
+    const member = members.find((m) => m.id === id);
+
+    if (!member) {
+      return { success: false, error: "Member not found." };
+    }
+    if (!name || !name.trim()) {
+      return { success: false, error: "Name is required." };
+    }
+    if (!email || !isValidEmail(email)) {
+      return { success: false, error: "A valid email is required." };
+    }
+    if (isDuplicateEmail(email, members, id)) {
+      return { success: false, error: "A member with this email already exists." };
+    }
+
+    member.name = name.trim();
+    member.role = role ? role.trim() : "Team Member";
+    member.email = email.trim();
+    member.initials = getInitials(name);
+
+    DataStore.saveMembers(members);
+    if (typeof ActivityLog !== 'undefined' && typeof ActivityLog.logMemberUpdated === 'function') {
+      ActivityLog.logMemberUpdated(member);
+    }
+    return { success: true, member };
   }
 
   /**
@@ -134,6 +172,7 @@ const Members = (function () {
 
   return {
     addMember,
+    editMember,
     deleteMember,
     getAllMembers,
     getAssignedTaskCount,

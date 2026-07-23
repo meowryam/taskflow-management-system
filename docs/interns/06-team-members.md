@@ -120,3 +120,77 @@ tasks — the latter must be blocked with a warning, not silently allowed.
   per the assignment's constraint-based prompting requirement.
 - The module does not modify the existing application shell or routing
   script; it self-registers into the existing "Members" sidebar link.
+
+---
+
+# Enhancement: Dashboard UI Alignment (+ Edit & Delete Confirmation)
+
+## GitHub Issue
+**Issue Link:** <add issue link>
+
+## Branch
+**Branch Name:** `feature/members-dashboard-ui-alignment`
+
+## Pull Request
+**PR Link:** <add PR link>
+
+## Objective
+Update the Team Members UI so it matches the Dashboard design system, and
+add the missing edit-member capability plus a styled delete-confirmation
+dialog — without breaking existing functionality or the self-contained
+navigation hook.
+
+## Files Modified
+- `src/modules/members.js`
+- `src/modules/members-ui.js`
+
+## Features Implemented
+- Restyled the view to reuse the Dashboard design system: `.widget-card`
+  shells, `.widget-empty` empty state, `.pm-btn` buttons, and design
+  tokens (`--color-primary`, `--color-gray-*`, `--color-danger`).
+- Scoped `.member-tile` grid with Dashboard-style gradient avatars, sized
+  for multi-line content so it does not reintroduce the old `.stat-card`
+  overflow bug.
+- Edit member via a single Add/Edit form toggle, backed by a new
+  `editMember()` in `members.js` with a self-excluding duplicate-email
+  check (keeping a member's own email is allowed) and recomputed initials.
+- Styled delete-confirmation dialog (glass card overlay) replacing the
+  native `alert()`; the active-task safety-check error is shown inside the
+  dialog.
+- Empty state ("No members yet") when the team is empty.
+- Fixed `navigateTo('members')` so the Dashboard quick action renders the
+  populated view instead of a blank section (navigation is now hooked on
+  the `#nav-members` list item).
+
+## AI Tool Used
+- Cursor (Claude model)
+
+## Prompting Techniques Used
+- Role-based
+- Context-rich
+- Constraint-based
+- Phased workflow (analysis → issue → plan → implementation)
+
+## AI Mistake Found
+- `editMember()` needs the duplicate-email check to exclude the member
+  being edited; a naive reuse of the add-time check would falsely reject
+  saving a member without changing their email. This was called out and
+  handled by passing an `excludeId` into the duplicate check.
+
+## Manual Fix
+- <add any manual adjustments made during review, or "None">
+
+## Testing Performed
+- [ ] Add member (valid) shows tile with correct initials and gradient avatar
+- [ ] Validation: blank name, invalid email, and duplicate email are rejected
+- [ ] Edit member updates name/role/email and recomputes initials
+- [ ] Editing while keeping the member's own email is allowed
+- [ ] Delete opens the styled dialog; Cancel / Escape / overlay click aborts
+- [ ] Confirming delete removes a member with no active tasks
+- [ ] Deleting a member with active (non-Done) tasks is blocked, error in dialog
+- [ ] Empty state shows when zero members remain
+- [ ] `navigateTo('members')` quick action renders the populated view
+- [ ] Responsive: tiles wrap with no horizontal overflow at 400px / 768px / 1024px+
+
+## Screenshots
+(Add before/after screenshots here)
