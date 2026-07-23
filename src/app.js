@@ -15,15 +15,18 @@
 
     try {
       var members = store.getMembers();
+      var normalizedEmail = session.email ? session.email.trim().toLowerCase() : '';
       var existing = members.find(function (m) {
-        return m.email && m.email.toLowerCase() === session.email.toLowerCase();
+        return m.email && normalizedEmail && m.email.trim().toLowerCase() === normalizedEmail;
       });
       if (existing) return existing.id;
+
+      if (!normalizedEmail) return null;
 
       var newMember = {
         id: Date.now(),
         name: session.name,
-        email: session.email,
+        email: session.email.trim(),
         role: session.role,
         initials: getInitials(session.name),
       };
@@ -39,8 +42,17 @@
     var nameEl = document.getElementById('headerUserName');
     if (nameEl) nameEl.textContent = session.name + ' (' + session.role + ')';
 
-    var greetingEl = document.getElementById('dashboardGreeting');
-    if (greetingEl) greetingEl.textContent = 'Welcome back, ' + session.name + '!';
+    var sidebarName = document.getElementById('sidebarUserName');
+    if (sidebarName) sidebarName.textContent = session.name;
+
+    var sidebarRole = document.getElementById('sidebarUserRole');
+    if (sidebarRole) sidebarRole.textContent = session.role;
+
+    var sidebarAvatar = document.getElementById('sidebarUserAvatar');
+    if (sidebarAvatar) {
+      sidebarAvatar.innerHTML = getInitials(session.name);
+      sidebarAvatar.setAttribute('aria-label', session.name + ' avatar');
+    }
   }
 
   function initLogout() {

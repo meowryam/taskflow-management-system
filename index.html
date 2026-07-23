@@ -36,7 +36,7 @@
       cursor: pointer; border: 1px solid transparent; transition: 0.15s ease;
     }
     .pm-btn--primary {
-      background: var(--color-primary, #6b7a3a); color: #fff; border-color: var(--color-primary, #6b7a3a);
+      background: var(--color-primary, #9AAA63); color: #fff; border-color: var(--color-primary, #9AAA63);
     }
     .pm-btn--primary:hover { opacity: 0.9; }
     .pm-btn--secondary {
@@ -102,7 +102,7 @@
     .tasks-view__header h2 { margin: 0; font-size: var(--font-size-xl, 1.5rem); }
     .tasks-view__create-btn {
       padding: 8px 18px; border-radius: 6px; font-size: 14px; font-weight: 600;
-      cursor: pointer; background: var(--color-primary, #6b4f2a); color: #fff;
+      cursor: pointer; background: var(--color-primary, #9AAA63); color: #fff;
       border: none; transition: 0.15s ease;
     }
     .tasks-view__create-btn:hover { opacity: 0.9; }
@@ -316,7 +316,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           <span class="header__breadcrumb-item header__breadcrumb-item--active">Dashboard</span>
         </nav>
-        <h1 class="header__title" style="display:none;">Dashboard</h1>
+        <h1 class="header__title">Dashboard</h1>
       </div>
 
       <div class="header__right">
@@ -731,7 +731,7 @@
                   <span class="quick-action-card__label">Open Board</span>
                   <span class="quick-action-card__desc">Kanban view</span>
                 </button>
-                <button class="quick-action-card quick-action-card--upload" onclick="navigateTo('activity')">
+                <button class="quick-action-card quick-action-card--activity" onclick="navigateTo('activity')">
                   <div class="quick-action-card__icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                   </div>
@@ -1086,7 +1086,7 @@
           </div>
 
           <!-- Header -->
-          <div class="reports__header" id="rptStatsSection">
+          <div class="reports__header" id="rptHeaderSection">
             <div class="reports__header-left">
               <h2>Reports</h2>
               <div class="reports__header-subtitle">
@@ -1654,6 +1654,11 @@
             activityLogMounted = true;
           }
         }
+
+        /* Render members list when navigating to Team Members */
+        if (route.init === 'members' && typeof window.renderMembersPage === 'function') {
+          window.renderMembersPage();
+        }
       }
 
       /* ---- Create Task button inside tasks view ---- */
@@ -1746,23 +1751,6 @@
       // Initialize Lucide icons
       if (typeof lucide !== 'undefined' && lucide.createIcons) {
         lucide.createIcons();
-      }
-
-      // Theme toggle
-      var themeToggle = document.getElementById('themeToggle');
-      if (themeToggle) {
-        themeToggle.addEventListener('click', function () {
-          var html = document.documentElement;
-          var current = html.getAttribute('data-theme') || 'light';
-          var next = current === 'dark' ? 'light' : 'dark';
-          html.setAttribute('data-theme', next);
-          localStorage.setItem('taskflow-theme', next);
-        });
-        // Restore saved theme
-        var saved = localStorage.getItem('taskflow-theme');
-        if (saved) {
-          document.documentElement.setAttribute('data-theme', saved);
-        }
       }
 
       // Activity count update

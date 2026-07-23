@@ -517,5 +517,7 @@
     // are needed anymore.
     const membersNav = document.getElementById("nav-members");
     if (membersNav) membersNav.addEventListener("click", showMembers);
+
+    window.renderMembersPage = renderMembers;
   });
 })();

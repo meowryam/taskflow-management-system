@@ -136,15 +136,15 @@ const DataStore = (function () {
       { id: 3, name: 'Demo Member', email: 'member@demo.local', role: 'Team Member', initials: 'DN' }
     ];
     var projects = [
-      { id: 1, name: 'Sample Sprint', description: 'Example project with sample data for demonstration purposes.', deadline: getFutureDate(7), status: 'Active', createdAt: new Date().toISOString() },
-      { id: 2, name: 'Sample Launch', description: 'Example product launch project for demonstration purposes.', deadline: getFutureDate(30), status: 'Active', createdAt: new Date().toISOString() }
+      { id: 1, name: 'Sample Sprint', description: 'Example project with sample data for demonstration purposes.', startDate: new Date().toISOString().split('T')[0], deadline: getFutureDate(7), status: 'Active', createdAt: new Date().toISOString() },
+      { id: 2, name: 'Sample Launch', description: 'Example product launch project for demonstration purposes.', startDate: new Date().toISOString().split('T')[0], deadline: getFutureDate(30), status: 'Active', createdAt: new Date().toISOString() }
     ];
     var tasks = [
-      { id: 1, projectId: 1, title: 'Sample: Setup project', description: 'This is demo data. Create your own tasks to replace it.', assignedUserId: 3, dueDate: getFutureDate(2), priority: 'High', status: 'In Progress', createdAt: new Date().toISOString() },
-      { id: 2, projectId: 1, title: 'Sample: Write test cases', description: 'This is demo data. Create your own tasks to replace it.', assignedUserId: 3, dueDate: getFutureDate(5), priority: 'Medium', status: 'Todo', createdAt: new Date().toISOString() },
-      { id: 3, projectId: 1, title: 'Sample: Initialize layout', description: 'This is demo data. Create your own tasks to replace it.', assignedUserId: 1, dueDate: getPastDate(1), priority: 'Low', status: 'Done', createdAt: new Date().toISOString() },
-      { id: 4, projectId: 2, title: 'Sample: Landing page', description: 'This is demo data. Create your own tasks to replace it.', assignedUserId: 2, dueDate: getFutureDate(10), priority: 'High', status: 'Todo', createdAt: new Date().toISOString() },
-      { id: 5, projectId: 2, title: 'Sample: DNS setup', description: 'This is demo data. Create your own tasks to replace it.', assignedUserId: 1, dueDate: null, priority: 'High', status: 'Review', createdAt: new Date().toISOString() }
+      { id: 1, projectId: 1, title: 'Sample: Setup project', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [3, 1], dueDate: getFutureDate(2), priority: 'High', status: 'In Progress', createdAt: new Date().toISOString() },
+      { id: 2, projectId: 1, title: 'Sample: Write test cases', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [3], dueDate: getFutureDate(5), priority: 'Medium', status: 'Todo', createdAt: new Date().toISOString() },
+      { id: 3, projectId: 1, title: 'Sample: Initialize layout', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [1], dueDate: getPastDate(1), priority: 'Low', status: 'Done', createdAt: new Date().toISOString() },
+      { id: 4, projectId: 2, title: 'Sample: Landing page', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [2, 3], dueDate: getFutureDate(10), priority: 'High', status: 'Todo', createdAt: new Date().toISOString() },
+      { id: 5, projectId: 2, title: 'Sample: DNS setup', description: 'This is demo data. Create your own tasks to replace it.', assignedMemberIds: [1], dueDate: null, priority: 'High', status: 'Review', createdAt: new Date().toISOString() }
     ];
 
     saveMembers(members);
