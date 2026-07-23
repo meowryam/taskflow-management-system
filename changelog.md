@@ -17,11 +17,18 @@ All notable changes to this project will be documented here.
 - Team Members: edit-member support via an add/edit form toggle
 - Team Members: styled delete-confirmation dialog (replaces native alert)
 - Team Members: empty state when no members exist
+- Activity Log: per-action SVG icons and date grouping (Today / Yesterday / older)
+- Activity Log: clear-log action with a styled confirmation dialog
+- Activity Log: `clearAll()` in the activity log data layer
+- Activity Log: empty state aligned with the dashboard `.widget-empty` pattern
 
 ### Changed
 
 - Team Members: UI aligned with the Dashboard design system (widget-card
   shells, design tokens, scoped member-tile grid)
+- Activity Log: full-page view and dashboard Recent Activity feed aligned
+  with the Dashboard design system (widget-card shell, design tokens,
+  color-coded per-action entries)
 
 ### Fixed
 
