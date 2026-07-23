@@ -1881,21 +1881,120 @@
       }
     })();
 
-    // Notification bell toggle
+    // Dynamic notification bell
     (function () {
       var bell = document.getElementById('notifBellBtn');
       var dropdown = document.getElementById('notifDropdown');
-      if (bell && dropdown) {
-        bell.addEventListener('click', function (e) {
-          e.stopPropagation();
-          var isOpen = dropdown.style.display !== 'none';
-          dropdown.style.display = isOpen ? 'none' : 'block';
-        });
-        document.addEventListener('click', function () {
-          dropdown.style.display = 'none';
-        });
-        dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+      var notifList = document.getElementById('notifList');
+      var notifDot = document.querySelector('.header__notif-dot');
+      if (!bell || !dropdown || !notifList) return;
+
+      var lastNotifCount = 0;
+
+      function getRelativeTime(dateStr) {
+        if (!dateStr) return '';
+        var now = new Date();
+        var d = new Date(dateStr);
+        var diffMs = now - d;
+        var diffMin = Math.floor(diffMs / 60000);
+        if (diffMin < 1) return 'Just now';
+        if (diffMin < 60) return diffMin + 'm ago';
+        var diffHrs = Math.floor(diffMin / 60);
+        if (diffHrs < 24) return diffHrs + 'h ago';
+        var diffDays = Math.floor(diffHrs / 24);
+        if (diffDays < 7) return diffDays + 'd ago';
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       }
+
+      function getEntityIcon(entityType) {
+        if (entityType === 'Task') return '&#x25CF;';
+        if (entityType === 'Project') return '&#x25B6;';
+        if (entityType === 'Member') return '&#x25C9;';
+        return '&#x25CF;';
+      }
+
+      function getEntityRoute(entityType) {
+        if (entityType === 'Task') return 'tasks';
+        if (entityType === 'Project') return 'projects';
+        if (entityType === 'Member') return 'members';
+        return 'tasks';
+      }
+
+      function renderNotifications() {
+        var entries = (window.ActivityLog && ActivityLog.readEntries) ? ActivityLog.readEntries() : [];
+        var recent = entries.slice(-10).reverse();
+        var count = entries.length;
+
+        // Update dot badge
+        if (notifDot) {
+          if (count > lastNotifCount) {
+            notifDot.style.display = '';
+            notifDot.style.background = '#a8452f';
+          }
+          if (count === 0) notifDot.style.display = 'none';
+        }
+
+        if (recent.length === 0) {
+          notifList.innerHTML = '<div style="padding:16px;text-align:center;color:#a89b78;font-size:0.875rem;">No notifications yet</div>';
+          return;
+        }
+
+        var html = '';
+        for (var i = 0; i < recent.length; i++) {
+          var e = recent[i];
+          var time = getRelativeTime(e.timestamp || e.occurredAt || e.createdAt);
+          var entityType = e.entityType || e.type || '';
+          var desc = e.actionDetail || e.description || e.actionType || 'Activity';
+          var user = e.userName || e.performedBy || e.user || '';
+          html += '<div class="notif-item" data-route="' + getEntityRoute(entityType) + '" style="padding:10px 16px;border-bottom:1px solid #f3ecdb;cursor:pointer;transition:background 0.15s;display:flex;gap:10px;align-items:flex-start;" onmouseover="this.style.background=\'#faf6ec\'" onmouseout="this.style.background=\'\'">' +
+            '<span style="font-size:1rem;flex-shrink:0;margin-top:2px;">' + getEntityIcon(entityType) + '</span>' +
+            '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:0.8125rem;color:#2c2820;line-height:1.4;">' + (user ? '<strong>' + user.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</strong> ' : '') + desc.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' +
+            '<div style="font-size:0.75rem;color:#a89b78;margin-top:2px;">' + time + ' ' + (entityType ? '&middot; ' + entityType : '') + '</div>' +
+            '</div></div>';
+        }
+        notifList.innerHTML = html;
+
+        // Click handler for notification items
+        notifList.querySelectorAll('.notif-item').forEach(function (item) {
+          item.addEventListener('click', function () {
+            var route = item.getAttribute('data-route');
+            dropdown.style.display = 'none';
+            if (window.navigateTo) window.navigateTo(route);
+          });
+        });
+      }
+
+      // Bell toggle
+      bell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = dropdown.style.display !== 'none';
+        dropdown.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+          lastNotifCount = (window.ActivityLog && ActivityLog.readEntries) ? ActivityLog.readEntries().length : 0;
+          if (notifDot) notifDot.style.display = lastNotifCount > 0 ? '' : 'none';
+        }
+      });
+
+      document.addEventListener('click', function () { dropdown.style.display = 'none'; });
+      dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+
+      // Listen for real-time updates
+      function updateNotif() { renderNotifications(); }
+
+      window.addEventListener('taskflow:activity-changed', updateNotif);
+      window.addEventListener('taskflow:tasks-changed', function () {
+        setTimeout(updateNotif, 100);
+      });
+      window.addEventListener('taskflow:members-changed', function () {
+        setTimeout(updateNotif, 100);
+      });
+      window.addEventListener('taskflow:projects-changed', function () {
+        setTimeout(updateNotif, 100);
+      });
+
+      // Initial render
+      renderNotifications();
     })();
 
     // Make search functional
