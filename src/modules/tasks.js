@@ -18,7 +18,9 @@ const editIndicator = document.getElementById('taskEditIndicator');
 const projectSelect = document.getElementById('taskProject');
 const memberCountInput = document.getElementById('taskMemberCount');
 const memberSelections = document.getElementById('taskMemberSelections');
+const creationDateInput = document.getElementById('taskCreationDate');
 const startDateInput = document.getElementById('taskStartDate');
+const startDateHint = document.getElementById('startDateHint');
 const dueDateInput = document.getElementById('taskDueDate');
 const taskCardGrid = document.getElementById('taskCardGrid');
 const taskNavigation = document.getElementById('nav-tasks');
@@ -37,7 +39,8 @@ function normalizeReference(item, type) {
   return rawId == null ? null : {
     id: rawId,
     label: label || `Unnamed ${type}`,
-    role: item.role ?? item.roleName ?? ''
+    role: item.role ?? item.roleName ?? '',
+    startDate: type === 'project' ? String(item.startDate || '') : ''
   };
 }
 
@@ -90,7 +93,15 @@ function renderMemberSelections(count, selectedIds = getCurrentMemberSelections(
 
 function applyDateConstraints() {
   const today = getTodayIso();
-  startDateInput.value = editingTaskId === null ? today : startDateInput.value;
+  const selectedProject = projects.find((project) => String(project.id) === projectSelect.value);
+  const projectStartDate = selectedProject?.startDate || '';
+
+  if (editingTaskId === null) creationDateInput.value = today;
+  if (projectStartDate) startDateInput.min = projectStartDate;
+  else startDateInput.removeAttribute('min');
+  startDateHint.textContent = projectStartDate
+    ? `Must be on or after the project start date: ${projectStartDate}.`
+    : 'Select a project to see its earliest start date.';
   dueDateInput.min = startDateInput.value > today ? startDateInput.value : today;
 }
 
@@ -175,7 +186,8 @@ function resetForm(options = {}) {
   clearErrors();
   memberCountInput.value = members.length ? '1' : '';
   renderMemberSelections(1, []);
-  startDateInput.value = getTodayIso();
+  creationDateInput.value = getTodayIso();
+  startDateInput.value = '';
   applyDateConstraints();
   showMessage(options.message || '', options.type || '');
 }
@@ -234,6 +246,7 @@ function beginEditing(taskId) {
   projectSelect.value = input.projectId;
   memberCountInput.value = String(Math.min(input.memberCount, Math.max(members.length, 1)));
   renderMemberSelections(memberCountInput.value, input.assignedMemberIds);
+  creationDateInput.value = input.creationDate;
   startDateInput.value = input.startDate;
   dueDateInput.value = input.dueDate;
   form.elements.priority.value = input.priority;
@@ -338,6 +351,8 @@ if (form) {
     memberSelections.querySelectorAll('select').forEach((select) => select.removeAttribute('aria-invalid'));
     updateMemberOptionAvailability();
   });
+  projectSelect.addEventListener('change', applyDateConstraints);
+  startDateInput.addEventListener('change', applyDateConstraints);
   cancelCreationButton.addEventListener('click', () => {
     resetForm();
     showTasksView();

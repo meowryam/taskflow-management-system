@@ -793,10 +793,16 @@
             <div class="task-form__field task-form__field--wide">
               <fieldset class="task-form__date-group">
                 <legend>Task Schedule</legend>
+                <div class="task-form__field task-form__field--meta">
+                  <label for="taskCreationDate">Creation Date</label>
+                  <input id="taskCreationDate" name="creationDate" type="date" readonly aria-readonly="true" />
+                  <span class="task-form__hint">Auto-filled</span>
+                </div>
                 <div class="task-form__date-fields">
-                  <div class="task-form__field task-form__field--meta">
-                    <label for="taskStartDate">Creation Date</label>
-                    <input id="taskStartDate" name="startDate" type="date" aria-describedby="startDateError" readonly />
+                  <div class="task-form__field">
+                    <label for="taskStartDate">Start Date</label>
+                    <input id="taskStartDate" name="startDate" type="date" aria-describedby="startDateHint startDateError" />
+                    <span id="startDateHint" class="task-form__hint"></span>
                     <span id="startDateError" class="task-form__error" aria-live="polite"></span>
                   </div>
                   <div class="task-form__field">

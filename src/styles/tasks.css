@@ -72,21 +72,32 @@
 }
 
 .task-form__date-fields {
-  grid-template-columns: minmax(150px, 0.7fr) minmax(220px, 1.3fr);
   align-items: start;
 }
 
-.task-form__field--meta label,
-.task-form__field--meta label span {
+.task-form__field--meta {
+  width: min(100%, 165px);
+  margin: 0 0 var(--space-3);
+}
+
+.task-form .task-form__field--meta label {
   color: var(--color-gray-500);
   font-size: var(--font-size-xs);
   font-weight: 500;
 }
 
-.task-form__field--meta input {
+.task-form .task-form__field--meta input {
+  padding: 0.48rem 0.65rem;
   color: var(--color-gray-500);
   background: var(--color-gray-50);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+}
+
+.task-form__hint {
+  min-height: 1rem;
+  color: var(--color-gray-400);
+  font-size: 0.72rem;
+  line-height: 1.35;
 }
 
 .task-form__member-field {
