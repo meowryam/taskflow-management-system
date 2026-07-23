@@ -75,6 +75,33 @@
     return m ? (m.initials || m.name.substring(0, 2).toUpperCase()) : '--';
   }
 
+  function getAssignedMemberIds(task) {
+    if (Array.isArray(task && task.assignedMemberIds)) {
+      return task.assignedMemberIds.filter(function (id) { return id != null; });
+    }
+    var legacyId = task && (task.assignedMemberId !== undefined ? task.assignedMemberId : task.assignedUserId);
+    return legacyId == null ? [] : [legacyId];
+  }
+
+  function taskIncludesMember(task, memberId) {
+    return getAssignedMemberIds(task).some(function (id) {
+      return String(id) === String(memberId);
+    });
+  }
+
+  function getTaskMemberLabel(task, memberMap) {
+    var ids = getAssignedMemberIds(task);
+    if (ids.length === 0) return 'Unassigned';
+    return ids.map(function (id) { return getMemberName(id, memberMap); }).join(', ');
+  }
+
+  function getTaskMemberSortLabel(task, memberMap) {
+    return getAssignedMemberIds(task).map(function (id) {
+      var m = memberMap[String(id)];
+      return m ? m.name : '';
+    }).filter(Boolean).join(', ');
+  }
+
   /* ── Data Loader ─────────────────────────────────────────── */
   function loadAllData() {
     var store = globalThis.DataStore;
@@ -168,7 +195,7 @@
 
   function calcMemberWorkload(tasks, members) {
     return members.map(function (m) {
-      var memberTasks = tasks.filter(function (t) { return String(t.assignedUserId) === String(m.id); });
+      var memberTasks = tasks.filter(function (t) { return taskIncludesMember(t, m.id); });
       var completed = memberTasks.filter(function (t) { return (t.status || '').toLowerCase() === 'done'; }).length;
       var pending = memberTasks.length - completed;
       var total = memberTasks.length;
@@ -270,7 +297,7 @@
         id: t.id,
         title: t.title || 'Untitled',
         project: getProjectName(t.projectId, projectMap),
-        member: getMemberName(t.assignedUserId, memberMap),
+        member: getTaskMemberLabel(t, memberMap),
         priority: t.priority || 'Medium',
         dueDate: t.dueDate,
         daysOverdue: daysBetween(t.dueDate, today),
@@ -291,7 +318,7 @@
         id: t.id,
         title: t.title || 'Untitled',
         project: getProjectName(t.projectId, projectMap),
-        member: getMemberName(t.assignedUserId, memberMap),
+        member: getTaskMemberLabel(t, memberMap),
         priority: t.priority || 'Medium',
         dueDate: t.dueDate,
         daysRemaining: daysBetween(today, t.dueDate),
@@ -644,7 +671,7 @@
       tasks = tasks.filter(function (t) { return String(t.projectId) === f.filterProject; });
     }
     if (f.filterMember) {
-      tasks = tasks.filter(function (t) { return String(t.assignedUserId) === f.filterMember; });
+      tasks = tasks.filter(function (t) { return taskIncludesMember(t, f.filterMember); });
     }
     if (f.filterPriority) {
       tasks = tasks.filter(function (t) { return (t.priority || '').toLowerCase() === f.filterPriority.toLowerCase(); });
@@ -696,8 +723,8 @@
           return pnA.localeCompare(pnB);
         },
         'member': function (a, b, pm, mm) {
-          var mA = mm[String(a.assignedUserId)] ? mm[String(a.assignedUserId)].name : '';
-          var mB = mm[String(b.assignedUserId)] ? mm[String(b.assignedUserId)].name : '';
+          var mA = getTaskMemberSortLabel(a, mm);
+          var mB = getTaskMemberSortLabel(b, mm);
           return mA.localeCompare(mB);
         }
       };
@@ -1037,7 +1064,7 @@
     var today = getToday();
     team.forEach(function (m) {
       m.overdue = data.tasks.filter(function (t) {
-        if (String(t.assignedUserId) !== String(m.id)) return false;
+        if (!taskIncludesMember(t, m.id)) return false;
         if ((t.status || '').toLowerCase() === 'done') return false;
         if (!t.dueDate) return false;
         return new Date(t.dueDate) < today;
@@ -1595,9 +1622,9 @@
     init();
   }
 
-  document.addEventListener('taskflow:tasks-changed', refresh);
-  document.addEventListener('taskflow:projects-changed', refresh);
-  document.addEventListener('taskflow:members-changed', refresh);
+  window.addEventListener('taskflow:tasks-changed', refresh);
+  window.addEventListener('taskflow:projects-changed', refresh);
+  window.addEventListener('taskflow:members-changed', refresh);
 
   window.ReportsModule = { refresh: refresh, init: init };
 })();
