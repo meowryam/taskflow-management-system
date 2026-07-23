@@ -74,6 +74,8 @@
     this.projects = [];
     this.members = [];
     this.draggedTaskId = null;
+    this.pendingStatusChange = null;
+    this.previousFocus = null;
 
     this.filters = {
       search: '',
@@ -322,7 +324,7 @@
       e.preventDefault();
       list.classList.remove('kanban-column__list--drag-over');
       if (self.draggedTaskId !== null) {
-        self.moveTask(self.draggedTaskId, status);
+        self.requestStatusChange(self.draggedTaskId, status);
         self.draggedTaskId = null;
       }
     });
@@ -651,7 +653,7 @@
 
     select.addEventListener('change', function (e) {
       var newStatus = e.target.value;
-      self.moveTask(task.id, newStatus);
+      self.requestStatusChange(task.id, newStatus, select);
     });
 
     cardFooter.appendChild(select);
@@ -660,29 +662,399 @@
     return card;
   };
 
-  KanbanBoard.prototype.moveTask = function (taskId, newStatus) {
-    var task = this.tasks.find(function (t) { return String(t.id) === String(taskId); });
-    if (!task || task.status === newStatus) return;
+  KanbanBoard.prototype.getCurrentUser = function () {
+    if (typeof window !== 'undefined' && window.TaskFlowSession) {
+      return {
+        userId: window.TaskFlowSession.memberId || window.TaskFlowSession.userId || 0,
+        userName: window.TaskFlowSession.name || window.TaskFlowSession.userName || 'TaskFlow User'
+      };
+    }
+    if (typeof window !== 'undefined' && window.JWT && typeof window.JWT.getSession === 'function') {
+      var session = window.JWT.getSession();
+      if (session) {
+        return {
+          userId: session.userId || session.memberId || 0,
+          userName: session.name || session.username || 'TaskFlow User'
+        };
+      }
+    }
+    return {
+      userId: 1,
+      userName: 'TaskFlow Admin'
+    };
+  };
 
-    var oldStatus = task.status;
+  KanbanBoard.prototype.escapeHtml = function (str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
+  /**
+   * Intercept status change requests and open confirmation modal
+   */
+  KanbanBoard.prototype.requestStatusChange = function (taskId, newStatus, selectEl) {
+    var task = this.tasks.find(function (t) { return String(t.id) === String(taskId); });
+    if (!task) return;
+
+    // Edge case: Same-column drop or same status select -> Do not open modal
+    if (task.status === newStatus) {
+      if (selectEl) selectEl.value = task.status;
+      return;
+    }
+
+    this.pendingStatusChange = {
+      task: task,
+      oldStatus: task.status,
+      newStatus: newStatus,
+      selectEl: selectEl || null
+    };
+
+    this.openStatusChangeModal();
+  };
+
+  /**
+   * Opens status change confirmation modal with description textarea and validation
+   */
+  KanbanBoard.prototype.openStatusChangeModal = function () {
+    var self = this;
+    var pending = this.pendingStatusChange;
+    var existingOverlay = document.getElementById('status-change-modal-overlay');
+    if (existingOverlay) {
+      existingOverlay.remove();
+    }
+    var task = pending.task;
+    var oldStatus = pending.oldStatus;
+    var newStatus = pending.newStatus;
+
+    this.previousFocus = document.activeElement;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'status-modal-overlay';
+    overlay.id = 'status-change-modal-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'status-modal-title');
+
+    var modal = document.createElement('div');
+    modal.className = 'status-modal';
+
+    function getBadgeClass(st) {
+      if (st === 'Todo') return 'status-modal__status-badge--todo';
+      if (st === 'In Progress') return 'status-modal__status-badge--in-progress';
+      if (st === 'Review') return 'status-modal__status-badge--review';
+      if (st === 'Done') return 'status-modal__status-badge--done';
+      return '';
+    }
+
+    modal.innerHTML = 
+      '<div class="status-modal__header">' +
+        '<div class="status-modal__title-group">' +
+          '<span class="status-modal__icon">🔄</span>' +
+          '<h3 class="status-modal__title" id="status-modal-title">Change Task Status</h3>' +
+        '</div>' +
+        '<button type="button" class="status-modal__close-btn" id="status-modal-close" aria-label="Close modal">&times;</button>' +
+      '</div>' +
+      '<div class="status-modal__body">' +
+        '<div class="status-modal__info-box">' +
+          '<div class="status-modal__info-row">' +
+            '<span class="status-modal__info-label">Task</span>' +
+            '<div class="status-modal__task-name">' + this.escapeHtml(task.title || 'Untitled Task') + '</div>' +
+          '</div>' +
+          '<div class="status-modal__transition-grid">' +
+            '<div class="status-modal__status-box">' +
+              '<span class="status-modal__status-title">Move From</span>' +
+              '<span class="status-modal__status-badge ' + getBadgeClass(oldStatus) + '">' +
+                (STATUS_ICONS[oldStatus] || '📋') + ' ' + oldStatus +
+              '</span>' +
+            '</div>' +
+            '<div class="status-modal__arrow">➔</div>' +
+            '<div class="status-modal__status-box">' +
+              '<span class="status-modal__status-title">Move To</span>' +
+              '<span class="status-modal__status-badge ' + getBadgeClass(newStatus) + '">' +
+                (STATUS_ICONS[newStatus] || '📋') + ' ' + newStatus +
+              '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="status-modal__field">' +
+          '<label for="status-change-comment" class="status-modal__field-label">' +
+            '<span>Description / Comment <span class="status-modal__required">*</span></span>' +
+          '</label>' +
+          '<textarea id="status-change-comment" class="status-modal__textarea" rows="4" placeholder="Enter details or reason for changing task status..."></textarea>' +
+          '<div id="status-change-error" class="status-modal__error-msg" style="display: none;"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="status-modal__actions">' +
+        '<button type="button" id="btn-cancel-status-change" class="status-modal__btn status-modal__btn--cancel">Cancel</button>' +
+        '<button type="button" id="btn-submit-status-change" class="status-modal__btn status-modal__btn--submit">Update Status</button>' +
+      '</div>';
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    var textarea = document.getElementById('status-change-comment');
+    var errorDiv = document.getElementById('status-change-error');
+    var btnCancel = document.getElementById('btn-cancel-status-change');
+    var btnSubmit = document.getElementById('btn-submit-status-change');
+    var btnClose = document.getElementById('status-modal-close');
+
+    setTimeout(function () {
+      if (textarea) textarea.focus();
+    }, 50);
+
+    if (textarea) {
+      textarea.addEventListener('input', function () {
+        textarea.classList.remove('status-modal__textarea--invalid');
+        if (errorDiv) {
+          errorDiv.style.display = 'none';
+          errorDiv.textContent = '';
+        }
+      });
+    }
+
+    if (btnCancel) {
+      btnCancel.addEventListener('click', function () {
+        self.closeStatusChangeModal(false);
+      });
+    }
+
+    if (btnClose) {
+      btnClose.addEventListener('click', function () {
+        self.closeStatusChangeModal(false);
+      });
+    }
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) {
+        self.closeStatusChangeModal(false);
+      }
+    });
+
+    if (btnSubmit) {
+      btnSubmit.addEventListener('click', function () {
+        self.confirmStatusChange();
+      });
+    }
+
+    this.modalKeydownHandler = function (e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        self.closeStatusChangeModal(false);
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        var focusables = [textarea, btnCancel, btnSubmit, btnClose].filter(Boolean);
+        var activeIdx = focusables.indexOf(document.activeElement);
+
+        if (e.shiftKey) {
+          if (activeIdx <= 0) {
+            e.preventDefault();
+            focusables[focusables.length - 1].focus();
+          }
+        } else {
+          if (activeIdx === -1 || activeIdx >= focusables.length - 1) {
+            e.preventDefault();
+            focusables[0].focus();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', this.modalKeydownHandler);
+  };
+
+  /**
+   * Validates description input and executes status update
+   */
+  KanbanBoard.prototype.confirmStatusChange = function () {
+    if (!this.pendingStatusChange) return;
+
+    var textarea = document.getElementById('status-change-comment');
+    var errorDiv = document.getElementById('status-change-error');
+
+    var comment = textarea ? textarea.value : '';
+
+    if (!comment || comment.trim().length === 0) {
+      if (textarea) {
+        textarea.classList.add('status-modal__textarea--invalid');
+        textarea.focus();
+      }
+      if (errorDiv) {
+        errorDiv.textContent = '⚠️ Description / comment is required before changing status.';
+        errorDiv.style.display = 'flex';
+      }
+      return;
+    }
+
+    var pending = this.pendingStatusChange;
+    this.updateTaskWithComment(pending.task, pending.oldStatus, pending.newStatus, comment.trim());
+    this.closeStatusChangeModal(true);
+  };
+
+  /**
+   * Persists task status, history comment, and records activity log
+   */
+  KanbanBoard.prototype.updateTaskWithComment = function (task, oldStatus, newStatus, comment) {
+    var self = this;
+    var currentUser = this.getCurrentUser();
+
     task.status = newStatus;
     if (newStatus === 'Done') {
       task.completedAt = new Date().toISOString();
     }
 
+    if (!Array.isArray(task.history)) {
+      task.history = [];
+    }
+
+    var historyEntry = {
+      fromStatus: oldStatus,
+      toStatus: newStatus,
+      comment: comment,
+      timestamp: new Date().toISOString(),
+      user: currentUser.userName,
+      userId: currentUser.userId
+    };
+
+    task.history.push(historyEntry);
+
     if (typeof DataStore !== 'undefined') {
       if (typeof DataStore.updateTask === 'function') {
-        DataStore.updateTask(taskId, { status: newStatus });
+        DataStore.updateTask(task.id, {
+          status: newStatus,
+          completedAt: task.completedAt || null,
+          history: task.history
+        });
       } else if (typeof DataStore.saveTasks === 'function') {
         DataStore.saveTasks(this.tasks);
       }
+
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        window.dispatchEvent(new CustomEvent('taskflow:tasks-changed', {
+          detail: { action: 'board_move', taskId: task.id, comment: comment }
+        }));
+      }
     }
 
-    if (typeof ActivityLog !== 'undefined' && typeof ActivityLog.logStatusChanged === 'function') {
-      ActivityLog.logStatusChanged(task, oldStatus, newStatus);
+    if (typeof ActivityLog !== 'undefined') {
+      var actionType = (newStatus === 'Done') ? 'Completed' : 'Status Changed';
+      var detailMsg = 'Task "' + (task.title || 'Untitled') + '" status changed from ' + oldStatus + ' to ' + newStatus + '. Description: ' + comment;
+
+      if (typeof ActivityLog.record === 'function') {
+        ActivityLog.record({
+          entityType: 'Task',
+          entityId: task.id,
+          actionType: actionType,
+          actionDetail: detailMsg,
+          occurredAt: new Date().toISOString(),
+          userId: currentUser.userId,
+          userName: currentUser.userName
+        });
+      } else if (typeof ActivityLog.logStatusChanged === 'function') {
+        ActivityLog.logStatusChanged(task, oldStatus, newStatus);
+      }
     }
+
+    var toastMsg = 'Task "' + (task.title || 'Untitled Task') + '" moved from ' + oldStatus + ' to ' + newStatus + ' successfully.';
+    this.showToast(toastMsg);
 
     this.renderBoard();
+  };
+
+  /**
+   * Displays a toast notification in bottom right corner upon successful status update
+   */
+  KanbanBoard.prototype.showToast = function (message) {
+    if (!message) return;
+
+    var container = document.getElementById('kanban-toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'kanban-toast-container';
+      container.className = 'kanban-toast-container';
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(container);
+    }
+
+    var toastEl = document.createElement('div');
+    toastEl.className = 'kanban-toast';
+    toastEl.setAttribute('role', 'status');
+
+    var iconSpan = document.createElement('span');
+    iconSpan.className = 'kanban-toast__icon';
+    iconSpan.textContent = '✓';
+
+    var contentDiv = document.createElement('div');
+    contentDiv.className = 'kanban-toast__content';
+    contentDiv.textContent = message;
+
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'kanban-toast__close-btn';
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Dismiss notification');
+    closeBtn.innerHTML = '&times;';
+
+    toastEl.appendChild(iconSpan);
+    toastEl.appendChild(contentDiv);
+    toastEl.appendChild(closeBtn);
+
+    container.appendChild(toastEl);
+
+    var isDismissed = false;
+
+    function dismissToast() {
+      if (isDismissed) return;
+      isDismissed = true;
+      toastEl.classList.add('kanban-toast--exiting');
+      setTimeout(function () {
+        if (toastEl.parentNode) {
+          toastEl.parentNode.removeChild(toastEl);
+        }
+      }, 260);
+    }
+
+    closeBtn.addEventListener('click', dismissToast);
+
+    setTimeout(dismissToast, 3500);
+  };
+
+  /**
+   * Closes status change modal and resets state
+   */
+  KanbanBoard.prototype.closeStatusChangeModal = function (isSuccess, silent) {
+    if (this.modalKeydownHandler) {
+      document.removeEventListener('keydown', this.modalKeydownHandler);
+      this.modalKeydownHandler = null;
+    }
+
+    var overlay = document.getElementById('status-change-modal-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+
+    if (!isSuccess && this.pendingStatusChange && this.pendingStatusChange.selectEl) {
+      this.pendingStatusChange.selectEl.value = this.pendingStatusChange.oldStatus;
+    }
+
+    this.pendingStatusChange = null;
+
+    if (!silent && this.previousFocus) {
+      try {
+        this.previousFocus.focus();
+      } catch (e) {}
+      this.previousFocus = null;
+    }
+  };
+
+  KanbanBoard.prototype.moveTask = function (taskId, newStatus, selectEl) {
+    this.requestStatusChange(taskId, newStatus, selectEl);
   };
 
   KanbanBoard.prototype.refresh = function () {
