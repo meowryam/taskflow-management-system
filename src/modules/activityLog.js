@@ -340,6 +340,18 @@ const ActivityLog = (function () {
     });
   }
 
+  /**
+   * Removes all activity entries. Writing an empty array keeps the
+   * storage key present (a truthy "[]"), so seed() will not repopulate
+   * demo data on the next load.
+   * Returns { success: true }.
+   */
+  function clearAll() {
+    writeEntries([]);
+    notifyChanged();
+    return { success: true };
+  }
+
   if (typeof globalThis !== 'undefined' && globalThis.DataStore) {
     seed();
   } else if (typeof document !== 'undefined') {
@@ -355,6 +367,7 @@ const ActivityLog = (function () {
     getAll,
     getRecent,
     seed,
+    clearAll,
     logProjectCreated,
     logProjectUpdated,
     logProjectDeleted,
