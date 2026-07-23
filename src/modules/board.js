@@ -2,8 +2,9 @@
  * TaskFlow Management System - Kanban Task Board Module
  * Intern 5 Module implementation.
  * 
- * Re-implemented Kanban Board aligned with the application theme (olive green, 
- * design tokens, card layout, dynamic due date indicators, drag & drop).
+ * Re-implemented Kanban Board aligned with application theme (olive green,
+ * design tokens, card layout, dynamic due date indicators, drag & drop, 
+ * multi-member assignees, and task creator footer display).
  */
 
 (function () {
@@ -384,32 +385,84 @@
   };
 
   /**
-   * Helper to lookup member details for a task
+   * Helper to lookup ALL assigned member objects for a task
+   * Handles task.assignedMemberIds (array), task.assignedUserId, task.assignedMemberId
    */
-  KanbanBoard.prototype.getTaskMemberInfo = function (task) {
-    var memberId = task.assignedUserId;
-    if (memberId === undefined && task.assignedMemberId !== undefined) {
-      memberId = task.assignedMemberId;
-    }
-    if (memberId === undefined && Array.isArray(task.assignedMemberIds) && task.assignedMemberIds.length > 0) {
-      memberId = task.assignedMemberIds[0];
-    }
+  KanbanBoard.prototype.getTaskAssignedMembers = function (task) {
+    var self = this;
+    var memberIds = [];
 
-    var member = this.members.find(function (m) {
-      return String(m.id) === String(memberId);
-    });
-
-    if (member) {
-      return {
-        name: member.name || member.fullName || 'Assigned Member',
-        initials: member.initials || (member.name ? member.name.substring(0, 2).toUpperCase() : 'M')
-      };
+    if (Array.isArray(task.assignedMemberIds) && task.assignedMemberIds.length > 0) {
+      memberIds = task.assignedMemberIds;
+    } else if (task.assignedUserId !== undefined && task.assignedUserId !== null) {
+      memberIds = [task.assignedUserId];
+    } else if (task.assignedMemberId !== undefined && task.assignedMemberId !== null) {
+      memberIds = [task.assignedMemberId];
     }
 
-    return {
-      name: 'Unassigned',
-      initials: 'UN'
-    };
+    if (memberIds.length === 0) {
+      return [{ name: 'Unassigned', initials: 'UN' }];
+    }
+
+    var foundMembers = [];
+    for (var i = 0; i < memberIds.length; i++) {
+      var id = memberIds[i];
+      var m = self.members.find(function (item) {
+        return String(item.id) === String(id);
+      });
+
+      if (m) {
+        foundMembers.push({
+          name: m.name || m.fullName || ('Member #' + id),
+          initials: m.initials || (m.name ? m.name.substring(0, 2).toUpperCase() : 'M')
+        });
+      } else {
+        foundMembers.push({
+          name: 'Member #' + id,
+          initials: 'M' + id
+        });
+      }
+    }
+
+    return foundMembers;
+  };
+
+  /**
+   * Helper to lookup task creator / assigner full name
+   */
+  KanbanBoard.prototype.getTaskCreatorName = function (task) {
+    if (!task) return 'TaskFlow Admin';
+
+    // 1. Direct string properties on task
+    if (task.createdBy && typeof task.createdBy === 'string') return task.createdBy;
+    if (task.creatorName && typeof task.creatorName === 'string') return task.creatorName;
+    if (task.assignedBy && typeof task.assignedBy === 'string') return task.assignedBy;
+    if (task.author && typeof task.author === 'string') return task.author;
+
+    // 2. ID properties on task (e.g. createdByUserId, creatorId, userId)
+    var creatorId = task.createdByUserId || task.creatorId || task.createdById || task.userId;
+    if (creatorId !== undefined && creatorId !== null) {
+      var member = this.members.find(function (m) {
+        return String(m.id) === String(creatorId);
+      });
+      if (member && member.name) return member.name;
+    }
+
+    // 3. ActivityLog lookup for "Task Created" action for this taskId
+    if (typeof ActivityLog !== 'undefined' && typeof ActivityLog.getEntries === 'function') {
+      var logs = ActivityLog.getEntries();
+      var createLog = logs.find(function (l) {
+        return String(l.entityId) === String(task.id) && l.entityType === 'Task' && l.actionType === 'Created';
+      });
+      if (createLog && createLog.userName) return createLog.userName;
+    }
+
+    // 4. Active Session user fallback
+    var session = window.TaskFlowSession || (window.JWT && window.JWT.getSession && window.JWT.getSession());
+    if (session && session.name) return session.name;
+
+    // 5. Default fallback
+    return 'TaskFlow Admin';
   };
 
   /**
@@ -434,9 +487,10 @@
    * ├──────────────────────────────────────────────┤
    * │ Priority      High                           │
    * │ Project       Website                        │
-   * │ Assigned To   Bilal                          │
+   * │ Assigned To   Bilal, Ahmed, Ali              │
    * │ Start Date    22 Jul 2026                    │
-   * │ Due Date      24 Jul 2026  [2 Days Left]     │
+   * │ Due Date      24 Jul 2026                    │
+   * │               [Overdue]                      │
    * └──────────────────────────────────────────────┘
    */
   KanbanBoard.prototype.createCardElement = function (task) {
@@ -526,8 +580,9 @@
     rowProject.appendChild(valProject);
     details.appendChild(rowProject);
 
-    // 3. Assigned To Row
-    var memberInfo = this.getTaskMemberInfo(task);
+    // 3. Assigned To Row (Displays ALL assigned members)
+    var assignedMembers = this.getTaskAssignedMembers(task);
+    var allMemberNames = assignedMembers.map(function (m) { return m.name; }).join(', ');
 
     var rowAssigned = document.createElement('div');
     rowAssigned.className = 'kanban-card__row';
@@ -538,7 +593,7 @@
 
     var valAssigned = document.createElement('span');
     valAssigned.className = 'kanban-card__value';
-    valAssigned.textContent = memberInfo.name;
+    valAssigned.textContent = allMemberNames;
 
     rowAssigned.appendChild(lblAssigned);
     rowAssigned.appendChild(valAssigned);
@@ -562,52 +617,62 @@
       details.appendChild(rowStart);
     }
 
-    // 5. Due Date Row with Dynamic Due Indicator Badge
+    // 5. Due Date Row with Vertical Right-Aligned Stacking (Clean nowrap pill)
     if (task.dueDate) {
       var isCompleted = (task.status === 'Done');
       var dueInfo = getDueDateInfo(task.dueDate, isCompleted);
 
       if (dueInfo) {
         var rowDue = document.createElement('div');
-        rowDue.className = 'kanban-card__row';
+        rowDue.className = 'kanban-card__row kanban-card__row--due';
 
         var lblDue = document.createElement('span');
         lblDue.className = 'kanban-card__label';
         lblDue.textContent = 'Due Date';
 
-        var valDue = document.createElement('span');
-        valDue.className = 'kanban-card__value';
-        valDue.textContent = dueInfo.dateText;
+        var dueGroup = document.createElement('div');
+        dueGroup.className = 'kanban-card__due-group';
+
+        var dueTextSpan = document.createElement('span');
+        dueTextSpan.className = 'kanban-card__due-date';
+        dueTextSpan.textContent = dueInfo.dateText;
+        dueGroup.appendChild(dueTextSpan);
 
         if (dueInfo.pill) {
           var pillSpan = document.createElement('span');
           pillSpan.className = 'due-pill ' + dueInfo.pill.class;
           pillSpan.textContent = dueInfo.pill.label;
-          valDue.appendChild(pillSpan);
+          dueGroup.appendChild(pillSpan);
         }
 
         rowDue.appendChild(lblDue);
-        rowDue.appendChild(valDue);
+        rowDue.appendChild(dueGroup);
         details.appendChild(rowDue);
       }
     }
 
     card.appendChild(details);
 
-    // --- FOOTER SECTION: Avatar & Quick Status Selector ---
+    // --- FOOTER SECTION: Task Creator Full Name & Quick Status Selector ---
+    var creatorFullName = this.getTaskCreatorName(task);
+
     var cardFooter = document.createElement('div');
     cardFooter.className = 'kanban-card__footer';
 
-    var memberArea = document.createElement('div');
-    memberArea.className = 'kanban-card__member';
+    var creatorArea = document.createElement('div');
+    creatorArea.className = 'kanban-card__creator';
 
-    var avatar = document.createElement('div');
-    avatar.className = 'member-avatar';
-    avatar.textContent = memberInfo.initials;
-    avatar.title = 'Assigned to ' + memberInfo.name;
-    memberArea.appendChild(avatar);
+    var creatorLabel = document.createElement('span');
+    creatorLabel.className = 'kanban-card__creator-label';
+    creatorLabel.textContent = 'Created by';
 
-    cardFooter.appendChild(memberArea);
+    var creatorName = document.createElement('span');
+    creatorName.className = 'kanban-card__creator-name';
+    creatorName.textContent = creatorFullName;
+
+    creatorArea.appendChild(creatorLabel);
+    creatorArea.appendChild(creatorName);
+    cardFooter.appendChild(creatorArea);
 
     var select = document.createElement('select');
     select.className = 'status-select';
