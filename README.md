@@ -406,15 +406,20 @@ TaskFlow was validated through structured manual testing rather than automated t
 
 <div align="center">
 
-> 📸 Screenshots of the Dashboard, Kanban Board, Reports view, and Prompt Builder live in the **[/screenshots](./docs/screenshots)** folder.
+> 📸 Application screenshots showcasing key modules live in the **[docs/screenshots](./docs/screenshots)** directory.
 
-| Dashboard | Task Board | Reports |
+| Dashboard | Login & Auth | Prompt Builder |
 |:---:|:---:|:---:|
-|🖼️ screenshot placeholder | 🖼️ *screenshot placeholder* | 🖼️ *screenshot placeholder* |
+| ![Dashboard](./docs/screenshots/dashboard.png) | ![Login](./docs/screenshots/login.png) | ![Prompt Builder](./docs/screenshots/prompt-builder.png) |
+
+| Registration | Prompt Generator |
+|:---:|:---:|
+| ![Register](./docs/screenshots/register.png) | ![Generated Prompt](./docs/screenshots/prompt-builder-generated.png) |
 
 </div>
 
 > 🎬 A live demo walkthrough is available on request as part of the final sprint demo presentation.
+
 
 ---
 
