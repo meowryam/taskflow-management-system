@@ -490,23 +490,6 @@ This project exists because of the combined effort of 10 talented interns across
 5. 📱 **Mobile App**: A companion mobile experience for on-the-go task tracking
 6. 📊 **Advanced Analytics**: Burndown charts and velocity tracking
 
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for details.
-
-```
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files, to deal in the Software
-without restriction, including the rights to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of the Software.
-```
-
----
-
 ## 🙏 Acknowledgments
 
 - 🏢 **CODOC (PRIVATE) LIMITED** for designing and running this 2-Day Agentic Development Sprint
