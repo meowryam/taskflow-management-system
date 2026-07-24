@@ -289,42 +289,6 @@ flowchart LR
 
 </div>
 
-### 🧾 Git Commands Used in This Sprint
-
-```bash
-# Step 1: Create a GitHub Issue via CLI
-gh issue create \
-  --title "docs: Documentation and Release Prep" \
-  --body "Responsible for finalizing README.md, AI usage report, changelog, and release notes." \
-  --assignee AbdulAzeemHashmi
-
-# Step 2: Create a branch following CONTRIBUTING.md naming rules
-git checkout -b docs/documentation-and-release-prep
-
-# Step 3: Commit changes using conventional commit style
-git add .
-git commit -m "docs: finalize README, AI usage report, changelog, and release notes"
-
-# Step 4: Push branch to remote
-git push origin docs/documentation-and-release-prep
-
-# Step 5: Open Pull Request via CLI
-gh pr create \
-  --title "docs: Documentation and Release Prep v1.0.0" \
-  --body "## Description\nFinalized all project documentation for v1.0.0 release.\n\n## Linked Issue\nCloses #95\n\n## Testing Steps\n1. Render README.md and verify all links.\n2. Check AI_usage_report.md contains all 10 intern entries.\n3. Confirm changelog.md includes v1.0.0 release block.\n\n## Screenshots\nSee docs/screenshots/" \
-  --base main \
-  --head docs/documentation-and-release-prep
-
-# Step 6: Merge after review approval
-git checkout main
-git merge --no-ff docs/documentation-and-release-prep -m "chore: merge docs/documentation-and-release-prep into main"
-git push origin main
-
-# Step 7: Tag the v1.0.0 release
-git tag -a v1.0.0 -m "release: TaskFlow Management System v1.0.0"
-git push origin v1.0.0
-```
-
 ### ✅ Workflow Guarantees
 
 - 🚫 No direct pushes to `main` after initial setup
