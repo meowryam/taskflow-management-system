@@ -39,7 +39,9 @@ cd taskflow-management-system
 python3 -m http.server 8000
 # Then open http://localhost:8000/index.html
 
-# OR serve using Node.js
+# OR
+
+# Serve using Node.js
 npx serve .
 ```
 
