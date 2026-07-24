@@ -1,8 +1,10 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:2193b0,100:6dd5ed&height=200&section=header&text=TaskFlow&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Team%20Task%20Management%20System&descAlignY=55&descSize=20" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:2193b0,100:6dd5ed&height=220&section=header&text=TaskFlow&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Team%20Task%20Management%20System&descAlignY=58&descSize=22" width="100%"/>
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&pause=1000&color=2193B0&center=true&vCenter=true&width=650&lines=Plan.+Assign.+Track.+Deliver.;Built+in+a+2+Day+Agentic+Development+Sprint;10+Interns+%2B+2+Groups+%2B+1+Product;Prompted%2C+Verified%2C+and+Shipped" alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=2193B0&center=true&vCenter=true&width=700&lines=Plan.+Assign.+Track.+Deliver.;Built+in+a+2-Day+Agentic+Development+Sprint;10+Interns+%2B+2+Groups+%2B+1+Product;Prompted%2C+Verified%2C+and+Shipped" alt="Typing SVG" />
+
+<br/>
 
 ![Build](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge)
@@ -11,14 +13,20 @@
 ![AI Assisted](https://img.shields.io/badge/AI%20Assisted-Development-6C63FF?style=for-the-badge&logo=openai&logoColor=white)
 
 <img src="https://img.shields.io/github/stars/meowryam/taskflow-management-system?style=social" alt="stars"/>
+&nbsp;
 <img src="https://img.shields.io/github/forks/meowryam/taskflow-management-system?style=social" alt="forks"/>
+&nbsp;
 <img src="https://img.shields.io/github/contributors/meowryam/taskflow-management-system?color=2193b0" alt="contributors"/>
 
-### ✨ Plan smarter. Ship faster. Built by a team of twelve in two days.
+<br/><br/>
+
+### ✨ Plan smarter. Ship faster. Built by a team of ten in two days.
 
 </div>
 
 <br/>
+
+---
 
 ## 🚀 Quick Start
 
@@ -27,12 +35,15 @@
 git clone https://github.com/meowryam/taskflow-management-system.git
 cd taskflow-management-system
 
-# No build step. Serve locally so ES modules (task creation) load correctly.
+# Serve locally using Python
 python3 -m http.server 8000
 # Then open http://localhost:8000/index.html
+
+# OR serve using Node.js
+npx serve .
 ```
 
-> TaskFlow runs in the browser with LocalStorage. Task creation uses ES modules, so open the app through a local HTTP server rather than double-clicking `index.html`.
+> 💡 TaskFlow runs entirely in the browser using LocalStorage. Task creation uses ES modules, so always open the app through a local HTTP server rather than double-clicking `index.html`.
 
 ---
 
@@ -48,7 +59,7 @@ python3 -m http.server 8000
 | 06 | [📘 Usage Instructions](#-usage-instructions) |
 | 07 | [🔀 GitHub Workflow Evidence](#-github-workflow-evidence) |
 | 08 | [📅 Development Process](#-development-process) |
-| 09 | [🧩 Day 1: The 12 Modules](#-day-1-the-9-modules) |
+| 09 | [🧩 Day 1: The 10 Modules](#-day-1-the-10-modules) |
 | 10 | [🤝 Day 2: Group Integration](#-day-2-group-integration) |
 | 11 | [🤖 AI Usage and Prompt Engineering](#-ai-usage-and-prompt-engineering) |
 | 12 | [🛡️ Responsible AI Policy](#️-responsible-ai-policy) |
@@ -63,16 +74,16 @@ python3 -m http.server 8000
 
 ## 📖 Project Overview
 
-**TaskFlow** is a lightweight, browser based team task management system built to help small teams create projects, assign work, track status, and stay on top of deadlines, all without needing a backend server.
+**TaskFlow** is a lightweight, browser-based team task management system built to help small teams create projects, assign work, track status, and stay on top of deadlines, all without needing a backend server.
 
-TaskFlow was born out of a **2 day Agentic Development Sprint**: a hands on assessment where 10 interns used AI coding assistants (Cursor, Claude, Codex, GitHub Copilot) as professional development partners, not as a shortcut. Every line of AI generated code was manually verified, tested, and explained before it shipped.
+TaskFlow was born out of a **2-Day Agentic Development Sprint**: a hands-on assessment where 10 interns used AI coding assistants (Cursor, Claude, Codex, GitHub Copilot) as professional development partners, not as a shortcut. Every line of AI generated code was manually verified, tested, and explained before it shipped.
 
 ### 💎 In a nutshell
 
 - 📊 A dashboard that shows exactly where every project stands
 - 🗂️ Full project lifecycle management, from creation to completion
 - ✅ A Kanban board that keeps tasks moving
-- 🧠 A built in Prompt Builder that teaches good prompting habits
+- 🧠 A built-in Prompt Builder that teaches good prompting habits
 - 🔒 Built on a foundation of responsible, disclosed AI usage
 
 <div align="center">
@@ -86,7 +97,7 @@ TaskFlow was born out of a **2 day Agentic Development Sprint**: a hands on asse
 <div align="center">
 
 | Feature | Icon | Description |
-|---|:---:|---|
+|:--------|:----:|:------------|
 | **Dashboard** | 📊 | Summary cards and progress visibility across all projects |
 | **Project Management** | 🗂️ | Full CRUD: create, edit, delete, view, and track project status |
 | **Task Management** | ✅ | Assignment, priority, status, and due dates on every task |
@@ -96,7 +107,7 @@ TaskFlow was born out of a **2 day Agentic Development Sprint**: a hands on asse
 | **Activity Log** | 🕒 | Timestamped history of every meaningful action |
 | **Reports Dashboard** | 📈 | Analytics on completion rate, overdue tasks, and workload |
 | **Prompt Builder** | 🧠 | Generates structured, professional AI prompts on demand |
-| **Responsible AI Policy** | 🛡️ | Documented rules for safe, disclosed AI assisted development |
+| **Responsible AI Policy** | 🛡️ | Documented rules for safe, disclosed AI-assisted development |
 
 </div>
 
@@ -107,10 +118,10 @@ TaskFlow was born out of a **2 day Agentic Development Sprint**: a hands on asse
 <div align="center">
 
 | Layer | Technology |
-|---|---|
+|:------|:-----------|
 | 🎨 **Frontend** | HTML5, CSS3, JavaScript (Vanilla, ES6+) |
 | 💾 **Storage** | Browser LocalStorage, structured for future backend integration |
-| 🤖 **AI Tools Used** | Cursor, Claude, GitHub Copilot, OpenAI Codex, VS Code AI extensions |
+| 🤖 **AI Tools Used** | Cursor, Claude, GitHub Copilot, OpenAI Codex, DeepSeek |
 | 🌿 **Version Control** | Git and GitHub, full Issue to PR to Merge workflow |
 | 🧪 **Testing** | Manual test cases and structured bug reports |
 
@@ -142,10 +153,16 @@ taskflow-management-system/
 │   └── workflows/                   # GitHub Actions workflows
 │
 ├── 📚 docs/                         # Architecture, workflow, and contribution docs
+│   ├── interns/                     # Per-intern module documentation
+│   ├── screenshots/                 # App screenshots and demo images
+│   └── templates/                   # PR and issue templates
 │
 ├── 🧰 scripts/                      # Utility and setup scripts
 │
 ├── 💻 src/                          # Application source (modules, data layer, styles)
+│   ├── modules/                     # Feature modules (board, tasks, members, etc.)
+│   ├── styles/                      # Per-module CSS files
+│   └── dataStore.js                 # Shared LocalStorage persistence layer
 │
 ├── 🧪 tests/                        # Manual test cases and QA documentation
 │
@@ -157,7 +174,7 @@ taskflow-management-system/
 └── 📝 changelog.md                  # Version history and release notes
 ```
 
-> 📌 This mirrors the actual structure of the live repository. The original module by module folder plan from the assignment (`modules/projects.js`, `modules/tasks.js`, and so on) was consolidated into `src/` during Day 2 integration.
+> 📌 This mirrors the actual structure of the live repository. The original module-by-module folder plan from the assignment was consolidated into `src/` during Day 2 integration.
 
 ---
 
@@ -217,7 +234,7 @@ On first load, LocalStorage initializes automatically with an empty state. No se
 
 ### 🧭 Navigating the App
 
-TaskFlow is organized around a persistent sidebar or navbar giving quick access to the Dashboard, Projects, Task Board, Team Members, Reports, and Prompt Builder.
+TaskFlow is organized around a persistent sidebar giving quick access to the Dashboard, Projects, Task Board, Team Members, Reports, and Prompt Builder.
 
 ### 🔑 Key Workflows
 
@@ -241,7 +258,7 @@ flowchart LR
 4. **Move tasks** through the Kanban board as work progresses
 5. **Search and filter** to find exactly what you need across projects
 6. **Check the Reports Dashboard** for a live snapshot of team workload
-7. **Use the Prompt Builder** whenever you need a well structured AI prompt
+7. **Use the Prompt Builder** whenever you need a well-structured AI prompt
 
 ---
 
@@ -253,12 +270,12 @@ Every single change in this repository, across all 10 interns and both integrati
 
 ```mermaid
 flowchart LR
-    A[📌 Issue] --> B[🌿 Branch]
-    B --> C[💻 Commit]
-    C --> D[🔀 Pull Request]
-    D --> E[🔍 Review]
-    E --> F[✅ Merge]
-    F --> G[🔒 Issue Closed]
+    A[📌 Create Issue] --> B[🌿 Create Branch]
+    B --> C[💻 Commit Changes]
+    C --> D[🔀 Open Pull Request]
+    D --> E[🔍 Request Review]
+    E --> F[✅ Merge to Main]
+    F --> G[🔒 Close Issue]
 ```
 
 </div>
@@ -272,6 +289,44 @@ flowchart LR
 
 </div>
 
+### 🧾 Git Commands Used in This Sprint
+
+```bash
+# Step 1: Create a GitHub Issue via CLI
+gh issue create \
+  --title "docs: Documentation and Release Prep" \
+  --body "Responsible for finalizing README.md, AI usage report, changelog, and release notes." \
+  --assignee AbdulAzeemHashmi
+
+# Step 2: Create a branch following CONTRIBUTING.md naming rules
+git checkout -b docs/documentation-and-release-prep
+
+# Step 3: Commit changes using conventional commit style
+git add .
+git commit -m "docs: finalize README, AI usage report, changelog, and release notes"
+
+# Step 4: Push branch to remote
+git push origin docs/documentation-and-release-prep
+
+# Step 5: Open Pull Request via CLI
+gh pr create \
+  --title "docs: Documentation and Release Prep v1.0.0" \
+  --body "## Description\nFinalized all project documentation for v1.0.0 release.\n\n## Linked Issue\nCloses #95\n\n## Testing Steps\n1. Render README.md and verify all links.\n2. Check AI_usage_report.md contains all 10 intern entries.\n3. Confirm changelog.md includes v1.0.0 release block.\n\n## Screenshots\nSee docs/screenshots/" \
+  --base main \
+  --head docs/documentation-and-release-prep
+
+# Step 6: Merge after review approval
+git checkout main
+git merge --no-ff docs/documentation-and-release-prep -m "chore: merge docs/documentation-and-release-prep into main"
+git push origin main
+
+# Step 7: Tag the v1.0.0 release
+git tag -a v1.0.0 -m "release: TaskFlow Management System v1.0.0"
+git push origin v1.0.0
+```
+
+### ✅ Workflow Guarantees
+
 - 🚫 No direct pushes to `main` after initial setup
 - 🌿 Every intern worked on their own dedicated branch
 - 🔍 Every Pull Request was reviewed before merging
@@ -284,12 +339,12 @@ flowchart LR
 
 ## 📅 Development Process
 
-TaskFlow was built in a tight, structured **2 day Agentic Development Sprint**.
+TaskFlow was built in a tight, structured **2-Day Agentic Development Sprint**.
 
 <div align="center">
 
 | Day | Mode | Focus |
-|---|---|---|
+|:----|:-----|:------|
 | **Day 1** | 🧑‍💻 Solo, 10 interns | Each intern built one module independently on their own branch |
 | **Day 2** | 🤝 Group Alpha and Group Beta, 5 members each | Integration, bug fixes, testing, documentation, and final release |
 
@@ -304,7 +359,7 @@ Each intern owned one module end to end: designing it, building it, testing it, 
 <div align="center">
 
 | # | Owner | Module | Status |
-|---|---|---|:---:|
+|:--|:------|:-------|:------:|
 | 1 | [meowryam](https://github.com/meowryam) | Project Setup and App Layout | ✅ |
 | 2 | [Salman-ahmed-2](https://github.com/Salman-ahmed-2) | Authentication / User Selector | ✅ |
 | 3 | [laibainqilab-ds](https://github.com/laibainqilab-ds) | Project Management | ✅ |
@@ -327,7 +382,7 @@ Each module followed the same discipline: an Issue describing the task, a dedica
 <div align="center">
 
 | Group | Members | Focus | Main Responsibility |
-|---|:---:|---|---|
+|:------|:-------:|:------|:--------------------|
 | 🔵 **Group Alpha** | 5 | Product Integration and UI | Merged all UI modules into one consistent flow, polished the dashboard, connected projects to tasks to the board, and prepared the final demo |
 | 🟣 **Group Beta** | 5 | Logic, QA, Storage and Release | Fixed LocalStorage sync bugs, connected reports to real data, completed manual testing, finalized all documentation, and shipped the release |
 
@@ -356,7 +411,7 @@ AI tools were used as professional development assistants throughout this sprint
 <div align="center">
 
 | Technique | Purpose |
-|---|---|
+|:----------|:--------|
 | 🎭 **Role Based Prompting** | Assigning AI a persona: senior frontend engineer, QA engineer, architect |
 | 📚 **Context Rich Prompting** | Providing module purpose, file structure, and known edge cases |
 | 🔒 **Constraint Based Prompting** | Defining what not to use and what output format to follow |
@@ -406,20 +461,31 @@ TaskFlow was validated through structured manual testing rather than automated t
 
 <div align="center">
 
-> 📸 Application screenshots showcasing key modules live in the **[docs/screenshots](./docs/screenshots)** directory.
+> 📸 All screenshots are captured from the live application and stored in **[docs/screenshots](./docs/screenshots)**.
 
-| Dashboard | Login & Auth | Prompt Builder |
-|:---:|:---:|:---:|
-| ![Dashboard](./docs/screenshots/dashboard.png) | ![Login](./docs/screenshots/login.png) | ![Prompt Builder](./docs/screenshots/prompt-builder.png) |
+### 🖥️ Dashboard
 
-| Registration | Prompt Generator |
-|:---:|:---:|
-| ![Register](./docs/screenshots/register.png) | ![Generated Prompt](./docs/screenshots/prompt-builder-generated.png) |
+![Dashboard](./docs/screenshots/dashboard.png)
+
+---
+
+### 🔐 Login and Authentication
+
+| Login Page | Registration Page |
+|:----------:|:-----------------:|
+| ![Login](./docs/screenshots/login.png) | ![Register](./docs/screenshots/register.png) |
+
+---
+
+### 🧠 Prompt Builder
+
+| Default View | Generated Output |
+|:------------:|:----------------:|
+| ![Prompt Builder Default](./docs/screenshots/prompt-builder-default.png) | ![Prompt Builder Generated](./docs/screenshots/prompt-builder-generated.png) |
 
 </div>
 
 > 🎬 A live demo walkthrough is available on request as part of the final sprint demo presentation.
-
 
 ---
 
@@ -427,10 +493,10 @@ TaskFlow was validated through structured manual testing rather than automated t
 
 <div align="center">
 
-This project exists because of the combined effort of 10 talented interns across a single 2 day sprint.
+This project exists because of the combined effort of 10 talented interns across a single 2-day sprint.
 
 | Intern | Module | GitHub |
-|---|---|---|
+|:-------|:-------|:------:|
 | Intern 1 | Project Setup and App Layout | [@meowryam](https://github.com/meowryam) |
 | Intern 2 | Authentication / User Selector | [@Salman-ahmed-2](https://github.com/Salman-ahmed-2) |
 | Intern 3 | Project Management | [@laibainqilab-ds](https://github.com/laibainqilab-ds) |
@@ -438,9 +504,13 @@ This project exists because of the combined effort of 10 talented interns across
 | Intern 5 | Task Board | [@Bilalmughal-07](https://github.com/Bilalmughal-07) |
 | Intern 6 | Documentation and Release Prep | [@AbdulAzeemHashmi](https://github.com/AbdulAzeemHashmi) |
 | Intern 7 | Search, Filter and Sorting | [@TahaSohail-Goat](https://github.com/TahaSohail-Goat) |
-| Intern 8 | Prompt Builder and Responsible AI  | [@hassaanahmed-dev](https://github.com/hassaanahmed-dev) |
+| Intern 8 | Prompt Builder and Responsible AI | [@hassaanahmed-dev](https://github.com/hassaanahmed-dev) |
 | Intern 9 | QA and Manual Testing | [@inshrahmumtaz](https://github.com/inshrahmumtaz) |
 | Intern 10 | Team Members | [@muhammad-haris2](https://github.com/muhammad-haris2) |
+
+<br/>
+
+<img src="https://contrib.rocks/image?repo=meowryam/taskflow-management-system" alt="contributors image" />
 
 </div>
 
@@ -448,12 +518,12 @@ This project exists because of the combined effort of 10 talented interns across
 
 ## 🔮 Future Improvements
 
-1. 🌐 **Backend API Integration**, replacing LocalStorage with a real database and REST API
-2. 🔐 **User Authentication**, proper login, sessions, and role based permissions
-3. ⚡ **Real Time Updates**, WebSocket based live sync across team members
-4. 🤝 **Team Collaboration Features**, comments, mentions, and file attachments on tasks
-5. 📱 **Mobile App**, a companion mobile experience for on the go task tracking
-6. 📊 **Advanced Analytics**, burndown charts and velocity tracking
+1. 🌐 **Backend API Integration**: Replacing LocalStorage with a real database and REST API
+2. 🔐 **User Authentication**: Proper login, sessions, and role-based permissions
+3. ⚡ **Real-Time Updates**: WebSocket-based live sync across team members
+4. 🤝 **Team Collaboration Features**: Comments, mentions, and file attachments on tasks
+5. 📱 **Mobile App**: A companion mobile experience for on-the-go task tracking
+6. 📊 **Advanced Analytics**: Burndown charts and velocity tracking
 
 ---
 
@@ -467,14 +537,14 @@ MIT License
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files, to deal in the Software
 without restriction, including the rights to use, copy, modify, merge,
-publish, distribute, sublicense, and or sell copies of the Software.
+publish, distribute, sublicense, and/or sell copies of the Software.
 ```
 
 ---
 
 ## 🙏 Acknowledgments
 
-- 🏢 **CODOC (PRIVATE) LIMITED** for designing and running this 2 day Agentic Development Sprint
+- 🏢 **CODOC (PRIVATE) LIMITED** for designing and running this 2-Day Agentic Development Sprint
 - 🎓 The entire **Intern Development Programme** cohort for their discipline and collaboration
 - 🔵 **Group Alpha** and 🟣 **Group Beta** for turning 10 individual modules into one cohesive product
 - 🤖 The AI tools that assisted throughout, used responsibly and always under human verification
@@ -483,7 +553,7 @@ publish, distribute, sublicense, and or sell copies of the Software.
 
 <div align="center">
 
-### ⭐ If TaskFlow helped you understand agentic development, give it a star
+### ⭐ If TaskFlow helped you understand agentic development, give it a star!
 
 <img src="https://img.shields.io/github/stars/meowryam/taskflow-management-system?style=social" alt="star this repo"/>
 
@@ -491,6 +561,6 @@ publish, distribute, sublicense, and or sell copies of the Software.
 
 **Built with 💙 by 10 interns in 2 days | CODOC Internship Programme 2026**
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:6dd5ed,100:2193b0&height=100&section=footer" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:6dd5ed,100:2193b0&height=120&section=footer" width="100%"/>
 
 </div>
