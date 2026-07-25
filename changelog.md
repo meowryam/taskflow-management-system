@@ -2,25 +2,29 @@
 
 All notable changes to this project will be documented here.
 
-## [Unreleased]
+## [1.0.0] - 2026-07-25
+
+### 🚀 Initial Public Release
+
+This release marks the completion of the **TaskFlow Management System** 2-Day Agentic Development Sprint by 10 interns.
 
 ### Added
+- **Project Setup & Application Shell**: Modular responsive layout, sidebar, header, CSS variables, and BEM architecture (`@meowryam`).
+- **Authentication & User Selector**: Simulated sign-in, registration, JWT session persistence in LocalStorage, and role permission matrix (`@Salman-ahmed-2`).
+- **Project Management**: Project CRUD operations, deadline validation, status tracking, and deletion safety checks (`@laibainqilab-ds`).
+- **Task Creation**: Comprehensive task form, multi-member assignment, due date validation, priority, and status assignment (`@abihajibbran1-lang`).
+- **Kanban Task Board**: Interactive 4-column board (Todo, In Progress, Review, Done) with drag-and-drop state persistence (`@Bilalmughal-07`).
+- **Documentation & Release Prep**: Full README audit, consolidated 10-intern AI usage report, Responsible AI policy, changelog, and release notes (`@AbdulAzeemHashmi`).
+- **Search, Filter & Sorting**: Multi-criteria filter chaining (project, status, priority, assigned member) and due date sorting (`@TahaSohail-Goat`).
+- **Prompt Builder & Responsible AI**: Built-in prompt generator across 6 engineering categories with validation, copy, and reset (`@hassaanahmed-dev`).
+- **QA & Manual Testing**: Structured manual test suites, validation checklists, and bug report templates (`@inshrahmumtaz`).
+- **Team Members**: Member management with live task count tracking, avatar initials generation, and deletion safety rules (`@muhammad-haris2`).
 
-- Initial repository
-- Professional folder structure
-- Documentation files
-- Base project layout
-- Prompt Builder module with 6 prompt categories
-- Prompt validation, copy, and reset functionality
-- Responsible AI guidance section
-- Prompt Builder documentation and manual test cases
-- Team Members: edit-member support via an add/edit form toggle
-- Team Members: styled delete-confirmation dialog (replaces native alert)
-- Team Members: empty state when no members exist
-- Activity Log: per-action SVG icons and date grouping (Today / Yesterday / older)
-- Activity Log: clear-log action with a styled confirmation dialog
-- Activity Log: `clearAll()` in the activity log data layer
-- Activity Log: empty state aligned with the dashboard `.widget-empty` pattern
+### Fixed
+- Fixed LocalStorage synchronization and session restoration on page reload.
+- Resolved Kanban column drag-and-drop state updates to persist directly to `DataStore`.
+- Corrected responsive grid layouts on mobile and tablet viewport sizes.
+
 
 ### Changed
 
